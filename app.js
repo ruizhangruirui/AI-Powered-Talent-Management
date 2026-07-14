@@ -275,11 +275,9 @@ const roles = {
 };
 
 const navItems = [
-  ["overview", "Overview", "What needs attention now"],
+  ["organization", "Organization", "Research Center structure at a glance"],
   ["people", "People", "Find employees and open profiles"],
-  ["teamReadiness", "Team Readiness", "Can this team achieve its goals?"],
-  ["development", "Talent & Development", "People requiring review or action"],
-  ["organization", "Organization", "Structure, teams and annual goals"],
+  ["talentTeam", "Talent & Team", "Team situation and talent actions"],
   ["administration", "Administration", "Owner-only configuration and governance"],
 ];
 
@@ -575,13 +573,15 @@ const annualGoals = organization.businessUnits.flatMap((unit) =>
 );
 
 const state = {
-  page: "overview",
+  page: "organization",
   role: "owner",
   selectedEmployee: "e1",
   talentTab: "Overview",
+  talentTeamView: "Team Plan",
   developmentView: "Requires Attention",
   adminSection: "Business Units & Teams",
   search: "",
+  orgSearch: "",
   aiOutputs: [],
 };
 
@@ -675,7 +675,7 @@ function init() {
 function bindEvents() {
   el.roleSelect.addEventListener("change", () => {
     state.role = el.roleSelect.value;
-    if (state.page === "administration" && !currentRole().admin) state.page = "overview";
+    if (state.page === "administration" && !currentRole().admin) state.page = "organization";
     render();
   });
   el.businessFilter.addEventListener("change", () => {
@@ -711,7 +711,7 @@ function renderNav() {
 }
 
 function navIcon(key) {
-  return { overview: "⌂", people: "◎", teamReadiness: "▦", development: "◇", organization: "╬", administration: "⚙" }[key];
+  return { organization: "╬", people: "◎", talentTeam: "▦", administration: "⚙" }[key];
 }
 
 function renderFilters(reset) {
@@ -740,18 +740,16 @@ function setHeader(title, subtitle, actions = "") {
 }
 
 function renderPage() {
-  el.scopeFilter.hidden = state.page === "talent";
+  el.scopeFilter.hidden = ["organization", "talent"].includes(state.page);
   updateScopeSummary();
   const pageMap = {
-    overview: renderOverview,
     people: renderPeople,
     talent: renderTalent,
-    teamReadiness: renderTeamReadiness,
-    development: renderTalentDevelopment,
+    talentTeam: renderTalentTeam,
     organization: renderOrganization,
     administration: renderAdministration,
   };
-  pageMap[state.page]();
+  (pageMap[state.page] || renderOrganization)();
 }
 
 function renderOverview() {
@@ -927,55 +925,28 @@ function recommendationTable(items = capabilitiesInScope()) {
   `;
 }
 
-function renderPeople() {
-  const role = currentRole();
-  setHeader(
-    "People",
-    "Find an employee quickly, then open a focused profile.",
-    `${role.canAddEmployees ? '<button class="primary-button" data-action="addEmployee">Add Employee</button>' : ""}
-     ${role.canImportExport ? '<button class="secondary-button" data-action="importEmployees">Import Employees</button><button class="secondary-button" data-action="exportEmployees">Export Employees</button>' : ""}`
-  );
-  const scoped = employeesInScope();
-  el.content.innerHTML = `
-    <section class="people-tools">
-      <div><label for="peopleSearch">Search employee number, name or capability</label><input id="peopleSearch" value="${state.search}" placeholder="Search people" /></div>
-      <div><label>Contract type</label><select id="contractFilter"><option>All contracts</option><option>Employee</option><option>Leased Labour</option><option>Intern</option></select></div>
-      <div><label>Talent tag</label><select id="tagFilter"><option>All tags</option>${talentTags.map((tag) => `<option>${tag}</option>`).join("")}</select></div>
-    </section>
-    <section>
-      <div class="section-header"><div><h2>People in Scope</h2><p id="peopleCount"></p></div></div>
-      <div class="table-wrap" id="peopleTable"></div>
-    </section>
-  `;
-  const searchInput = document.querySelector("#peopleSearch");
-  searchInput.addEventListener("input", () => {
-    state.search = searchInput.value;
-    renderPeopleTable(scoped);
-  });
-  renderPeopleTable(scoped);
+function tenure(employee) {
+  const start = new Date(employee.startDate);
+  const now = new Date("2026-07-14");
+  let months = (now.getFullYear() - start.getFullYear()) * 12 + now.getMonth() - start.getMonth();
+  if (now.getDate() < start.getDate()) months -= 1;
+  if (months < 12) return `${Math.max(1, months)} mo`;
+  const years = Math.floor(months / 12);
+  const remainingMonths = months % 12;
+  return remainingMonths ? `${years}y ${remainingMonths}m` : `${years}y`;
 }
 
-function renderPeopleTable(scoped) {
-  const query = state.search.trim().toLowerCase();
-  const filtered = scoped.filter((employee) => {
-    const capabilityText = employee.capabilities.map((item) => item.name).join(" ").toLowerCase();
-    return !query || employee.name.toLowerCase().includes(query) || employee.number.toLowerCase().includes(query) || capabilityText.includes(query);
-  });
-  document.querySelector("#peopleCount").textContent = `Showing ${Math.min(filtered.length, 36)} of ${filtered.length} people. Use search or filters to narrow the list.`;
-  document.querySelector("#peopleTable").innerHTML = filtered.length
-    ? `<table><thead><tr><th>Name</th><th>Role</th><th>Organization</th><th>Talent signals</th><th>Actions</th></tr></thead><tbody>
-        ${filtered.slice(0, 36).map((employee) => `
-          <tr>
-            <td><strong>${employee.name}</strong><br><span class="muted">${employee.number} · ${employee.contract}</span></td>
-            <td>${employee.title}<br><span class="muted">${employee.level}</span></td>
-            <td>${employee.unit}<br><span class="muted">${employee.team}</span></td>
-            <td>${employee.tags.slice(0, 2).map((tag) => `<span class="badge">${tag}</span>`).join(" ")} ${employee.openActions ? `<span class="badge warning">${employee.openActions} open action</span>` : ""}</td>
-            <td><button class="secondary-button" data-employee="${employee.id}">Open Profile</button></td>
-          </tr>
-        `).join("")}
-      </tbody></table>`
-    : `<div class="empty-state"><h2>No people match this scope</h2><p>Adjust filters or select another permitted organization scope.</p></div>`;
-  document.querySelectorAll("[data-employee]").forEach((button) => {
+function attentionIndicator(employee) {
+  if (employee.retentionRisk === "High") return '<span class="badge danger">Attention</span>';
+  if (employee.openActions) return '<span class="badge warning">Open action</span>';
+  if (employee.dependency !== "No critical dependency") return '<span class="badge warning">Key person</span>';
+  return "";
+}
+
+function bindEmployeeLinks(root = document) {
+  root.querySelectorAll("[data-employee]").forEach((button) => {
+    if (button.dataset.employeeBound) return;
+    button.dataset.employeeBound = "true";
     button.addEventListener("click", () => {
       state.selectedEmployee = button.dataset.employee;
       state.page = "talent";
@@ -986,34 +957,113 @@ function renderPeopleTable(scoped) {
   });
 }
 
+function renderPeople() {
+  const role = currentRole();
+  setHeader(
+    "People",
+    "Find and understand employees quickly.",
+    `${role.canAddEmployees ? '<button class="primary-button" data-action="addEmployee">Add Employee</button>' : ""}
+     ${role.canImportExport ? '<button class="secondary-button" data-action="importEmployees">Import Employees</button><button class="secondary-button" data-action="exportEmployees">Export Employees</button>' : ""}`
+  );
+  const scoped = employeesInScope();
+  el.content.innerHTML = `
+    <section class="people-tools">
+      <div><label for="peopleSearch">Search by name or employee number</label><input id="peopleSearch" value="${state.search}" placeholder="Search people" /></div>
+      <div><label for="contractFilter">Contract type</label><select id="contractFilter"><option>All contracts</option><option>Employee</option><option>Leased Labour</option><option>Intern</option></select></div>
+      <div><label for="tagFilter">Talent tag</label><select id="tagFilter"><option>All tags</option>${talentTags.map((tag) => `<option>${tag}</option>`).join("")}</select></div>
+    </section>
+    <section>
+      <div class="section-header"><div><h2>People in Scope</h2><p id="peopleCount"></p></div></div>
+      <div class="people-card-grid" id="peopleCards"></div>
+    </section>
+  `;
+  const searchInput = document.querySelector("#peopleSearch");
+  const contractFilter = document.querySelector("#contractFilter");
+  const tagFilter = document.querySelector("#tagFilter");
+  const refreshCards = () => renderPeopleCards(scoped);
+  searchInput.addEventListener("input", () => {
+    state.search = searchInput.value;
+    refreshCards();
+  });
+  contractFilter.addEventListener("change", refreshCards);
+  tagFilter.addEventListener("change", refreshCards);
+  renderPeopleCards(scoped);
+}
+
+function renderPeopleCards(scoped) {
+  const query = state.search.trim().toLowerCase();
+  const contract = document.querySelector("#contractFilter")?.value || "All contracts";
+  const tag = document.querySelector("#tagFilter")?.value || "All tags";
+  const filtered = scoped.filter((employee) => {
+    const queryOk = !query || employee.name.toLowerCase().includes(query) || employee.number.toLowerCase().includes(query);
+    const contractOk = contract === "All contracts" || employee.contract === contract;
+    const tagOk = tag === "All tags" || employee.tags.includes(tag);
+    return queryOk && contractOk && tagOk;
+  });
+  document.querySelector("#peopleCount").textContent = `Showing ${Math.min(filtered.length, 36)} of ${filtered.length} people. Use search or filters to narrow the list.`;
+  document.querySelector("#peopleCards").innerHTML = filtered.length
+    ? filtered.slice(0, 36).map((employee) => `
+          <article class="employee-card compact">
+            <header>
+              <div>
+                <h3>${employee.name}</h3>
+                <p class="muted">${employee.number}</p>
+              </div>
+              ${attentionIndicator(employee)}
+            </header>
+            <dl class="profile-facts">
+              <div><dt>Job title</dt><dd>${employee.title}</dd></div>
+              <div><dt>Team</dt><dd>${employee.team}</dd></div>
+              <div><dt>Tenure</dt><dd>${tenure(employee)}</dd></div>
+              <div><dt>Contract</dt><dd>${employee.contract}</dd></div>
+            </dl>
+            <div class="tag-row">${employee.tags.slice(0, 2).map((item) => `<span class="badge">${item}</span>`).join("") || '<span class="muted">No talent tag</span>'}</div>
+            <button class="secondary-button" data-employee="${employee.id}">Open Profile</button>
+          </article>
+        `).join("")
+    : `<div class="empty-state"><h2>No people match this scope</h2><p>Adjust filters or select another permitted organization scope.</p></div>`;
+  bindEmployeeLinks();
+}
+
 function renderTalent() {
   const scoped = employeesInScope();
   const employee = scoped.find((item) => item.id === state.selectedEmployee) || scoped[0] || employees[0];
   state.selectedEmployee = employee.id;
   setHeader(
-    "Talent Card",
-    "One place for talent summary, evidence, capabilities, development and history.",
+    "Employee Profile",
+    "One employee profile with role-based sections and actions.",
     `${currentRole().canAddEmployees ? '<button class="secondary-button" data-action="editEmployee">Edit Employee</button>' : ""}
      ${currentRole().canAddManagerRecord ? '<button class="secondary-button" data-action="addManagerRecord">Add Manager Record</button>' : ""}
-     ${currentRole().canAddTalentInsight ? '<button class="secondary-button" data-action="addTalentInsight">Add Talent Insight</button>' : ""}
+     ${currentRole().canAddTalentInsight ? '<button class="secondary-button" data-action="addTalentInsight">Add HRBP Record</button>' : ""}
      ${currentRole().canArchiveEmployees ? '<button class="danger-button" data-action="archiveEmployee">Archive Employee</button>' : ""}
      <button class="primary-button" data-action="createTalentAction">Create Talent Action</button>`
   );
-  const tabs = ["Overview", "Evidence", "Capabilities", "Development", "History"];
+  const tabs = ["Overview", "Manager Records", "HRBP Records", "Development", "History"];
   el.content.innerHTML = `
     <section class="talent-header">
       <div class="talent-header-main">
         <div>
-          <p class="eyebrow">Talent Card</p>
+          <p class="eyebrow">Employee Profile</p>
           <h2>${employee.name}</h2>
-          <p>${employee.title} · ${employee.level} · ${employee.team}</p>
-          <div class="tag-row">${employee.tags.map((tag) => `<span class="badge">${tag}</span>`).join("")}${employee.awards.map((award) => `<span class="badge blue">${award}</span>`).join("")}</div>
+          <p>${employee.number} · ${employee.title}</p>
+          <dl class="profile-facts header-facts">
+            <div><dt>Level</dt><dd>${employee.level}</dd></div>
+            <div><dt>Business Unit</dt><dd>${employee.unit}</dd></div>
+            <div><dt>Team</dt><dd>${employee.team}</dd></div>
+            <div><dt>Contract</dt><dd>${employee.contract}</dd></div>
+            <div><dt>Tenure</dt><dd>${tenure(employee)}</dd></div>
+          </dl>
+          <div class="tag-row">
+            ${employee.tags.map((tag) => `<span class="badge">${tag}</span>`).join("") || '<span class="muted">No talent tag</span>'}
+            ${employee.awards.map((award) => `<span class="badge blue">${award}</span>`).join("") || ""}
+          </div>
         </div>
       </div>
       <div class="indicator-grid">
         ${indicator("Impact", employee.currentImpact)}
         ${indicator("Potential", employee.growthPotential)}
         ${indicator("Retention Risk", visibleTalentValue("retentionRisk", employee))}
+        ${indicator("Open Actions", employee.openActions || "None")}
       </div>
     </section>
     <nav class="tabs" aria-label="Employee profile tabs">${tabs.map((tab) => `<button class="tab ${tab === state.talentTab ? "active" : ""}" data-tab="${tab}">${tab}</button>`).join("")}</nav>
@@ -1040,31 +1090,52 @@ function indicator(label, value) {
 function renderTalentTab(employee) {
   if (state.talentTab === "Overview") {
     return `
-      <article class="ai-panel">
-        ${aiMeta("AI Talent Summary", "2026-07-14", "Last 12 months", "Moderate", "Current")}
-        <h2>${employee.name}</h2>
-        <p>${employee.summary}</p>
-        <div class="button-row"><button class="secondary-button" data-drawer="employee-${employee.id}">View Evidence</button><button class="secondary-button" data-action="promptAI">Generate with Prompt</button><button class="primary-button" data-toast="Talent summary accepted.">Accept</button><button class="ghost-button" data-toast="Talent summary dismissed.">Dismiss</button></div>
-      </article>
+      <div class="grid two">
+        <article class="card">
+          <h2>Basic Information</h2>
+          <dl class="profile-facts">
+            <div><dt>Manager</dt><dd>${employee.manager}</dd></div>
+            <div><dt>Reporting line</dt><dd>${employee.reportingLine}</dd></div>
+            <div><dt>Start date</dt><dd>${employee.startDate}</dd></div>
+            <div><dt>Contract type</dt><dd>${employee.contract}</dd></div>
+          </dl>
+        </article>
+        <article class="ai-panel">
+          ${aiMeta("AI Talent Summary", "2026-07-14", "Last 12 months", "Moderate", "Current")}
+          <h2>Summary</h2>
+          <p>${employee.summary}</p>
+          <div class="button-row"><button class="secondary-button" data-drawer="employee-${employee.id}">View Evidence</button><button class="secondary-button" data-action="promptAI">Generate with Prompt</button></div>
+        </article>
+      </div>
+      <div class="grid two">
+        <article class="card"><h2>Important Tags and Awards</h2><div class="tag-row">${employee.tags.map((tag) => `<span class="badge">${tag}</span>`).join("") || '<span class="muted">No important tag</span>'}${employee.awards.map((award) => `<span class="badge blue">${award}</span>`).join("") || ""}</div></article>
+        <article class="card"><h2>Current Open Actions</h2>${actionList(employee)}</article>
+      </div>
       ${renderPromptOutputs("talent")}
-      ${decisionList([
-        employee.retentionRisk === "High" || employee.dependency !== "No critical dependency"
-          ? { label: "Review", title: "Primary attention", detail: employee.dependency, tone: employee.retentionRisk === "High" ? "danger" : "warning" }
-          : { label: "Stable", title: "No urgent profile risk", detail: "Use tabs only when evidence detail is needed.", tone: "blue" },
-        employee.openActions
-          ? { label: "Action", title: `${employee.openActions} open talent action`, detail: "Review owner, due date and required evidence.", tone: "warning" }
-          : { label: "Action", title: "No open talent action", detail: "Create one only when evidence requires follow-up.", tone: "blue" },
-      ])}
     `;
   }
-  if (state.talentTab === "Evidence") return `<div class="card"><h2>Manager Records</h2>${recordsList(employee.records)}</div>`;
-  if (state.talentTab === "Capabilities") {
-    return `<div class="card"><h2>Capabilities</h2><div class="table-wrap"><table><thead><tr><th>Capability</th><th>Level</th><th>Evidence quality</th><th>Source</th></tr></thead><tbody>${employee.capabilities.map((capability) => `<tr><td>${capability.name}</td><td>${capability.level}</td><td>${capability.evidenceQuality}</td><td>${capability.source}</td></tr>`).join("")}</tbody></table></div></div>`;
+  if (state.talentTab === "Manager Records") {
+    return `<div class="card"><div class="section-header"><div><h2>Manager Records</h2><p>Professional and business evidence from managers.</p></div>${currentRole().canAddManagerRecord ? '<button class="primary-button" data-action="addManagerRecord">Add Manager Record</button>' : ""}</div>${recordsList(employee.records)}</div>`;
+  }
+  if (state.talentTab === "HRBP Records") {
+    if (!currentRole().canAddTalentInsight) return restrictedState();
+    return `<div class="card"><div class="section-header"><div><h2>HRBP Records</h2><p>Talent insight, risk, development suggestion and retention consideration.</p></div><button class="primary-button" data-action="addTalentInsight">Add HRBP Record</button></div>${employee.insights.length ? recordsList(employee.insights) : '<div class="empty-state"><h2>No HRBP record</h2><p>Not every employee has a formal HRBP record.</p></div>'}</div>`;
   }
   if (state.talentTab === "Development") {
-    return `<div class="grid two"><article class="card"><h2>Talent Insights</h2>${state.role === "teamLead" ? restrictedState() : employee.insights.length ? recordsList(employee.insights) : '<div class="empty-state"><h2>No HRBP insight</h2><p>Not every employee has formal HRBP records.</p></div>'}</article><article class="card"><h2>Talent Actions</h2>${actionList(employee)}</article></div>`;
+    return `<div class="grid two">
+      <article class="card"><h2>Development Actions</h2>${actionList(employee)}</article>
+      <article class="card"><h2>Readiness and Backup</h2>
+        <dl class="profile-facts">
+          <div><dt>Promotion readiness</dt><dd>${visibleTalentValue("promotionReadiness", employee)}</dd></div>
+          <div><dt>Succession / backup</dt><dd>${employee.dependency}</dd></div>
+          <div><dt>Mentoring focus</dt><dd>${employee.capabilities[0].name}</dd></div>
+          <div><dt>Internal mobility</dt><dd>${employee.team} adjacent project exposure</dd></div>
+        </dl>
+        <div class="button-row"><button class="primary-button" data-action="createTalentAction">Create Talent Action</button></div>
+      </article>
+    </div>`;
   }
-  return `<div class="card"><h2>History</h2>${recordsList(employee.growthPath)}</div>`;
+  return `<div class="card"><h2>History</h2>${recordsList([...employee.growthPath, ...employee.awards.map((award) => ["Award", "2026-01-15", award, "Historical award record retained on the profile."])])}</div>`;
 }
 
 function recordsList(records) {
@@ -1078,6 +1149,93 @@ function restrictedState() {
 function actionList(employee) {
   if (!employee.actions.length) return `<div class="empty-state"><h2>No open talent action</h2><p>Create an action when evidence, risk or capability coverage requires follow-up.</p></div>`;
   return `<div class="timeline">${employee.actions.map((action) => `<div class="timeline-item"><h3>${action.type} <span class="badge ${action.status === "Completed" ? "blue" : "warning"}">${action.status}</span></h3><p>Target: ${action.capability}. Owner: ${action.owner}. Due: ${action.due}.</p></div>`).join("")}</div>`;
+}
+
+function renderTalentTeam() {
+  const tabs = ["Team Plan", "Talent Review", "Development Actions", "Team Activities"];
+  const scoped = employeesInScope();
+  setHeader(
+    "Talent & Team",
+    "Understand the current team situation and decide which talent actions are needed.",
+    `<button class="primary-button" data-action="createTalentAction">Create Talent Action</button>
+     <button class="secondary-button" data-action="generateAnalysis">Generate AI Analysis</button>`
+  );
+  el.content.innerHTML = `
+    <nav class="tabs" aria-label="Talent and team management tabs">${tabs.map((tab) => `<button class="tab ${tab === state.talentTeamView ? "active" : ""}" data-talent-team-view="${tab}">${tab}</button>`).join("")}</nav>
+    <section>${renderTalentTeamTab(scoped)}</section>
+  `;
+  document.querySelectorAll("[data-talent-team-view]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.talentTeamView = button.dataset.talentTeamView;
+      renderPage();
+    });
+  });
+  bindEmployeeLinks();
+  bindDrawerButtons();
+}
+
+function selectedTeamLabel() {
+  return el.teamFilter.value === "All permitted teams" ? "selected teams" : el.teamFilter.value;
+}
+
+function selectedCapabilities() {
+  return capabilitiesInScope().filter((item) => el.teamFilter.value === "All permitted teams" || item.team === el.teamFilter.value);
+}
+
+function renderTalentTeamTab(scoped) {
+  if (state.talentTeamView === "Team Plan") {
+    const scopedCapabilities = selectedCapabilities();
+    const primaryGap = scopedCapabilities.find((item) => item.severity === "High") || scopedCapabilities[0];
+    return `
+      <div class="grid two">
+        <article class="card">
+          <h2>Current Situation</h2>
+          <dl class="profile-facts">
+            <div><dt>Business unit</dt><dd>${el.businessFilter.value}</dd></div>
+            <div><dt>Team</dt><dd>${selectedTeamLabel()}</dd></div>
+            <div><dt>Year</dt><dd>${el.periodFilter.value}</dd></div>
+            <div><dt>Employees</dt><dd>${scoped.length}</dd></div>
+          </dl>
+        </article>
+        <article class="ai-panel">
+          ${aiMeta("AI Team Summary", "2026-07-14", "Team goals and evidence", primaryGap?.severity || "Moderate", "Current")}
+          <h2>${selectedTeamLabel()}</h2>
+          <p>${primaryGap ? `Strength exists around active project evidence, while the main gap is ${primaryGap.gap} for ${primaryGap.name}. The key dependency is ${primaryGap.recommendation}` : "No major team gap is visible in the selected scope."}</p>
+          <div class="button-row"><button class="secondary-button" data-action="promptAI">Generate with Prompt</button></div>
+        </article>
+      </div>
+      <section>
+        <div class="section-header"><div><h2>Goal, Gap and Major Action</h2><p>Editable team planning summary for authorized review.</p></div><button class="secondary-button" data-toast="Team plan edit mode opened.">Edit Plan</button></div>
+        <div class="capability-flow">${scopedCapabilities.slice(0, 4).map(capabilityFlowItem).join("") || '<div class="empty-state"><h2>No team plan data</h2><p>Select a team or permitted business unit.</p></div>'}</div>
+      </section>
+      ${renderPromptOutputs("talentTeam")}
+    `;
+  }
+  if (state.talentTeamView === "Talent Review") {
+    const attention = talentReviewItems(scoped, "Requires Attention");
+    return `
+      <div class="section-header"><div><h2>Employees Requiring Attention</h2><p>Retention, promotion readiness, key-person dependency, backup need and 9-box summary.</p></div><button class="secondary-button" data-toast="All employees view opened for the selected scope.">View All Employees</button></div>
+      ${decisionList(attention.slice(0, 8))}
+      <details class="quiet-details">
+        <summary>Review table (${attention.length})</summary>
+        <div class="table-wrap">${talentReviewTable(attention)}</div>
+      </details>
+    `;
+  }
+  if (state.talentTeamView === "Development Actions") {
+    const rows = scoped.flatMap((employee) => employee.actions.map((action) => ({ employee, action })));
+    return `
+      <div class="section-header"><div><h2>Development Actions</h2><p>Learning, mentoring, knowledge transfer, backup development, succession and mobility.</p></div><button class="primary-button" data-action="createTalentAction">Create Action</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Action</th><th>Capability</th><th>Owner</th><th>Status</th><th></th></tr></thead><tbody>
+        ${rows.length ? rows.map(({ employee, action }) => `<tr><td><strong>${employee.name}</strong><br><span class="muted">${employee.team}</span></td><td>${action.type}</td><td>${action.capability}</td><td>${action.owner}</td><td><span class="badge ${action.status === "Completed" ? "blue" : "warning"}">${action.status}</span></td><td><button class="secondary-button" data-employee="${employee.id}">Open Profile</button></td></tr>`).join("") : '<tr><td colspan="6">No development actions in the selected scope.</td></tr>'}
+      </tbody></table></div>
+    `;
+  }
+  const activities = ["Team Event", "Technical Sharing", "Summit", "Cross-team collaboration", "Team-building activities"];
+  return `
+    <div class="section-header"><div><h2>Team Activities</h2><p>Activity types are managed in Administration.</p></div><button class="secondary-button" data-toast="Team activity form opened.">Create Activity</button></div>
+    <div class="grid three">${activities.map((activity, index) => `<article class="card"><h2>${activity}</h2><p>${selectedTeamLabel()} · 2026 Q${(index % 4) + 1}</p><p class="muted">Use activities to record team learning, collaboration and engagement context.</p></article>`).join("")}</div>
+  `;
 }
 
 function renderTeamReadiness() {
@@ -1121,7 +1279,7 @@ function renderTalentDevelopment() {
   setHeader(
     "Talent & Development",
     "Who requires development, review or talent action?",
-    `${currentRole().canAddTalentInsight ? '<button class="secondary-button" data-action="addTalentInsight">Add Talent Insight</button>' : ""}
+    `${currentRole().canAddTalentInsight ? '<button class="secondary-button" data-action="addTalentInsight">Add HRBP Record</button>' : ""}
      <button class="primary-button" data-action="createTalentAction">Create Talent Action</button>`
   );
   el.content.innerHTML = `
@@ -1220,26 +1378,134 @@ function capabilityItem(capability) {
   `;
 }
 
-function renderOrganization() {
-  setHeader("Organization", "Research Center structure and team annual goals.", `${currentRole().canEditOrg ? '<button class="primary-button" data-toast="Organization editor opened.">Edit Structure</button>' : ""}`);
-  el.content.innerHTML = `
-    <article class="ai-panel">
-      ${aiMeta("Organization summary", "2026-07-14", "2026 structure", "High", "Current")}
-      <h2>8 business units, ${organization.businessUnits.reduce((sum, unit) => sum + unit.teams.length, 0)} teams and ${employees.length} people</h2>
-      <p>The mock organization now represents a multi-year research center with labs, platforms and operations teams.</p>
-      <div class="button-row"><button class="secondary-button" data-drawer="briefing">View Evidence</button><button class="secondary-button" data-action="promptAI">Generate with Prompt</button><button class="primary-button" data-toast="Organization summary accepted.">Accept</button><button class="ghost-button" data-toast="Organization summary dismissed.">Dismiss</button></div>
-    </article>
-    ${renderPromptOutputs("organization")}
-    <div class="grid two">
-      <article class="card"><h2>Structure</h2><div class="timeline">${organization.businessUnits.map((unit) => `<div class="timeline-item"><h3>${unit.name} <span class="badge">${unit.type}</span></h3><p>${unit.teams.join(", ")}</p><p class="muted">${employees.filter((employee) => employee.unit === unit.name).length} people</p></div>`).join("")}</div></article>
-      <article class="card"><h2>Annual Goals</h2>${recordsList(annualGoals.slice(0, 10))}</article>
-    </div>
+function employeesForTeam(team) {
+  return employees.filter((employee) => !employee.archived && employee.team === team);
+}
+
+function employeesForUnit(unitName) {
+  return employees.filter((employee) => !employee.archived && employee.unit === unitName);
+}
+
+function teamLeadName(team) {
+  const lead = employeesForTeam(team).find((employee) => employee.level === "Team Lead");
+  return lead ? lead.name : `${team} Lead`;
+}
+
+function unitLeaderName(unit) {
+  const lead = employeesForUnit(unit.name).find((employee) => employee.level === "Team Lead");
+  return lead ? `${lead.name} / ${unit.type} Lead` : `${unit.name} Director`;
+}
+
+function renderOrganizationTree() {
+  const query = state.orgSearch.trim().toLowerCase();
+  const units = organization.businessUnits
+    .map((unit) => {
+      const teams = unit.teams
+        .map((team) => {
+          const members = employeesForTeam(team);
+          const matchingMembers = query ? members.filter((employee) => [employee.name, employee.number, employee.title].some((value) => value.toLowerCase().includes(query))) : members;
+          const teamMatches = !query || team.toLowerCase().includes(query) || matchingMembers.length;
+          return teamMatches ? { team, members: matchingMembers.length ? matchingMembers : members.slice(0, 4), total: members.length } : null;
+        })
+        .filter(Boolean);
+      const unitMatches = !query || unit.name.toLowerCase().includes(query) || unit.type.toLowerCase().includes(query) || teams.length;
+      return unitMatches ? { unit, teams } : null;
+    })
+    .filter(Boolean);
+
+  if (!units.length) return `<div class="empty-state"><h2>No organization match</h2><p>Search by employee, team or business unit.</p></div>`;
+
+  return `
+    <details class="org-root" open>
+      <summary>
+        <span>
+          <strong>${organization.centers[0]}</strong>
+          <small>${organization.businessUnits.length} business units · ${organization.businessUnits.reduce((sum, unit) => sum + unit.teams.length, 0)} teams · ${employees.filter((employee) => !employee.archived).length} employees</small>
+        </span>
+      </summary>
+      <div class="org-tree">
+        ${units.map(({ unit, teams }) => {
+          const unitCount = employeesForUnit(unit.name).length;
+          return `
+            <details class="org-node unit" open>
+              <summary>
+                <span>
+                  <strong>${unit.name}</strong>
+                  <small>${unit.type} · Leader: ${unitLeaderName(unit)} · ${unit.teams.length} teams · ${unitCount} employees</small>
+                </span>
+                <button class="ghost-button" data-org-unit="${unit.name}">Open</button>
+              </summary>
+              <div class="org-children">
+                ${teams.map(({ team, members, total }) => `
+                  <details class="org-node team" ${query ? "open" : ""}>
+                    <summary>
+                      <span>
+                        <strong>${team}</strong>
+                        <small>Team Lead: ${teamLeadName(team)} · ${total} employees</small>
+                      </span>
+                      <button class="ghost-button" data-org-team="${team}" data-org-unit="${unit.name}">Open</button>
+                    </summary>
+                    <div class="org-people">
+                      ${members.map((employee) => `
+                        <button class="org-person" data-employee="${employee.id}">
+                          <strong>${employee.name}</strong>
+                          <span>${employee.number} · ${employee.title}</span>
+                        </button>
+                      `).join("")}
+                    </div>
+                  </details>
+                `).join("")}
+              </div>
+            </details>
+          `;
+        }).join("")}
+      </div>
+    </details>
   `;
+}
+
+function renderOrganization() {
+  setHeader("Organization", "Understand the complete Research Center structure at a glance.", `${currentRole().canEditOrg ? '<button class="primary-button" data-toast="Open Administration / Business Units & Teams for structure changes.">Edit Structure</button>' : ""}`);
+  el.content.innerHTML = `
+    <section class="people-tools org-tools">
+      <div><label for="orgSearch">Search employee, team or business unit</label><input id="orgSearch" value="${state.orgSearch}" placeholder="Search organization" /></div>
+    </section>
+    <section class="org-panel">
+      ${renderOrganizationTree()}
+    </section>
+  `;
+  const searchInput = document.querySelector("#orgSearch");
+  searchInput.addEventListener("input", () => {
+    state.orgSearch = searchInput.value;
+    renderPage();
+  });
+  bindEmployeeLinks();
+  document.querySelectorAll("[data-org-unit]:not([data-org-team])").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      el.businessFilter.value = button.dataset.orgUnit;
+      renderFilters(false);
+      state.page = "people";
+      renderNav();
+      renderPage();
+    });
+  });
+  document.querySelectorAll("[data-org-team]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      el.businessFilter.value = button.dataset.orgUnit;
+      renderFilters(false);
+      el.teamFilter.value = button.dataset.orgTeam;
+      state.page = "people";
+      renderNav();
+      renderPage();
+    });
+  });
 }
 
 function renderAdministration() {
   if (!currentRole().admin) {
-    state.page = "overview";
+    state.page = "organization";
     renderNav();
     renderPage();
     return;
@@ -1338,7 +1604,7 @@ function openActionDrawer(action) {
     exportEmployees: "Export Employees",
     editEmployee: "Edit Employee",
     addManagerRecord: "Add Manager Record",
-    addTalentInsight: "Add Talent Insight",
+    addTalentInsight: "Add HRBP Record",
     createTalentAction: "Create Talent Action",
     createLearningAction: "Create Learning Action",
     archiveEmployee: "Archive Employee",
@@ -1432,13 +1698,13 @@ function actionDrawerContent(action, employee) {
   if (action === "addTalentInsight") {
     return `
       <form data-action-form class="form-grid">
-        ${selectField("Insight Type", "insightType", ["Development Suggestion", "Talent Risk", "Strength", "Growth Opportunity", "Succession consideration", "Promotion readiness evidence"], "Development Suggestion")}
+        ${selectField("Record Type", "insightType", ["Talent Insight", "Talent Risk", "Development Suggestion", "HRBP observation", "Retention consideration"], "Development Suggestion")}
         ${field("Date", "date", "2026-07-14", "date")}
         ${field("Scope", "scope", employee.team, "text")}
         ${textareaField("Description", "description", `${employee.name} should receive a focused development action connected to ${employee.capabilities[0].name}.`)}
         ${textareaField("Recommended action", "recommendedAction", "Create a mentoring or learning action with review evidence.")}
         ${selectField("Visibility", "visibility", ["HRBP only", "Leadership visible", "Manager visible after approval"], "HRBP only")}
-        ${formActions("Add talent insight")}
+        ${formActions("Add HRBP record")}
       </form>
     `;
   }
@@ -1581,14 +1847,14 @@ function handleActionSubmit(action, form) {
   }
   if (action === "addManagerRecord") {
     employee.records.unshift([data.recordType, data.date, data.scope, `${data.description} Related capability: ${data.capability}. Visibility: ${data.visibility}.`]);
-    state.talentTab = "Evidence";
+    state.talentTab = "Manager Records";
     finishAction("Manager record added.");
     return;
   }
   if (action === "addTalentInsight") {
     employee.insights.unshift([data.insightType, data.date, "HRBP", `${data.description} Recommended action: ${data.recommendedAction}. Visibility: ${data.visibility}.`]);
-    state.talentTab = "Development";
-    finishAction("Talent insight added.");
+    state.talentTab = "HRBP Records";
+    finishAction("HRBP record added.");
     return;
   }
   if (action === "archiveEmployee") {
@@ -1657,14 +1923,14 @@ function aiScopeOptions() {
     const employee = employees.find((item) => item.id === state.selectedEmployee) || employees[0];
     options.unshift(`${employee.name} profile evidence`);
   }
-  if (state.page === "teamReadiness") options.unshift("Team readiness gaps and learning action evidence");
+  if (state.page === "talentTeam") options.unshift("Talent and team management evidence");
   if (state.page === "organization") options.unshift("Research Center structure and annual goals");
   return options;
 }
 
 function defaultPromptForPage() {
   if (state.page === "talent") return "Summarize the most important evidence gaps and next best talent action for this employee.";
-  if (state.page === "teamReadiness") return "Identify the highest-impact internal learning action for the selected team readiness gaps.";
+  if (state.page === "talentTeam") return "Identify the highest-impact team or talent action for the selected scope.";
   if (state.page === "organization") return "Summarize which labs have the most urgent operating model or capability coverage concerns.";
   return "What are the three most important leadership decisions for this scope this month?";
 }
@@ -1677,7 +1943,7 @@ function generatePromptResponse(prompt, type, page) {
     const employee = employees.find((item) => item.id === state.selectedEmployee) || employees[0];
     return `${type}: ${employee.name} has strongest evidence in ${employee.capabilities[0].name}. Based on the prompt, the next review should focus on ${employee.dependency === "No critical dependency" ? "evidence quality and development history" : employee.dependency}. Recommended follow-up: create or update one talent action with manager-visible evidence.`;
   }
-  if (page === "teamReadiness") {
+  if (page === "talentTeam") {
     const gap = highRisks[0] || scopedCapabilities[0];
     return `${type}: The strongest signal is ${gap?.team || "the selected scope"} / ${gap?.name || "capability coverage"}. The recommended response is to prioritize internal development first, assign an owner, and require project contribution plus manager validation as completion evidence.`;
   }
