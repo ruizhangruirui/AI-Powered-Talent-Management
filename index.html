@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Research Talent & Capability OS</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Primary navigation">
+        <div class="brand">
+          <div class="brand-mark">RC</div>
+          <div>
+            <strong>Research Talent OS</strong>
+            <span>Capability governance</span>
+          </div>
+        </div>
+        <nav class="primary-nav" id="primaryNav"></nav>
+        <div class="role-panel">
+          <label for="roleSelect">Current role</label>
+          <select id="roleSelect"></select>
+          <p id="roleScope"></p>
+        </div>
+      </aside>
+
+      <main class="main-shell">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">AI-powered Research Talent & Capability Operating System</p>
+            <h1 id="pageTitle">Overview</h1>
+            <p id="pageSubtitle">Understand capability demand, people coverage, talent risk and actions.</p>
+          </div>
+          <div class="topbar-actions" id="topbarActions"></div>
+        </header>
+
+        <section class="scope-filter" aria-label="Scope filter">
+          <div>
+            <label for="centerFilter">Research Center</label>
+            <select id="centerFilter"></select>
+          </div>
+          <div>
+            <label for="businessFilter">Business Unit</label>
+            <select id="businessFilter"></select>
+          </div>
+          <div>
+            <label for="teamFilter">Team</label>
+            <select id="teamFilter"></select>
+          </div>
+          <div>
+            <label for="periodFilter">Time Period</label>
+            <select id="periodFilter">
+              <option>2026</option>
+              <option>2025</option>
+              <option>Last 12 months</option>
+            </select>
+          </div>
+          <p id="scopeSummary"></p>
+        </section>
+
+        <section class="content-area" id="contentArea"></section>
+      </main>
+    </div>
+
+    <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+    <aside class="drawer" id="drawer" aria-hidden="true" aria-label="Details panel">
+      <div class="drawer-header">
+        <div>
+          <p class="eyebrow" id="drawerEyebrow">Evidence</p>
+          <h2 id="drawerTitle">Evidence</h2>
+        </div>
+        <button class="icon-button" id="closeDrawer" aria-label="Close drawer">×</button>
+      </div>
+      <div id="drawerBody"></div>
+    </aside>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
