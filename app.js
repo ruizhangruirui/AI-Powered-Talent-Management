@@ -275,20 +275,20 @@ const roles = {
 };
 
 const navItems = [
-  ["overview", "Dashboard", "What needs attention now"],
+  ["overview", "Overview", "What needs attention now"],
   ["people", "People", "Find employees and open profiles"],
-  ["talent", "Employee Profile", "Talent card, evidence and actions"],
-  ["capability", "Capability Intelligence", "Capability gaps, coverage and learning actions"],
+  ["teamReadiness", "Team Readiness", "Can this team achieve its goals?"],
+  ["development", "Talent & Development", "People requiring review or action"],
   ["organization", "Organization", "Structure, teams and annual goals"],
   ["administration", "Administration", "Owner-only configuration and governance"],
 ];
 
 const adminGroups = {
   Organization: ["Business Units & Teams", "Employee Transfers", "Organization History"],
-  "People Operations": ["Bulk Import", "Bulk Archive", "Former Employees", "Data Export"],
+  "People Operations": ["Add Employee", "Bulk Import", "Bulk Archive", "Former Employees", "Export"],
   "Access & Governance": ["Leadership & Access", "HRBP Coverage", "Roles & Permissions", "Audit Log"],
   "Talent Configuration": ["Talent Tags", "Awards", "Talent Action Types", "Activity Types", "Capability Taxonomy", "Promotion Criteria"],
-  System: ["Appearance", "Security", "Change Password", "System Preferences"],
+  System: ["Appearance", "Security", "Change Password"],
 };
 
 const firstNames = ["Alice", "Brian", "Carla", "David", "Elena", "Farid", "Grace", "Hao", "Iris", "Jonas", "Keiko", "Lina", "Maya", "Nikhil", "Olivia", "Priya", "Rui", "Sofia", "Tomas", "Wei", "Yara", "Zoe", "Marco", "Anika", "Daniel", "Mei", "Victor", "Nora", "Ahmed", "Julia"];
@@ -579,6 +579,7 @@ const state = {
   role: "owner",
   selectedEmployee: "e1",
   talentTab: "Overview",
+  developmentView: "Requires Attention",
   adminSection: "Business Units & Teams",
   search: "",
   aiOutputs: [],
@@ -642,6 +643,7 @@ function allowedTeamsFor(unitName) {
 function employeesInScope() {
   const role = currentRole();
   return employees.filter((employee) => {
+    if (employee.archived) return false;
     const unitOk = role.businessUnits === "all" || role.businessUnits.includes(employee.unit);
     const teamOk = role.teams === "all" || role.teams.includes(employee.team);
     const selectedUnit = el.businessFilter.value;
@@ -709,16 +711,18 @@ function renderNav() {
 }
 
 function navIcon(key) {
-  return { overview: "⌂", people: "◎", talent: "◇", capability: "▦", organization: "╬", administration: "⚙" }[key];
+  return { overview: "⌂", people: "◎", teamReadiness: "▦", development: "◇", organization: "╬", administration: "⚙" }[key];
 }
 
 function renderFilters(reset) {
   const units = ["All permitted units", ...allowedBusinessUnits()];
-  const selectedUnit = reset || !units.includes(el.businessFilter.value) ? units[0] : el.businessFilter.value;
+  const defaultUnit = Array.isArray(currentRole().businessUnits) && currentRole().businessUnits.length === 1 ? currentRole().businessUnits[0] : units[0];
+  const selectedUnit = reset || !units.includes(el.businessFilter.value) ? defaultUnit : el.businessFilter.value;
   setOptions(el.businessFilter, units, selectedUnit);
   const teamSource = selectedUnit === "All permitted units" ? allowedBusinessUnits().flatMap((unit) => allowedTeamsFor(unit)) : allowedTeamsFor(selectedUnit);
   const teams = ["All permitted teams", ...teamSource];
-  const selectedTeam = reset || !teams.includes(el.teamFilter.value) ? teams[0] : el.teamFilter.value;
+  const defaultTeam = Array.isArray(currentRole().teams) && currentRole().teams.length === 1 ? currentRole().teams[0] : teams[0];
+  const selectedTeam = reset || !teams.includes(el.teamFilter.value) ? defaultTeam : el.teamFilter.value;
   setOptions(el.teamFilter, teams, selectedTeam);
   updateScopeSummary();
 }
@@ -742,7 +746,8 @@ function renderPage() {
     overview: renderOverview,
     people: renderPeople,
     talent: renderTalent,
-    capability: renderCapability,
+    teamReadiness: renderTeamReadiness,
+    development: renderTalentDevelopment,
     organization: renderOrganization,
     administration: renderAdministration,
   };
@@ -755,31 +760,18 @@ function renderOverview() {
   const critical = scopedCapabilities.filter((capability) => capability.severity === "High");
   const risks = scoped.filter((employee) => employee.retentionRisk === "High" || employee.dependency !== "No critical dependency");
   const openActions = scoped.flatMap((employee) => employee.actions.filter((action) => action.status !== "Completed").map((action) => ({ employee, action })));
-  const decisions = [
-    ...critical.slice(0, 3).map((capability) => ({
-      label: capability.gap,
-      title: `${capability.team}: ${capability.name}`,
-      detail: capability.recommendation,
-      tone: "danger",
-    })),
-    ...risks.slice(0, 2).map((employee) => ({
-      label: "Talent risk",
-      title: employee.name,
-      detail: employee.dependency,
-      tone: "warning",
-    })),
-  ];
+  const landing = roleLanding(scoped, critical, risks, openActions);
   setHeader(
-    "Dashboard",
-    "What requires attention today?",
+    "Overview",
+    landing.question,
     `<button class="secondary-button" data-toast="AI analysis refreshed for the selected scope.">Refresh AI Analysis</button>
-     <button class="primary-button" data-toast="Review queue opened with ${critical.length + risks.length} items.">Review Attention Queue</button>`
+     <button class="primary-button" data-toast="Review queue opened with ${landing.items.length} items.">${landing.primaryAction}</button>`
   );
   el.content.innerHTML = `
     <article class="ai-panel">
-      ${aiMeta("Scope briefing", "2026-07-14", "2026 annual plan and evidence", "High", "Current")}
-      <h2>${critical.length} capability risks need a decision</h2>
-      <p>Focus today on backup gaps, single-point dependencies and overdue learning actions.</p>
+      ${aiMeta(landing.label, "2026-07-14", "2026 annual plan and evidence", "High", "Current")}
+      <h2>${landing.conclusion}</h2>
+      <p>${landing.summary}</p>
       <div class="button-row">
         <button class="secondary-button" data-drawer="briefing">View Evidence</button>
         <button class="secondary-button" data-action="promptAI">Generate with Prompt</button>
@@ -790,7 +782,7 @@ function renderOverview() {
     ${renderPromptOutputs("overview")}
     <section>
       <div class="section-header"><div><h2>Decision Queue</h2><p>Review in order.</p></div></div>
-      ${decisionList(decisions)}
+      ${decisionList(landing.items)}
     </section>
     <details class="quiet-details">
       <summary>Recommended actions (${Math.min(scopedCapabilities.length, 8)})</summary>
@@ -798,6 +790,74 @@ function renderOverview() {
     </details>
   `;
   bindDrawerButtons();
+}
+
+function roleLanding(scoped, critical, risks, openActions) {
+  if (state.role === "hrbp") {
+    const staleInsights = scoped.filter((employee) => employee.insights.length && employee.idNumber % 2 === 0);
+    return {
+      label: "HRBP talent briefing",
+      question: "Which talent reviews need attention?",
+      conclusion: `${risks.slice(0, 5).length} talent reviews need HRBP attention`,
+      summary: "Focus on retention risk, promotion readiness and open talent actions in your assigned coverage.",
+      primaryAction: "Open Talent Review Queue",
+      items: [
+        ...risks.slice(0, 3).map((employee) => ({ label: "Retention", title: employee.name, detail: `${employee.retentionRisk} retention risk; ${employee.promotionReadiness}.`, tone: employee.retentionRisk === "High" ? "danger" : "warning" })),
+        ...staleInsights.slice(0, 2).map((employee) => ({ label: "Insight", title: employee.name, detail: "Talent Insight should be refreshed before the next calibration review.", tone: "warning" })),
+      ],
+    };
+  }
+  if (state.role === "teamLead") {
+    return {
+      label: "Team lead briefing",
+      question: "What does my team need today?",
+      conclusion: `${openActions.length} actions or capability risks need follow-up`,
+      summary: "Focus on assigned team actions, recent employee evidence and missing backup coverage.",
+      primaryAction: "Open Team Tasks",
+      items: [
+        ...openActions.slice(0, 3).map(({ employee, action }) => ({ label: "Action", title: employee.name, detail: `${action.type} for ${action.capability}; due ${action.due}.`, tone: "warning" })),
+        ...critical.slice(0, 2).map((capability) => ({ label: capability.gap, title: capability.name, detail: capability.recommendation, tone: "danger" })),
+      ],
+    };
+  }
+  if (state.role === "labDirector") {
+    return {
+      label: "Lab readiness briefing",
+      question: "Which team in my lab needs attention?",
+      conclusion: `${critical.length} lab readiness risks need review`,
+      summary: "Focus on team-level readiness, missing backups and open development actions inside your assigned lab.",
+      primaryAction: "Review Lab Readiness",
+      items: [
+        ...critical.slice(0, 4).map((capability) => ({ label: capability.gap, title: capability.team, detail: `${capability.name}: ${capability.recommendation}`, tone: "danger" })),
+        ...openActions.slice(0, 1).map(({ employee, action }) => ({ label: "Action", title: employee.name, detail: `${action.type} due ${action.due}.`, tone: "warning" })),
+      ],
+    };
+  }
+  if (state.role === "director") {
+    return {
+      label: "Research Center briefing",
+      question: "What requires leadership attention?",
+      conclusion: `${critical.length} organization-level risks require review`,
+      summary: "Focus on major capability risks, teams requiring attention and promotion calibration candidates.",
+      primaryAction: "Review Leadership Queue",
+      items: [
+        ...critical.slice(0, 3).map((capability) => ({ label: capability.gap, title: `${capability.team}: ${capability.name}`, detail: capability.recommendation, tone: "danger" })),
+        ...risks.slice(0, 2).map((employee) => ({ label: "Dependency", title: employee.name, detail: employee.dependency, tone: "warning" })),
+      ],
+    };
+  }
+  return {
+    label: "Owner briefing",
+    question: "What requires attention now?",
+    conclusion: `${critical.length} capability risks and ${openActions.length} open actions need governance`,
+    summary: "Focus on critical decisions, pending approvals, organizational changes and system configuration issues.",
+    primaryAction: "Review Owner Queue",
+    items: [
+      ...critical.slice(0, 3).map((capability) => ({ label: capability.gap, title: `${capability.team}: ${capability.name}`, detail: capability.recommendation, tone: "danger" })),
+      { label: "Governance", title: "Access and HRBP coverage", detail: "Review role assignments and HRBP coverage after recent structure changes.", tone: "warning" },
+      ...openActions.slice(0, 1).map(({ employee, action }) => ({ label: "Approval", title: employee.name, detail: `${action.type} for ${action.capability} needs owner visibility.`, tone: "blue" })),
+    ],
+  };
 }
 
 function decisionList(items) {
@@ -881,8 +941,6 @@ function renderPeople() {
       <div><label for="peopleSearch">Search employee number, name or capability</label><input id="peopleSearch" value="${state.search}" placeholder="Search people" /></div>
       <div><label>Contract type</label><select id="contractFilter"><option>All contracts</option><option>Employee</option><option>Leased Labour</option><option>Intern</option></select></div>
       <div><label>Talent tag</label><select id="tagFilter"><option>All tags</option>${talentTags.map((tag) => `<option>${tag}</option>`).join("")}</select></div>
-      <div><label>Open action</label><select id="actionFilter"><option>Any</option><option>Has open action</option><option>No open actions</option></select></div>
-      <div><label>9-Box</label><select id="boxFilter"><option>All placements</option><option>High Impact / High Potential</option><option>Medium Impact / High Potential</option></select></div>
     </section>
     <section>
       <div class="section-header"><div><h2>People in Scope</h2><p id="peopleCount"></p></div></div>
@@ -933,19 +991,20 @@ function renderTalent() {
   const employee = scoped.find((item) => item.id === state.selectedEmployee) || scoped[0] || employees[0];
   state.selectedEmployee = employee.id;
   setHeader(
-    "Employee Profile",
+    "Talent Card",
     "One place for talent summary, evidence, capabilities, development and history.",
     `${currentRole().canAddEmployees ? '<button class="secondary-button" data-action="editEmployee">Edit Employee</button>' : ""}
      ${currentRole().canAddManagerRecord ? '<button class="secondary-button" data-action="addManagerRecord">Add Manager Record</button>' : ""}
      ${currentRole().canAddTalentInsight ? '<button class="secondary-button" data-action="addTalentInsight">Add Talent Insight</button>' : ""}
+     ${currentRole().canArchiveEmployees ? '<button class="danger-button" data-action="archiveEmployee">Archive Employee</button>' : ""}
      <button class="primary-button" data-action="createTalentAction">Create Talent Action</button>`
   );
-  const tabs = ["Overview", "Performance Evidence", "Capabilities", "Talent & Development", "Career History"];
+  const tabs = ["Overview", "Evidence", "Capabilities", "Development", "History"];
   el.content.innerHTML = `
     <section class="talent-header">
       <div class="talent-header-main">
         <div>
-          <p class="eyebrow">Employee Profile</p>
+          <p class="eyebrow">Talent Card</p>
           <h2>${employee.name}</h2>
           <p>${employee.title} · ${employee.level} · ${employee.team}</p>
           <div class="tag-row">${employee.tags.map((tag) => `<span class="badge">${tag}</span>`).join("")}${employee.awards.map((award) => `<span class="badge blue">${award}</span>`).join("")}</div>
@@ -998,14 +1057,14 @@ function renderTalentTab(employee) {
       ])}
     `;
   }
-  if (state.talentTab === "Performance Evidence") return `<div class="card"><h2>Manager Records</h2>${recordsList(employee.records)}</div>`;
+  if (state.talentTab === "Evidence") return `<div class="card"><h2>Manager Records</h2>${recordsList(employee.records)}</div>`;
   if (state.talentTab === "Capabilities") {
     return `<div class="card"><h2>Capabilities</h2><div class="table-wrap"><table><thead><tr><th>Capability</th><th>Level</th><th>Evidence quality</th><th>Source</th></tr></thead><tbody>${employee.capabilities.map((capability) => `<tr><td>${capability.name}</td><td>${capability.level}</td><td>${capability.evidenceQuality}</td><td>${capability.source}</td></tr>`).join("")}</tbody></table></div></div>`;
   }
-  if (state.talentTab === "Talent & Development") {
+  if (state.talentTab === "Development") {
     return `<div class="grid two"><article class="card"><h2>Talent Insights</h2>${state.role === "teamLead" ? restrictedState() : employee.insights.length ? recordsList(employee.insights) : '<div class="empty-state"><h2>No HRBP insight</h2><p>Not every employee has formal HRBP records.</p></div>'}</article><article class="card"><h2>Talent Actions</h2>${actionList(employee)}</article></div>`;
   }
-  return `<div class="card"><h2>Career History</h2>${recordsList(employee.growthPath)}</div>`;
+  return `<div class="card"><h2>History</h2>${recordsList(employee.growthPath)}</div>`;
 }
 
 function recordsList(records) {
@@ -1021,24 +1080,24 @@ function actionList(employee) {
   return `<div class="timeline">${employee.actions.map((action) => `<div class="timeline-item"><h3>${action.type} <span class="badge ${action.status === "Completed" ? "blue" : "warning"}">${action.status}</span></h3><p>Target: ${action.capability}. Owner: ${action.owner}. Due: ${action.due}.</p></div>`).join("")}</div>`;
 }
 
-function renderCapability() {
+function renderTeamReadiness() {
   const scopedCapabilities = capabilitiesInScope();
   const high = scopedCapabilities.filter((item) => item.severity === "High");
   setHeader(
-    "Capability Intelligence",
-    "Which capabilities are missing, under-covered or dependent on too few people?",
+    "Team Readiness",
+    "Can this team achieve its goals?",
     `<button class="primary-button" data-action="generateAnalysis">Generate AI Analysis</button>
-     <button class="secondary-button" data-toast="Capability analysis refreshed.">Refresh Analysis</button>
+     <button class="secondary-button" data-toast="Team readiness refreshed.">Refresh Analysis</button>
      <button class="secondary-button" data-action="createLearningAction">Create Learning Action</button>`
   );
   el.content.innerHTML = `
     <article class="ai-panel">
-      ${aiMeta("Capability analysis", "2026-07-14", "Team goals and evidence", high.length ? "High" : "Moderate", "Current")}
+      ${aiMeta("Team readiness assessment", "2026-07-14", "Team goals and evidence", high.length ? "High" : "Moderate", "Current")}
       <h2>Can this team achieve its goals?</h2>
       <p>${high.length ? `${high.length} high-severity gaps block goal readiness.` : "No high-severity gap is visible in this scope."}</p>
       <div class="button-row"><button class="secondary-button" data-drawer="briefing">View Evidence</button><button class="secondary-button" data-action="promptAI">Generate with Prompt</button><button class="primary-button" data-toast="Analysis accepted for human review.">Accept</button><button class="ghost-button" data-toast="Analysis dismissed.">Dismiss</button></div>
     </article>
-    ${renderPromptOutputs("capability")}
+    ${renderPromptOutputs("teamReadiness")}
     <section>
       <div class="section-header"><div><h2>Goal Readiness Flow</h2><p>Goal → capability → coverage → gap → action.</p></div></div>
       <div class="capability-flow">${scopedCapabilities.filter((item) => item.severity === "High").slice(0, 4).map(capabilityFlowItem).join("") || '<div class="empty-state"><h2>No high-severity risk</h2><p>Select another scope or refresh analysis.</p></div>'}</div>
@@ -1053,6 +1112,89 @@ function renderCapability() {
     </details>
   `;
   bindDrawerButtons();
+}
+
+function renderTalentDevelopment() {
+  const scoped = employeesInScope();
+  const views = ["Requires Attention", "Promotion Review", "Retention Review", "Development Actions"];
+  const attention = talentReviewItems(scoped, state.developmentView);
+  setHeader(
+    "Talent & Development",
+    "Who requires development, review or talent action?",
+    `${currentRole().canAddTalentInsight ? '<button class="secondary-button" data-action="addTalentInsight">Add Talent Insight</button>' : ""}
+     <button class="primary-button" data-action="createTalentAction">Create Talent Action</button>`
+  );
+  el.content.innerHTML = `
+    <nav class="tabs" aria-label="Talent development views">${views.map((view) => `<button class="tab ${view === state.developmentView ? "active" : ""}" data-development-view="${view}">${view}</button>`).join("")}</nav>
+    <article class="ai-panel">
+      ${aiMeta("Talent review briefing", "2026-07-14", "Assigned coverage", "Moderate", "Current")}
+      <h2>${attention.length} people require review</h2>
+      <p>Prioritize employees with retention risk, promotion readiness evidence gaps or overdue development actions.</p>
+      <div class="button-row"><button class="secondary-button" data-action="promptAI">Generate with Prompt</button><button class="primary-button" data-toast="Talent review briefing accepted.">Accept</button><button class="ghost-button" data-toast="Talent review briefing dismissed.">Dismiss</button></div>
+    </article>
+    ${renderPromptOutputs("development")}
+    ${decisionList(attention.slice(0, 5))}
+    <details class="quiet-details">
+      <summary>View all review items (${attention.length})</summary>
+      <div class="table-wrap">${talentReviewTable(attention)}</div>
+    </details>
+  `;
+  document.querySelectorAll("[data-development-view]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.developmentView = button.dataset.developmentView;
+      renderPage();
+    });
+  });
+  document.querySelectorAll("[data-employee]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.selectedEmployee = button.dataset.employee;
+      state.page = "talent";
+      state.talentTab = "Overview";
+      renderNav();
+      renderPage();
+    });
+  });
+  bindDrawerButtons();
+}
+
+function talentReviewItems(scoped, view) {
+  return scoped
+    .filter((employee) => {
+      if (view === "Promotion Review") return employee.promotionReadiness !== "Not Ready";
+      if (view === "Retention Review") return employee.retentionRisk !== "Low";
+      if (view === "Development Actions") return employee.openActions > 0;
+      return employee.retentionRisk === "High" || employee.openActions > 0 || employee.promotionReadiness === "Potentially Ready in 6-12 Months";
+    })
+    .map((employee) => ({
+      employee,
+      label: employee.retentionRisk === "High" ? "Retention" : employee.openActions ? "Action" : "Promotion",
+      title: employee.name,
+      detail: `${employee.title}; ${employee.retentionRisk} retention risk; ${employee.openActions} open actions.`,
+      tone: employee.retentionRisk === "High" ? "danger" : employee.openActions ? "warning" : "blue",
+      status: employee.promotionReadiness,
+      evidence: employee.capabilities[0].evidenceQuality,
+      nextAction: employee.openActions ? "Review action evidence" : "Open employee profile",
+    }));
+}
+
+function talentReviewTable(items) {
+  return `
+    <table>
+      <thead><tr><th>Employee</th><th>Reason</th><th>Status</th><th>Evidence</th><th>Next action</th><th></th></tr></thead>
+      <tbody>
+        ${items.map((item) => `
+          <tr>
+            <td><strong>${item.employee.name}</strong><br><span class="muted">${item.employee.team}</span></td>
+            <td>${item.detail}</td>
+            <td>${item.status}</td>
+            <td>${item.evidence}</td>
+            <td>${item.nextAction}</td>
+            <td><button class="secondary-button" data-employee="${item.employee.id}">Open Profile</button></td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
 }
 
 function capabilityFlowItem(capability) {
@@ -1115,6 +1257,7 @@ function renderAdministration() {
       renderPage();
     });
   });
+  bindActionButtons(el.content);
 }
 
 function adminGroupFor(section) {
@@ -1128,6 +1271,15 @@ function adminContent(section) {
   if (section === "Capability Taxonomy") {
     const taxonomy = [...new Set(employees.flatMap((employee) => employee.capabilities.map((capability) => capability.name)))].sort();
     return `<p>${taxonomy.length} capability terms are available in the realistic mock dataset.</p><div class="table-wrap"><table><thead><tr><th>Capability</th><th>Status</th><th>Validation</th></tr></thead><tbody>${taxonomy.slice(0, 40).map((capability) => `<tr><td>${capability}</td><td>Active</td><td>Human review required for AI merge suggestions</td></tr>`).join("")}</tbody></table></div>`;
+  }
+  if (section === "Add Employee") {
+    return `<p>Create one employee record and preserve audit history.</p><div class="button-row"><button class="primary-button" data-action="addEmployee">Add Employee</button></div>`;
+  }
+  if (section === "Bulk Import") {
+    return `<p>Import employees in bulk with validation before records become active.</p><div class="button-row"><button class="primary-button" data-action="importEmployees">Import Employees</button></div>`;
+  }
+  if (section === "Export") {
+    return `<p>Export employee data for authorized operational review.</p><div class="button-row"><button class="primary-button" data-action="exportEmployees">Export Employees</button></div>`;
   }
   if (section === "Roles & Permissions") {
     return `<p>Permissions are enforced by role, scope and field sensitivity.</p><div class="table-wrap"><table><thead><tr><th>Role</th><th>Scope</th><th>Org edit</th><th>Talent judgment</th></tr></thead><tbody>${Object.values(roles).map((role) => `<tr><td>${role.label}</td><td>${role.scope}</td><td>${yesNo(role.canEditOrg)}</td><td>${yesNo(role.canEditTalentJudgment)}</td></tr>`).join("")}</tbody></table></div>`;
@@ -1189,6 +1341,7 @@ function openActionDrawer(action) {
     addTalentInsight: "Add Talent Insight",
     createTalentAction: "Create Talent Action",
     createLearningAction: "Create Learning Action",
+    archiveEmployee: "Archive Employee",
     generateAnalysis: "Generate AI Analysis",
     promptAI: "Generate AI Intelligence",
   };
@@ -1286,6 +1439,19 @@ function actionDrawerContent(action, employee) {
         ${textareaField("Recommended action", "recommendedAction", "Create a mentoring or learning action with review evidence.")}
         ${selectField("Visibility", "visibility", ["HRBP only", "Leadership visible", "Manager visible after approval"], "HRBP only")}
         ${formActions("Add talent insight")}
+      </form>
+    `;
+  }
+  if (action === "archiveEmployee") {
+    return `
+      <form data-action-form class="form-grid">
+        <div class="form-wide">
+          <p><strong>${employee.name}</strong> will be archived from active employee views. Historical records, manager evidence, Talent Insights and actions remain preserved.</p>
+        </div>
+        ${field("Archive Date", "archiveDate", "2026-07-14", "date")}
+        ${selectField("Reason", "reason", ["Resigned", "Transferred out", "Contract ended", "Duplicate record", "Other"], "Contract ended")}
+        ${textareaField("Archive note", "note", "Archive employee while preserving historical talent and organization records.")}
+        ${formActions("Archive employee")}
       </form>
     `;
   }
@@ -1415,14 +1581,21 @@ function handleActionSubmit(action, form) {
   }
   if (action === "addManagerRecord") {
     employee.records.unshift([data.recordType, data.date, data.scope, `${data.description} Related capability: ${data.capability}. Visibility: ${data.visibility}.`]);
-    state.talentTab = "Performance Evidence";
+    state.talentTab = "Evidence";
     finishAction("Manager record added.");
     return;
   }
   if (action === "addTalentInsight") {
     employee.insights.unshift([data.insightType, data.date, "HRBP", `${data.description} Recommended action: ${data.recommendedAction}. Visibility: ${data.visibility}.`]);
-    state.talentTab = "Talent & Development";
+    state.talentTab = "Development";
     finishAction("Talent insight added.");
+    return;
+  }
+  if (action === "archiveEmployee") {
+    employee.archived = true;
+    employee.archive = { date: data.archiveDate, reason: data.reason, note: data.note };
+    state.page = "people";
+    finishAction("Employee archived. Historical records preserved.");
     return;
   }
   if (action === "createTalentAction" || action === "createLearningAction") {
@@ -1432,7 +1605,7 @@ function handleActionSubmit(action, form) {
     target.openActions = target.actions.filter((item) => item.status !== "Completed").length;
     state.selectedEmployee = target.id;
     state.page = "talent";
-    state.talentTab = "Talent & Development";
+    state.talentTab = "Development";
     finishAction("Talent action created.");
     return;
   }
@@ -1484,14 +1657,14 @@ function aiScopeOptions() {
     const employee = employees.find((item) => item.id === state.selectedEmployee) || employees[0];
     options.unshift(`${employee.name} profile evidence`);
   }
-  if (state.page === "capability") options.unshift("Capability gaps and learning action evidence");
+  if (state.page === "teamReadiness") options.unshift("Team readiness gaps and learning action evidence");
   if (state.page === "organization") options.unshift("Research Center structure and annual goals");
   return options;
 }
 
 function defaultPromptForPage() {
   if (state.page === "talent") return "Summarize the most important evidence gaps and next best talent action for this employee.";
-  if (state.page === "capability") return "Identify the highest-impact internal learning action for the selected capability gaps.";
+  if (state.page === "teamReadiness") return "Identify the highest-impact internal learning action for the selected team readiness gaps.";
   if (state.page === "organization") return "Summarize which labs have the most urgent operating model or capability coverage concerns.";
   return "What are the three most important leadership decisions for this scope this month?";
 }
@@ -1504,7 +1677,7 @@ function generatePromptResponse(prompt, type, page) {
     const employee = employees.find((item) => item.id === state.selectedEmployee) || employees[0];
     return `${type}: ${employee.name} has strongest evidence in ${employee.capabilities[0].name}. Based on the prompt, the next review should focus on ${employee.dependency === "No critical dependency" ? "evidence quality and development history" : employee.dependency}. Recommended follow-up: create or update one talent action with manager-visible evidence.`;
   }
-  if (page === "capability") {
+  if (page === "teamReadiness") {
     const gap = highRisks[0] || scopedCapabilities[0];
     return `${type}: The strongest signal is ${gap?.team || "the selected scope"} / ${gap?.name || "capability coverage"}. The recommended response is to prioritize internal development first, assign an owner, and require project contribution plus manager validation as completion evidence.`;
   }
