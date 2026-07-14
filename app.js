@@ -278,7 +278,7 @@ const navItems = [
   ["home", "Home", "Role-specific work queue"],
   ["organization", "Organization", "Research Center structure at a glance"],
   ["people", "People", "Find employees and open profiles"],
-  ["talentTeam", "Talent & Team", "Team situation and talent actions"],
+  ["talentTeam", "Development Hub", "Team, people and culture development"],
   ["administration", "Administration", "Owner-only configuration and governance"],
 ];
 
@@ -295,12 +295,17 @@ const levels = ["Junior Engineer", "Engineer", "Senior Engineer", "Staff Enginee
 const talentTags = ["AI", "Technical Leader", "High Potential", "Key Position", "Outstanding Talent", "Mentor", "Domain Expert", "Critical Backup"];
 const awards = ["Annual Innovation Award", "Technical Breakthrough Award", "Research Impact Award", "Collaboration Award", "Patent Contribution Award"];
 const evidenceTypes = ["Project contribution", "Technical innovation", "Cross-team collaboration", "Mentoring", "Technical leadership", "Management observation", "Recent achievement"];
-const actionTypes = ["Learning", "Mentoring", "Succession", "Knowledge Transfer", "Key Role Backup", "Internal Mobility"];
+const actionTypes = ["Learning", "Mentoring", "Knowledge Transfer", "Backup Development", "Succession", "Internal Mobility"];
 const configData = {
   talentTags: talentTags.map((name, index) => ({ id: `tag-${index + 1}`, name, active: true })),
   awards: awards.map((name, index) => ({ id: `award-${index + 1}`, name, active: true })),
   talentActionTypes: actionTypes.map((name, index) => ({ id: `action-${index + 1}`, name, active: true })),
   activityTypes: ["Team Event", "Technical Sharing", "Summit", "Cross-team collaboration"].map((name, index) => ({ id: `activity-${index + 1}`, name, active: true })),
+  activities: [
+    { id: "act-1", type: "Technical Sharing", unit: "GPU Research Lab", team: "GPU Compiler", date: "2026-05-18", owner: "GPU Compiler Lead", note: "Compiler backend knowledge sharing with runtime team." },
+    { id: "act-2", type: "Cross-team collaboration", unit: "AI Platform", team: "LLM Platform", date: "2026-06-06", owner: "LLM Platform Lead", note: "Evaluation platform working session with MLOps." },
+    { id: "act-3", type: "Team Event", unit: "Storage System Research Lab", team: "Data Reliability", date: "2026-06-21", owner: "Data Reliability Lead", note: "Incident review practice and team retro." },
+  ],
   users: [
     { id: "u1", name: "Rui Zhang", role: "Owner", scope: "All Research Center", active: true },
     { id: "u2", name: "GPU Compiler Lead", role: "Team Lead", scope: "GPU Compiler", active: true },
@@ -468,6 +473,9 @@ function createTalentActions(employee) {
   if (employee.idNumber % 9 === 0) {
     actions.push({ type: "Key Role Backup", status: "In Progress", capability: employee.capabilities[1]?.name || employee.capabilities[0].name, owner: employee.manager, due: "2026-10-31" });
   }
+  if (employee.idNumber % 10 === 0) {
+    actions.push({ type: "Mentoring", status: "Pending Manager Confirmation", capability: employee.capabilities[0].name, owner: employee.manager, due: "2026-08-31", source: "HRBP recommendation", requiresManagerConfirmation: true });
+  }
   if (employee.idNumber % 14 === 0) {
     actions.push({ type: actionTypes[employee.idNumber % actionTypes.length], status: "Completed", capability: employee.capabilities[0].name, owner: employee.manager, due: "2026-04-30" });
   }
@@ -588,7 +596,7 @@ const state = {
   role: "owner",
   selectedEmployee: "e1",
   talentTab: "Overview",
-  talentTeamView: "Team Plan",
+  talentTeamView: "Team/Lab Development",
   developmentView: "Requires Attention",
   adminSection: "Business Units & Teams",
   search: "",
@@ -808,6 +816,9 @@ function roleLanding(scoped, critical, risks, openActions) {
     };
   }
   if (state.role === "teamLead") {
+    const confirmations = scoped
+      .filter((employee) => employee.actions.some((action) => action.requiresManagerConfirmation && action.status === "Pending Manager Confirmation"))
+      .slice(0, 2);
     return {
       label: "Team lead briefing",
       question: "What does my team need today?",
@@ -816,8 +827,9 @@ function roleLanding(scoped, critical, risks, openActions) {
       primaryAction: "Open Team Tasks",
       items: [
         { label: "Team", title: currentRole().teams[0], detail: "Open the assigned team summary and team plan.", tone: "blue", target: `team:${currentRole().teams[0]}` },
+        ...confirmations.map((employee) => ({ label: "Confirm", title: employee.name, detail: "HRBP proposed a development action that needs manager confirmation.", tone: "warning", target: `employee:${employee.id}:Development` })),
         ...openActions.slice(0, 2).map(({ employee, action }) => ({ label: "Action", title: employee.name, detail: `${action.type} for ${action.capability}; due ${action.due}.`, tone: "warning", target: `employee:${employee.id}:Development` })),
-        ...critical.slice(0, 2).map((capability) => ({ label: capability.gap, title: capability.name, detail: capability.recommendation, tone: "danger", target: `team:${capability.team}:Team Plan` })),
+        ...critical.slice(0, 2).map((capability) => ({ label: capability.gap, title: capability.name, detail: capability.recommendation, tone: "danger", target: `team:${capability.team}:Team/Lab Development` })),
       ],
     };
   }
@@ -830,7 +842,7 @@ function roleLanding(scoped, critical, risks, openActions) {
       primaryAction: "Review Lab Readiness",
       items: [
         { label: "Lab", title: currentRole().businessUnits[0], detail: "Open assigned lab structure and teams.", tone: "blue", target: `unit:${currentRole().businessUnits[0]}` },
-        ...critical.slice(0, 3).map((capability) => ({ label: capability.gap, title: capability.team, detail: `${capability.name}: ${capability.recommendation}`, tone: "danger", target: `team:${capability.team}:Team Plan` })),
+        ...critical.slice(0, 3).map((capability) => ({ label: capability.gap, title: capability.team, detail: `${capability.name}: ${capability.recommendation}`, tone: "danger", target: `team:${capability.team}:Team/Lab Development` })),
         ...openActions.slice(0, 1).map(({ employee, action }) => ({ label: "Action", title: employee.name, detail: `${action.type} due ${action.due}.`, tone: "warning", target: `employee:${employee.id}:Development` })),
       ],
     };
@@ -843,7 +855,7 @@ function roleLanding(scoped, critical, risks, openActions) {
       summary: "Focus on major capability risks, teams requiring attention and promotion calibration candidates.",
       primaryAction: "Review Leadership Queue",
       items: [
-        ...critical.slice(0, 3).map((capability) => ({ label: capability.gap, title: `${capability.team}: ${capability.name}`, detail: capability.recommendation, tone: "danger", target: `team:${capability.team}:Team Plan` })),
+        ...critical.slice(0, 3).map((capability) => ({ label: capability.gap, title: `${capability.team}: ${capability.name}`, detail: capability.recommendation, tone: "danger", target: `team:${capability.team}:Team/Lab Development` })),
         ...risks.slice(0, 2).map((employee) => ({ label: "Dependency", title: employee.name, detail: employee.dependency, tone: "warning", target: `employee:${employee.id}` })),
       ],
     };
@@ -856,7 +868,7 @@ function roleLanding(scoped, critical, risks, openActions) {
     primaryAction: "Review Owner Queue",
     items: [
       { label: "Approval", title: "Pending employee and organization changes", detail: "Review People Operations and Business Unit changes.", tone: "blue", target: "admin:Business Units & Teams" },
-      ...critical.slice(0, 2).map((capability) => ({ label: capability.gap, title: `${capability.team}: ${capability.name}`, detail: capability.recommendation, tone: "danger", target: `team:${capability.team}:Team Plan` })),
+      ...critical.slice(0, 2).map((capability) => ({ label: capability.gap, title: `${capability.team}: ${capability.name}`, detail: capability.recommendation, tone: "danger", target: `team:${capability.team}:Team/Lab Development` })),
       { label: "Governance", title: "Access and HRBP coverage", detail: "Review role assignments and HRBP coverage after recent structure changes.", tone: "warning", target: "admin:HRBP Coverage" },
       ...openActions.slice(0, 1).map(({ employee, action }) => ({ label: "Approval", title: employee.name, detail: `${action.type} for ${action.capability} needs owner visibility.`, tone: "blue", target: `employee:${employee.id}:Development` })),
     ],
@@ -1028,6 +1040,7 @@ function renderPeopleCards(scoped) {
             </header>
             <dl class="profile-facts">
               <div><dt>Job title</dt><dd>${employee.title}</dd></div>
+              <div><dt>Level</dt><dd>${employee.level}</dd></div>
               <div><dt>Team</dt><dd>${employee.team}</dd></div>
               <div><dt>Tenure</dt><dd>${tenure(employee)}</dd></div>
               <div><dt>Contract</dt><dd>${employee.contract}</dd></div>
@@ -1154,18 +1167,19 @@ function restrictedState() {
 
 function actionList(employee, importantOnly = false) {
   if (!employee.actions.length) return `<div class="empty-state"><h2>No open talent action</h2><p>Create an action when evidence, risk or capability coverage requires follow-up.</p></div>`;
-  const actions = importantOnly ? employee.actions.filter((action) => action.status !== "Completed").slice(0, 3) : employee.actions;
-  return `<div class="timeline">${actions.map((action) => `<div class="timeline-item"><h3>${action.type} <span class="badge ${action.status === "Completed" ? "blue" : "warning"}">${action.status}</span></h3><p>Target: ${action.capability}. Owner: ${action.owner}. Due: ${action.due}.</p></div>`).join("")}</div>`;
+  const actions = employee.actions.map((action, index) => ({ action, index }));
+  const visible = importantOnly ? actions.filter(({ action }) => action.status !== "Completed").slice(0, 3) : actions;
+  return `<div class="timeline">${visible.map(({ action, index }) => `<div class="timeline-item"><h3>${action.type} <span class="badge ${action.status === "Completed" ? "blue" : action.status === "Pending Manager Confirmation" ? "warning" : "warning"}">${action.status}</span></h3><p>Target: ${action.capability}. Owner: ${action.owner}. Due: ${action.due}.</p>${action.source ? `<p class="muted">Source: ${action.source}</p>` : ""}${action.requiresManagerConfirmation && currentRole().canAddManagerRecord ? `<div class="button-row"><button class="primary-button" data-action="confirmTalentAction" data-employee-id="${employee.id}" data-action-index="${index}">Confirm Action</button></div>` : ""}</div>`).join("")}</div>`;
 }
 
 function renderTalentTeam() {
-  const tabs = ["Team Plan", "Talent Review", "Development Actions", "Team Activities"];
+  const tabs = ["Team/Lab Development", "People Insights", "Development Actions", "Culture Management"];
   const scoped = employeesInScope();
   const unitOptions = ["All permitted units", ...allowedBusinessUnits()];
   const teamOptions = ["All permitted teams", ...(el.businessFilter.value === "All permitted units" ? allowedBusinessUnits().flatMap((unit) => allowedTeamsFor(unit)) : allowedTeamsFor(el.businessFilter.value))];
   setHeader(
-    "Talent & Team",
-    "Understand the current team situation and decide which talent actions are needed.",
+    "Development Hub",
+    "Develop teams, people and culture with evidence-based actions.",
     `<button class="primary-button" data-action="createTalentAction">Create Talent Action</button>`
   );
   el.content.innerHTML = `
@@ -1174,7 +1188,7 @@ function renderTalentTeam() {
       <div><label for="teamScopeFilter">Team</label><select id="teamScopeFilter">${teamOptions.map((team) => `<option ${team === el.teamFilter.value ? "selected" : ""}>${team}</option>`).join("")}</select></div>
       <div><label for="teamYearFilter">Year</label><select id="teamYearFilter"><option ${el.periodFilter.value === "2026" ? "selected" : ""}>2026</option><option ${el.periodFilter.value === "2025" ? "selected" : ""}>2025</option></select></div>
     </section>
-    <nav class="tabs" aria-label="Talent and team management tabs">${tabs.map((tab) => `<button class="tab ${tab === state.talentTeamView ? "active" : ""}" data-talent-team-view="${tab}">${tab}</button>`).join("")}</nav>
+    <nav class="tabs" aria-label="Development Hub tabs">${tabs.map((tab) => `<button class="tab ${tab === state.talentTeamView ? "active" : ""}" data-talent-team-view="${tab}">${tab}</button>`).join("")}</nav>
     <section>${renderTalentTeamTab(scoped)}</section>
   `;
   document.querySelector("#teamUnitFilter").addEventListener("change", (event) => {
@@ -1209,42 +1223,64 @@ function selectedCapabilities() {
 }
 
 function renderTalentTeamTab(scoped) {
-  if (state.talentTeamView === "Team Plan") {
+  if (state.talentTeamView === "Team/Lab Development") {
     const scopedCapabilities = selectedCapabilities();
     const primaryGap = scopedCapabilities.find((item) => item.severity === "High") || scopedCapabilities[0];
+    const open = scoped.flatMap((employee) => employee.actions.filter((action) => action.status !== "Completed"));
+    const progress = scoped.length ? Math.round((scoped.filter((employee) => employee.openActions === 0).length / scoped.length) * 100) : 0;
     return `
-      <div class="grid two">
-        <article class="card">
-          <h2>Current Situation</h2>
-          <dl class="profile-facts">
-            <div><dt>Business unit</dt><dd>${el.businessFilter.value}</dd></div>
-            <div><dt>Team</dt><dd>${selectedTeamLabel()}</dd></div>
-            <div><dt>Year</dt><dd>${el.periodFilter.value}</dd></div>
-            <div><dt>Employees</dt><dd>${scoped.length}</dd></div>
-          </dl>
-        </article>
-        <article class="ai-panel">
+      <section class="development-summary">
+        <div>
+          <span>Current Situation</span>
+          <strong>${scoped.length} people / ${open.length} open actions</strong>
+          <p>${selectedTeamLabel()} · ${el.periodFilter.value}</p>
+        </div>
+        <div>
+          <span>Main Gap</span>
+          <strong>${primaryGap?.gap || "No major gap"}</strong>
+          <p>${primaryGap?.name || "Coverage stable"}</p>
+        </div>
+        <div>
+          <span>Major Action</span>
+          <strong>${primaryGap ? primaryGap.recommendation : "Maintain development cadence"}</strong>
+        </div>
+        <div>
+          <span>Progress Tracking</span>
+          <strong>${progress}% stable</strong>
+          <p>${scoped.filter((employee) => employee.openActions === 0).length} people without open actions</p>
+        </div>
+      </section>
+      <article class="ai-panel">
           ${aiMeta("AI Team Summary", "2026-07-14", "Team goals and evidence", primaryGap?.severity || "Moderate", "Current")}
-          <h2>${selectedTeamLabel()}</h2>
+          <h2>${selectedTeamLabel()} development focus</h2>
           <p>${primaryGap ? `Strength exists around active project evidence, while the main gap is ${primaryGap.gap} for ${primaryGap.name}. The key dependency is ${primaryGap.recommendation}` : "No major team gap is visible in the selected scope."}</p>
           <div class="button-row"><button class="secondary-button" data-drawer="briefing">View Evidence</button></div>
-        </article>
-      </div>
+      </article>
       <section>
-        <div class="section-header"><div><h2>Goal, Gap and Major Action</h2><p>Team planning summary for authorized review.</p></div></div>
+        <div class="section-header"><div><h2>Gap, Action and Progress</h2><p>Team/lab development items for follow-up.</p></div></div>
         <div class="capability-flow">${scopedCapabilities.slice(0, 4).map(capabilityFlowItem).join("") || '<div class="empty-state"><h2>No team plan data</h2><p>Select a team or permitted business unit.</p></div>'}</div>
       </section>
     `;
   }
-  if (state.talentTeamView === "Talent Review") {
+  if (state.talentTeamView === "People Insights") {
     const attention = talentReviewItems(scoped, "Requires Attention");
+    const contractRows = distributionRows(scoped, "contract");
+    const levelRows = distributionRows(scoped, "level");
+    const highImpactRisk = scoped.filter((employee) => employee.currentImpact === "High" && (employee.retentionRisk === "High" || employee.dependency !== "No critical dependency"));
     return `
-      <div class="section-header"><div><h2>Employees Requiring Attention</h2><p>Retention, promotion readiness, key-person dependency, backup need and 9-box summary.</p></div><button class="secondary-button" data-target="team:${el.teamFilter.value === "All permitted teams" ? scoped[0]?.team || "" : el.teamFilter.value}:Talent Review">Refresh Review</button></div>
-      ${decisionList(attention.slice(0, 8))}
-      <details class="quiet-details">
-        <summary>Review table (${attention.length})</summary>
-        <div class="table-wrap">${talentReviewTable(attention)}</div>
-      </details>
+      <section class="development-summary">
+        <div><span>People</span><strong>${scoped.length}</strong><p>${selectedTeamLabel()}</p></div>
+        <div><span>Contract Mix</span><strong>${contractRows.map((row) => `${row.label}: ${row.count}`).join(" / ")}</strong></div>
+        <div><span>Level Mix</span><strong>${levelRows.slice(0, 3).map((row) => `${row.label}: ${row.count}`).join(" / ")}</strong></div>
+        <div><span>High Impact / High Risk</span><strong>${highImpactRisk.length}</strong><p>Open individual evidence before action.</p></div>
+      </section>
+      <article class="ai-panel">
+        ${aiMeta("AI People Analysis", "2026-07-14", "Manager and HRBP records", "Moderate", "Current")}
+        <h2>${attention.length} people require review</h2>
+        <p>AI combines manager evidence, skill signals, HRBP observations and awards to surface retention, promotion and high-impact risk review candidates.</p>
+      </article>
+      <div class="section-header"><div><h2>People Requiring Attention</h2><p>Retention analysis, promotion analysis, high-impact risk and backup needs.</p></div></div>
+      <div class="table-wrap">${talentReviewTable(attention.slice(0, 12))}</div>
     `;
   }
   if (state.talentTeamView === "Development Actions") {
@@ -1256,11 +1292,25 @@ function renderTalentTeamTab(scoped) {
       </tbody></table></div>
     `;
   }
-  const activities = ["Team Event", "Technical Sharing", "Summit", "Cross-team collaboration", "Team-building activities"];
+  const visibleActivities = configData.activities.filter((activity) => {
+    const unitOk = el.businessFilter.value === "All permitted units" || activity.unit === el.businessFilter.value;
+    const teamOk = el.teamFilter.value === "All permitted teams" || activity.team === el.teamFilter.value;
+    return unitOk && teamOk;
+  });
   return `
-    <div class="section-header"><div><h2>Team Activities</h2><p>Activity types are managed in Administration.</p></div><button class="secondary-button" data-target="admin:Activity Types">Manage Activity Types</button></div>
-    <div class="grid three">${activities.map((activity, index) => `<article class="card"><h2>${activity}</h2><p>${selectedTeamLabel()} · 2026 Q${(index % 4) + 1}</p><p class="muted">Use activities to record team learning, collaboration and engagement context.</p></article>`).join("")}</div>
+    <div class="section-header"><div><h2>Culture Management</h2><p>Record team activities, technical sharing, summits and cross-team collaboration.</p></div><button class="primary-button" data-action="addActivity">Add Activity</button></div>
+    <div class="table-wrap"><table><thead><tr><th>Activity</th><th>Team</th><th>Date</th><th>Owner</th><th>Note</th><th></th></tr></thead><tbody>
+      ${visibleActivities.map((activity) => `<tr><td>${activity.type}</td><td>${activity.team}</td><td>${activity.date}</td><td>${activity.owner}</td><td>${activity.note}</td><td><button class="danger-button" data-action="deleteActivity" data-activity-id="${activity.id}">Delete</button></td></tr>`).join("") || '<tr><td colspan="6">No activities match this scope.</td></tr>'}
+    </tbody></table></div>
   `;
+}
+
+function distributionRows(items, field) {
+  const counts = items.reduce((acc, item) => {
+    acc[item[field]] = (acc[item[field]] || 0) + 1;
+    return acc;
+  }, {});
+  return Object.entries(counts).map(([label, count]) => ({ label, count })).sort((a, b) => b.count - a.count);
 }
 
 function renderTeamReadiness() {
@@ -1641,7 +1691,7 @@ function openTarget(target) {
     renderFilters(false);
     el.teamFilter.value = id;
     state.page = "talentTeam";
-    state.talentTeamView = tab || "Team Plan";
+    state.talentTeamView = normalizeDevelopmentTab(tab);
   }
   if (type === "unit") {
     el.businessFilter.value = id;
@@ -1655,6 +1705,13 @@ function openTarget(target) {
   }
   renderNav();
   renderPage();
+}
+
+function normalizeDevelopmentTab(tab) {
+  if (!tab || tab === "Team Plan") return "Team/Lab Development";
+  if (tab === "Talent Review") return "People Insights";
+  if (tab === "Team Activities") return "Culture Management";
+  return tab;
 }
 
 function bindToastButtons(root) {
@@ -1715,6 +1772,9 @@ function openActionDrawer(action) {
     deactivateConfigItem: "Change Configuration Status",
     deleteConfigItem: "Delete Configuration Item",
     addUserAccount: "Add User Account",
+    addActivity: "Add Culture Activity",
+    deleteActivity: "Delete Culture Activity",
+    confirmTalentAction: "Confirm Development Action",
   };
   el.drawerEyebrow.textContent = "Workflow";
   el.drawerTitle.textContent = titles[action] || "Action";
@@ -1768,9 +1828,9 @@ function drawerContent(kind) {
         <p>${gap ? gap.recommendation : "Current records do not show a critical team gap."}</p>
       </article>
       <div class="button-row">
-        <button class="secondary-button" data-target="team:${team}:Talent Review">View People</button>
-        <button class="secondary-button" data-target="team:${team}:Team Plan">Open Team Plan</button>
-        <button class="primary-button" data-target="team:${team}:Talent Review">Open Talent Review</button>
+        <button class="secondary-button" data-target="team:${team}:People Insights">View People Insights</button>
+        <button class="secondary-button" data-target="team:${team}:Team/Lab Development">Open Development Plan</button>
+        <button class="primary-button" data-target="team:${team}:People Insights">Open People Review</button>
       </div>
     `;
   }
@@ -1790,7 +1850,7 @@ function drawerContent(kind) {
       </dl>
       <div class="button-row">
         <button class="secondary-button" data-target="unit:${unitName}">View Teams</button>
-        <button class="primary-button" data-target="team:${unit?.teams[0] || ""}:Team Plan">Open Unit Plan</button>
+        <button class="primary-button" data-target="team:${unit?.teams[0] || ""}:Team/Lab Development">Open Unit Plan</button>
       </div>
     `;
   }
@@ -1891,7 +1951,7 @@ function actionDrawerContent(action, employee) {
         ${field("Related capability", "capability", selectedCapability, "text")}
         ${field("Owner", "owner", employee.manager || "Team Lead", "text")}
         ${field("Due Date", "due", "2026-10-31", "date")}
-        ${selectField("Status", "status", ["Open", "In Progress", "Completed"], "Open")}
+        ${selectField("Status", "status", currentRole().canAddTalentInsight && !currentRole().canAddManagerRecord ? ["Pending Manager Confirmation"] : ["Open", "In Progress", "Completed"], currentRole().canAddTalentInsight && !currentRole().canAddManagerRecord ? "Pending Manager Confirmation" : "Open")}
         ${textareaField("Required evidence", "evidence", "Project contribution, manager validation and technical review.")}
         ${formActions("Create action")}
       </form>
@@ -1991,6 +2051,36 @@ function actionDrawerContent(action, employee) {
       ${formActions("Add user")}
     </form>`;
   }
+  if (action === "addActivity") {
+    const selectedTeam = el.teamFilter.value === "All permitted teams" ? employeesInScope()[0]?.team || "GPU Compiler" : el.teamFilter.value;
+    const selectedUnit = employees.find((item) => item.team === selectedTeam)?.unit || (el.businessFilter.value === "All permitted units" ? organization.businessUnits[0].name : el.businessFilter.value);
+    return `<form data-action-form class="form-grid">
+      ${selectField("Activity Type", "activityType", activeConfig("activityTypes").map((item) => item.name), "Technical Sharing")}
+      ${selectField("Business Unit", "unit", organization.businessUnits.map((unit) => unit.name), selectedUnit)}
+      ${selectField("Team", "team", organization.businessUnits.flatMap((unit) => unit.teams), selectedTeam)}
+      ${field("Date", "date", "2026-07-14", "date")}
+      ${field("Owner", "owner", teamLeadName(selectedTeam), "text")}
+      ${textareaField("Note", "note", "Record the purpose, participation and follow-up from this activity.")}
+      ${formActions("Add activity")}
+    </form>`;
+  }
+  if (action === "deleteActivity") {
+    const activity = configData.activities.find((item) => item.id === state.actionContext.activityId);
+    return `<form data-action-form class="form-grid">
+      <div class="form-wide"><p>Delete <strong>${activity?.type || "activity"}</strong> for ${activity?.team || "this team"}? This removes the activity from culture tracking.</p></div>
+      ${textareaField("Reason", "reason", "Remove duplicate or incorrect activity record.")}
+      ${formActions("Delete activity")}
+    </form>`;
+  }
+  if (action === "confirmTalentAction") {
+    const target = employees.find((item) => item.id === state.actionContext.employeeId) || employee;
+    const talentAction = target.actions[Number(state.actionContext.actionIndex)];
+    return `<form data-action-form class="form-grid">
+      <div class="form-wide"><p>Confirm <strong>${talentAction?.type || "development action"}</strong> for ${target.name}. The action will move from HRBP recommendation to manager-confirmed execution.</p></div>
+      ${textareaField("Manager confirmation note", "note", "Confirmed with business manager review.")}
+      ${formActions("Confirm action")}
+    </form>`;
+  }
   return "<p>No action available.</p>";
 }
 
@@ -2087,7 +2177,8 @@ function handleActionSubmit(action, form) {
   if (action === "createTalentAction" || action === "createLearningAction") {
     const employeeId = data.employeeId.split("|")[0];
     const target = employees.find((item) => item.id === employeeId) || employee;
-    target.actions.unshift({ type: data.actionType, status: data.status, capability: data.capability, owner: data.owner, due: data.due });
+    const needsConfirmation = data.status === "Pending Manager Confirmation";
+    target.actions.unshift({ type: data.actionType, status: data.status, capability: data.capability, owner: data.owner, due: data.due, source: needsConfirmation ? "HRBP recommendation" : "Manager action", requiresManagerConfirmation: needsConfirmation });
     target.openActions = target.actions.filter((item) => item.status !== "Completed").length;
     state.selectedEmployee = target.id;
     state.page = "talent";
@@ -2205,6 +2296,31 @@ function handleActionSubmit(action, form) {
   if (action === "addUserAccount") {
     configData.users.push({ id: `u${Date.now()}`, name: data.name, role: data.role, scope: data.scope, active: true });
     finishAction("User account added.");
+    return;
+  }
+  if (action === "addActivity") {
+    configData.activities.unshift({ id: `act-${Date.now()}`, type: data.activityType, unit: data.unit, team: data.team, date: data.date, owner: data.owner, note: data.note });
+    state.talentTeamView = "Culture Management";
+    finishAction("Culture activity added.");
+    return;
+  }
+  if (action === "deleteActivity") {
+    configData.activities = configData.activities.filter((item) => item.id !== state.actionContext.activityId);
+    finishAction("Culture activity deleted.");
+    return;
+  }
+  if (action === "confirmTalentAction") {
+    const target = employees.find((item) => item.id === state.actionContext.employeeId) || employee;
+    const talentAction = target.actions[Number(state.actionContext.actionIndex)];
+    if (talentAction) {
+      talentAction.status = "In Progress";
+      talentAction.requiresManagerConfirmation = false;
+      talentAction.confirmedBy = currentRole().label;
+      talentAction.confirmationNote = data.note;
+      target.records.unshift(["Manager confirmation", "2026-07-14", talentAction.type, data.note]);
+    }
+    state.talentTab = "Development";
+    finishAction("Development action confirmed.");
   }
 }
 

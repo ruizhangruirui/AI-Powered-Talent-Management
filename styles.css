@@ -305,16 +305,25 @@ h3 {
 
 .decision-list {
   border-top: 1px solid var(--border);
-  background: var(--surface);
+  background: transparent;
 }
 
 .decision-row {
+  width: 100%;
   display: grid;
-  grid-template-columns: 128px minmax(0, 1fr);
+  grid-template-columns: 104px minmax(0, 1fr);
   gap: var(--space-16);
   align-items: start;
   padding: var(--space-16) 0;
+  border: 0;
   border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+}
+
+.decision-row:hover {
+  background: #fbfcfa;
 }
 
 .decision-row h3,
@@ -325,6 +334,33 @@ h3 {
 .quiet-details {
   padding: var(--space-16) 0;
   border-top: 1px solid var(--border);
+}
+
+.development-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-16);
+}
+
+.development-summary > div {
+  padding: var(--space-16) 0;
+  border-top: 1px solid var(--border);
+}
+
+.development-summary span {
+  display: block;
+  margin-bottom: var(--space-8);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.development-summary strong {
+  display: block;
+  margin-bottom: var(--space-8);
+  font-size: 18px;
+  line-height: 1.35;
 }
 
 .quiet-details summary {
@@ -879,6 +915,7 @@ tr:last-child td {
 
 @media (max-width: 1180px) {
   .metric-grid,
+  .development-summary,
   .grid.three,
   .employee-grid,
   .people-card-grid,
@@ -938,6 +975,7 @@ tr:last-child td {
   .scope-filter,
   .people-tools,
   .metric-grid,
+  .development-summary,
   .grid.three,
   .employee-grid,
   .people-card-grid,
