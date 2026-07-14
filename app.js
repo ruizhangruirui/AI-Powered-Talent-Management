@@ -730,6 +730,7 @@ function setHeader(title, subtitle, actions = "") {
   el.pageSubtitle.textContent = subtitle;
   el.topbarActions.innerHTML = actions;
   bindToastButtons(el.topbarActions);
+  bindActionButtons(el.topbarActions);
 }
 
 function renderPage() {
@@ -836,8 +837,8 @@ function renderPeople() {
   setHeader(
     "People",
     "Find an employee quickly, then open a focused profile.",
-    `${role.canAddEmployees ? '<button class="primary-button" data-toast="Add Employee opened.">Add Employee</button>' : ""}
-     ${role.canImportExport ? '<button class="secondary-button" data-toast="Import Employees opened.">Import Employees</button><button class="secondary-button" data-toast="People export started.">Export Employees</button>' : ""}`
+    `${role.canAddEmployees ? '<button class="primary-button" data-action="addEmployee">Add Employee</button>' : ""}
+     ${role.canImportExport ? '<button class="secondary-button" data-action="importEmployees">Import Employees</button><button class="secondary-button" data-action="exportEmployees">Export Employees</button>' : ""}`
   );
   const scoped = employeesInScope();
   el.content.innerHTML = `
@@ -899,10 +900,10 @@ function renderTalent() {
   setHeader(
     "Employee Profile",
     "One place for talent summary, evidence, capabilities, development and history.",
-    `${currentRole().canAddEmployees ? '<button class="secondary-button" data-toast="Edit Employee opened.">Edit Employee</button>' : ""}
-     ${currentRole().canAddManagerRecord ? '<button class="secondary-button" data-toast="Add Manager Record opened.">Add Manager Record</button>' : ""}
-     ${currentRole().canAddTalentInsight ? '<button class="secondary-button" data-toast="Add Talent Insight opened.">Add Talent Insight</button>' : ""}
-     <button class="primary-button" data-toast="Talent Action draft opened.">Create Talent Action</button>`
+    `${currentRole().canAddEmployees ? '<button class="secondary-button" data-action="editEmployee">Edit Employee</button>' : ""}
+     ${currentRole().canAddManagerRecord ? '<button class="secondary-button" data-action="addManagerRecord">Add Manager Record</button>' : ""}
+     ${currentRole().canAddTalentInsight ? '<button class="secondary-button" data-action="addTalentInsight">Add Talent Insight</button>' : ""}
+     <button class="primary-button" data-action="createTalentAction">Create Talent Action</button>`
   );
   const tabs = ["Overview", "Performance Evidence", "Capabilities", "Talent & Development", "Career History"];
   el.content.innerHTML = `
@@ -991,9 +992,9 @@ function renderCapability() {
   setHeader(
     "Capability Intelligence",
     "Which capabilities are missing, under-covered or dependent on too few people?",
-    `<button class="primary-button" data-toast="Generate AI Analysis started.">Generate AI Analysis</button>
+    `<button class="primary-button" data-action="generateAnalysis">Generate AI Analysis</button>
      <button class="secondary-button" data-toast="Capability analysis refreshed.">Refresh Analysis</button>
-     <button class="secondary-button" data-toast="Learning Action draft opened.">Create Learning Action</button>`
+     <button class="secondary-button" data-action="createLearningAction">Create Learning Action</button>`
   );
   el.content.innerHTML = `
     <article class="ai-panel">
@@ -1092,10 +1093,29 @@ function yesNo(value) {
 function bindDrawerButtons() {
   document.querySelectorAll("[data-drawer]").forEach((button) => button.addEventListener("click", () => openDrawer(button.dataset.drawer)));
   bindToastButtons(document);
+  bindActionButtons(document);
 }
 
 function bindToastButtons(root) {
-  root.querySelectorAll("[data-toast]").forEach((button) => button.addEventListener("click", () => showToast(button.dataset.toast)));
+  root.querySelectorAll("[data-toast]").forEach((button) => {
+    if (button.dataset.toastBound) return;
+    button.dataset.toastBound = "true";
+    button.addEventListener("click", () => showToast(button.dataset.toast));
+  });
+}
+
+function bindActionButtons(root) {
+  root.querySelectorAll("[data-action]").forEach((button) => {
+    if (button.dataset.actionBound) return;
+    button.dataset.actionBound = "true";
+    button.addEventListener("click", () => {
+    if (button.dataset.action === "closeDrawer") {
+      closeDrawer();
+      return;
+    }
+    openActionDrawer(button.dataset.action);
+    });
+  });
 }
 
 function openDrawer(kind) {
@@ -1106,6 +1126,37 @@ function openDrawer(kind) {
   el.drawer.classList.add("open");
   el.drawer.setAttribute("aria-hidden", "false");
   bindToastButtons(el.drawerBody);
+  bindActionButtons(el.drawerBody);
+}
+
+function openActionDrawer(action) {
+  const employee = employees.find((item) => item.id === state.selectedEmployee) || employees[0];
+  const titles = {
+    addEmployee: "Add Employee",
+    importEmployees: "Import Employees",
+    exportEmployees: "Export Employees",
+    editEmployee: "Edit Employee",
+    addManagerRecord: "Add Manager Record",
+    addTalentInsight: "Add Talent Insight",
+    createTalentAction: "Create Talent Action",
+    createLearningAction: "Create Learning Action",
+    generateAnalysis: "Generate AI Analysis",
+  };
+  el.drawerEyebrow.textContent = "Workflow";
+  el.drawerTitle.textContent = titles[action] || "Action";
+  el.drawerBody.innerHTML = actionDrawerContent(action, employee);
+  el.drawerBackdrop.hidden = false;
+  el.drawer.classList.add("open");
+  el.drawer.setAttribute("aria-hidden", "false");
+  bindToastButtons(el.drawerBody);
+  bindActionButtons(el.drawerBody);
+  const form = el.drawerBody.querySelector("form[data-action-form]");
+  if (form) {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      handleActionSubmit(action, form);
+    });
+  }
 }
 
 function closeDrawer() {
@@ -1124,9 +1175,238 @@ function drawerContent(kind) {
   }
   if (kind.startsWith("cap-")) {
     const capability = capabilities.find((item) => `cap-${item.name}` === kind);
-    return `${aiMeta("Capability gap analysis", "2026-07-14", "Team goals and evidence", capability.severity === "High" ? "High" : "Moderate", "Requires Review")}<h3>${capability.name}</h3><p><strong>Gap:</strong> ${capability.gap}</p><p>${capability.goal}</p><div class="table-wrap"><table><thead><tr><th>Employee</th><th>Level</th><th>Role</th><th>Evidence</th><th>Validation</th></tr></thead><tbody>${capability.coverage.length ? capability.coverage.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("") : '<tr><td colspan="5">No validated professional evidence in the selected scope.</td></tr>'}</tbody></table></div><h3>Recommended response</h3><p>${capability.recommendation}</p><div class="button-row"><button class="primary-button" data-toast="Learning Action draft created.">Create Learning Action</button><button class="ghost-button" data-toast="Recommendation dismissed.">Dismiss</button></div>`;
+    return `${aiMeta("Capability gap analysis", "2026-07-14", "Team goals and evidence", capability.severity === "High" ? "High" : "Moderate", "Requires Review")}<h3>${capability.name}</h3><p><strong>Gap:</strong> ${capability.gap}</p><p>${capability.goal}</p><div class="table-wrap"><table><thead><tr><th>Employee</th><th>Level</th><th>Role</th><th>Evidence</th><th>Validation</th></tr></thead><tbody>${capability.coverage.length ? capability.coverage.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("") : '<tr><td colspan="5">No validated professional evidence in the selected scope.</td></tr>'}</tbody></table></div><h3>Recommended response</h3><p>${capability.recommendation}</p><div class="button-row"><button class="primary-button" data-action="createLearningAction">Create Learning Action</button><button class="ghost-button" data-toast="Recommendation dismissed.">Dismiss</button></div>`;
   }
   return "<p>No evidence selected.</p>";
+}
+
+function actionDrawerContent(action, employee) {
+  if (action === "addEmployee") {
+    return `
+      <form data-action-form class="form-grid">
+        ${field("Employee number", "number", nextEmployeeNumber(), "text")}
+        ${field("Name", "name", "", "text")}
+        ${selectField("Business Unit", "unit", organization.businessUnits.map((unit) => unit.name), employee.unit)}
+        ${selectField("Team", "team", organization.businessUnits.flatMap((unit) => unit.teams), employee.team)}
+        ${field("Job Title", "title", "Research Engineer", "text")}
+        ${selectField("Level", "level", [...levels, "Team Lead", "Lab Director"], "Engineer")}
+        ${selectField("Contract Type", "contract", ["Employee", "Leased Labour", "Intern"], "Employee")}
+        ${field("Start Date", "startDate", "2026-07-14", "date")}
+        ${textareaField("Initial capability evidence", "notes", "Manager will add capability evidence after onboarding.")}
+        ${formActions("Create employee")}
+      </form>
+    `;
+  }
+  if (action === "editEmployee") {
+    return `
+      <form data-action-form class="form-grid">
+        ${field("Employee number", "number", employee.number, "text")}
+        ${field("Name", "name", employee.name, "text")}
+        ${selectField("Business Unit", "unit", organization.businessUnits.map((unit) => unit.name), employee.unit)}
+        ${selectField("Team", "team", organization.businessUnits.flatMap((unit) => unit.teams), employee.team)}
+        ${field("Job Title", "title", employee.title, "text")}
+        ${selectField("Level", "level", [...levels, "Team Lead", "Lab Director"], employee.level)}
+        ${selectField("Contract Type", "contract", ["Employee", "Leased Labour", "Intern"], employee.contract)}
+        ${field("Start Date", "startDate", employee.startDate, "date")}
+        ${textareaField("Change reason", "notes", "Correct profile information after manager review.")}
+        ${formActions("Save changes")}
+      </form>
+    `;
+  }
+  if (action === "addManagerRecord") {
+    return `
+      <form data-action-form class="form-grid">
+        ${selectField("Record Type", "recordType", evidenceTypes, "Project contribution")}
+        ${field("Date", "date", "2026-07-14", "date")}
+        ${field("Scope or project", "scope", `${employee.team} project`, "text")}
+        ${selectField("Related capability", "capability", employee.capabilities.map((item) => item.name), employee.capabilities[0].name)}
+        ${textareaField("Description", "description", `${employee.name} provided concrete evidence connected to team goals.`)}
+        ${selectField("Visibility", "visibility", ["Manager visible", "Leadership visible", "HRBP visible"], "Manager visible")}
+        ${formActions("Add manager record")}
+      </form>
+    `;
+  }
+  if (action === "addTalentInsight") {
+    return `
+      <form data-action-form class="form-grid">
+        ${selectField("Insight Type", "insightType", ["Development Suggestion", "Talent Risk", "Strength", "Growth Opportunity", "Succession consideration", "Promotion readiness evidence"], "Development Suggestion")}
+        ${field("Date", "date", "2026-07-14", "date")}
+        ${field("Scope", "scope", employee.team, "text")}
+        ${textareaField("Description", "description", `${employee.name} should receive a focused development action connected to ${employee.capabilities[0].name}.`)}
+        ${textareaField("Recommended action", "recommendedAction", "Create a mentoring or learning action with review evidence.")}
+        ${selectField("Visibility", "visibility", ["HRBP only", "Leadership visible", "Manager visible after approval"], "HRBP only")}
+        ${formActions("Add talent insight")}
+      </form>
+    `;
+  }
+  if (action === "createTalentAction" || action === "createLearningAction") {
+    const selectedCapability = capabilitiesInScope()[0]?.name || employee.capabilities[0].name;
+    return `
+      <form data-action-form class="form-grid">
+        ${selectField("Action Type", "actionType", actionTypes, action === "createLearningAction" ? "Learning" : "Key Role Backup")}
+        ${selectField("Employee", "employeeId", employeesInScope().slice(0, 60).map((item) => `${item.id}|${item.name}`), `${employee.id}|${employee.name}`)}
+        ${field("Related capability", "capability", selectedCapability, "text")}
+        ${field("Owner", "owner", employee.manager || "Team Lead", "text")}
+        ${field("Due Date", "due", "2026-10-31", "date")}
+        ${selectField("Status", "status", ["Open", "In Progress", "Completed"], "Open")}
+        ${textareaField("Required evidence", "evidence", "Project contribution, manager validation and technical review.")}
+        ${formActions("Create action")}
+      </form>
+    `;
+  }
+  if (action === "importEmployees") {
+    return `
+      <form data-action-form class="form-grid">
+        ${textareaField("Paste employee rows", "rows", "Name,Employee Number,Business Unit,Team,Job Title,Level\\nNew Researcher,00199901,GPU Research Lab,GPU Compiler,Compiler Engineer,Engineer")}
+        <p class="muted">This prototype validates the flow and adds three sample employees after import.</p>
+        ${formActions("Import employees")}
+      </form>
+    `;
+  }
+  if (action === "exportEmployees") {
+    const rows = employeesInScope().slice(0, 12).map((item) => `${item.number},${item.name},${item.unit},${item.team},${item.title}`).join("\n");
+    return `
+      <h3>Export preview</h3>
+      <p class="muted">Static prototype export preview for the selected scope.</p>
+      <textarea readonly rows="12">Employee Number,Name,Business Unit,Team,Job Title\n${rows}</textarea>
+      <div class="button-row"><button class="primary-button" data-toast="CSV export prepared for the selected scope.">Prepare CSV</button><button class="secondary-button" data-action="exportEmployees">Refresh preview</button></div>
+    `;
+  }
+  if (action === "generateAnalysis") {
+    return `
+      <h3>AI analysis stages</h3>
+      <div class="timeline">
+        ${["Reviewing annual goals", "Identifying required capabilities", "Matching people evidence", "Evaluating gaps", "Preparing recommendations"].map((stage) => `<div class="timeline-item"><h3>${stage} <span class="badge blue">Ready</span></h3><p>This stage uses the selected organization scope and current role permissions.</p></div>`).join("")}
+      </div>
+      <div class="button-row"><button class="primary-button" data-toast="AI analysis generated and placed under human review.">Generate analysis</button></div>
+    `;
+  }
+  return "<p>No action available.</p>";
+}
+
+function field(label, name, value, type) {
+  return `<div><label for="${name}">${label}</label><input id="${name}" name="${name}" type="${type}" value="${escapeAttr(value)}" required /></div>`;
+}
+
+function selectField(label, name, values, selected) {
+  return `<div><label for="${name}">${label}</label><select id="${name}" name="${name}">${values.map((value) => {
+    const optionValue = String(value);
+    const labelText = optionValue.includes("|") ? optionValue.split("|")[1] : optionValue;
+    return `<option value="${escapeAttr(optionValue)}" ${optionValue === selected ? "selected" : ""}>${labelText}</option>`;
+  }).join("")}</select></div>`;
+}
+
+function textareaField(label, name, value) {
+  return `<div class="form-wide"><label for="${name}">${label}</label><textarea id="${name}" name="${name}" rows="5" required>${escapeHtml(value)}</textarea></div>`;
+}
+
+function formActions(saveLabel) {
+  return `<div class="form-action-bar"><button type="button" class="secondary-button" data-action="closeDrawer">Cancel</button><button type="submit" class="primary-button">${saveLabel}</button></div>`;
+}
+
+function handleActionSubmit(action, form) {
+  const data = Object.fromEntries(new FormData(form).entries());
+  const employee = employees.find((item) => item.id === state.selectedEmployee) || employees[0];
+  if (action === "addEmployee") {
+    const unit = organization.businessUnits.find((item) => item.name === data.unit);
+    const profile = teamProfiles[data.team] || teamProfiles[unit?.teams[0]] || teamProfiles.HR;
+    const created = createEmployee(employees.length + 1, unit || organization.businessUnits[0], data.team, profile, 1);
+    Object.assign(created, {
+      number: data.number,
+      name: data.name,
+      title: data.title,
+      level: data.level,
+      contract: data.contract,
+      startDate: data.startDate,
+      manager: "Unassigned",
+      reportingLine: `Unassigned > ${data.team} > ${data.unit}`,
+      records: [["Onboarding", "2026-07-14", "Initial record", data.notes]],
+      insights: [],
+      actions: [],
+      openActions: 0,
+      summary: `${data.name} was added to ${data.team}. Capability evidence should be validated by the manager.`,
+    });
+    employees.push(created);
+    state.selectedEmployee = created.id;
+    state.page = "talent";
+    state.talentTab = "Overview";
+    finishAction("Employee created.");
+    return;
+  }
+  if (action === "editEmployee") {
+    Object.assign(employee, {
+      number: data.number,
+      name: data.name,
+      unit: data.unit,
+      team: data.team,
+      title: data.title,
+      level: data.level,
+      contract: data.contract,
+      startDate: data.startDate,
+      reportingLine: `${employee.manager} > ${data.team} > ${data.unit}`,
+    });
+    employee.records.unshift(["Profile update", "2026-07-14", "Basic information changed", data.notes]);
+    finishAction("Employee profile updated.");
+    return;
+  }
+  if (action === "addManagerRecord") {
+    employee.records.unshift([data.recordType, data.date, data.scope, `${data.description} Related capability: ${data.capability}. Visibility: ${data.visibility}.`]);
+    state.talentTab = "Performance Evidence";
+    finishAction("Manager record added.");
+    return;
+  }
+  if (action === "addTalentInsight") {
+    employee.insights.unshift([data.insightType, data.date, "HRBP", `${data.description} Recommended action: ${data.recommendedAction}. Visibility: ${data.visibility}.`]);
+    state.talentTab = "Talent & Development";
+    finishAction("Talent insight added.");
+    return;
+  }
+  if (action === "createTalentAction" || action === "createLearningAction") {
+    const employeeId = data.employeeId.split("|")[0];
+    const target = employees.find((item) => item.id === employeeId) || employee;
+    target.actions.unshift({ type: data.actionType, status: data.status, capability: data.capability, owner: data.owner, due: data.due });
+    target.openActions = target.actions.filter((item) => item.status !== "Completed").length;
+    state.selectedEmployee = target.id;
+    state.page = "talent";
+    state.talentTab = "Talent & Development";
+    finishAction("Talent action created.");
+    return;
+  }
+  if (action === "importEmployees") {
+    for (let index = 0; index < 3; index += 1) {
+      const unit = organization.businessUnits[0];
+      const profile = teamProfiles["GPU Compiler"];
+      const created = createEmployee(employees.length + 1, unit, "GPU Compiler", profile, index + 2);
+      created.name = `Imported Researcher ${index + 1}`;
+      created.records = [["Bulk import", "2026-07-14", "Imported employee", "Created from People Operations import flow."]];
+      created.insights = [];
+      created.actions = [];
+      created.openActions = 0;
+      created.summary = `${created.name} was imported into GPU Compiler.`;
+      employees.push(created);
+    }
+    finishAction("3 employees imported.");
+  }
+}
+
+function finishAction(message) {
+  closeDrawer();
+  renderFilters(false);
+  renderNav();
+  renderPage();
+  showToast(message);
+}
+
+function nextEmployeeNumber() {
+  return `00${String(120000 + employees.length + 1).slice(-6)}`;
+}
+
+function escapeHtml(value) {
+  return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value).replaceAll('"', "&quot;");
 }
 
 function showToast(message) {
