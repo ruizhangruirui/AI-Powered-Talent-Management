@@ -581,6 +581,7 @@ const state = {
   talentTab: "Overview",
   adminSection: "Business Units & Teams",
   search: "",
+  aiOutputs: [],
 };
 
 const el = {
@@ -767,10 +768,12 @@ function renderOverview() {
       <p>The selected scope contains ${scoped.length} people. The most important work is to resolve backup gaps, single-point dependencies and open learning actions before adding new analysis layers.</p>
       <div class="button-row">
         <button class="secondary-button" data-drawer="briefing">View Evidence</button>
+        <button class="secondary-button" data-action="promptAI">Generate with Prompt</button>
         <button class="primary-button" data-toast="Briefing accepted into review history.">Accept</button>
         <button class="ghost-button" data-toast="Briefing dismissed.">Dismiss</button>
       </div>
     </article>
+    ${renderPromptOutputs("overview")}
     <section>
       <div class="section-header"><div><h2>Key Risks</h2><p>Most urgent items first.</p></div></div>
       <div class="grid three">
@@ -782,15 +785,6 @@ function renderOverview() {
     <section>
       <div class="section-header"><div><h2>Recommended Actions</h2><p>Approve, edit or dismiss; AI does not create final records silently.</p></div></div>
       <div class="table-wrap">${recommendationTable(scopedCapabilities.slice(0, 8))}</div>
-    </section>
-    <section>
-      <div class="section-header"><div><h2>Scope Snapshot</h2><p>Compact context only, with detail available on the relevant pages.</p></div></div>
-      <div class="metric-grid">
-        ${metric("People", scoped.length, "Employees, leased labour and interns")}
-        ${metric("Capability risks", scopedCapabilities.filter((item) => item.gap !== "Well Covered").length, "Gaps requiring review")}
-        ${metric("Open actions", openActions.length, "Learning, backup and mobility actions")}
-        ${metric("HRBP insights", scoped.filter((employee) => employee.insights.length).length, "Visible only to authorized roles")}
-      </div>
     </section>
   `;
   bindDrawerButtons();
@@ -813,6 +807,29 @@ function metric(label, value, note) {
 
 function aiMeta(label, date, period, confidence, freshness) {
   return `<div class="ai-meta"><span class="badge ai">AI-generated</span><span class="badge">${label}</span><span class="badge">Generated ${date}</span><span class="badge">${period}</span><span class="badge">Confidence ${confidence}</span><span class="badge blue">${freshness}</span></div>`;
+}
+
+function renderPromptOutputs(page) {
+  const outputs = state.aiOutputs.filter((output) => output.page === page);
+  if (!outputs.length) return "";
+  return `
+    <section class="grid">
+      ${outputs.map((output) => `
+        <article class="ai-panel">
+          ${aiMeta("Prompt-generated intelligence", output.date, output.scope, "Moderate", "Requires Review")}
+          <h2>${output.title}</h2>
+          <p><strong>Prompt:</strong> ${escapeHtml(output.prompt)}</p>
+          <p>${escapeHtml(output.response)}</p>
+          <div class="button-row">
+            <button class="secondary-button" data-drawer="briefing">View Evidence</button>
+            <button class="secondary-button" data-action="promptAI">Generate with Prompt</button>
+            <button class="primary-button" data-toast="Prompt-generated intelligence accepted.">Accept</button>
+            <button class="ghost-button" data-toast="Prompt-generated intelligence dismissed.">Dismiss</button>
+          </div>
+        </article>
+      `).join("")}
+    </section>
+  `;
 }
 
 function recommendationTable(items = capabilitiesInScope()) {
@@ -957,8 +974,9 @@ function renderTalentTab(employee) {
         ${aiMeta("AI Talent Summary", "2026-07-14", "Last 12 months", "Moderate", "Current")}
         <h2>${employee.name}</h2>
         <p>${employee.summary}</p>
-        <div class="button-row"><button class="secondary-button" data-drawer="employee-${employee.id}">View Evidence</button><button class="primary-button" data-toast="Talent summary accepted.">Accept</button><button class="ghost-button" data-toast="Talent summary dismissed.">Dismiss</button></div>
+        <div class="button-row"><button class="secondary-button" data-drawer="employee-${employee.id}">View Evidence</button><button class="secondary-button" data-action="promptAI">Generate with Prompt</button><button class="primary-button" data-toast="Talent summary accepted.">Accept</button><button class="ghost-button" data-toast="Talent summary dismissed.">Dismiss</button></div>
       </article>
+      ${renderPromptOutputs("talent")}
       <div class="grid two">
         <article class="card"><h2>Key Risks</h2>${employee.retentionRisk === "High" || employee.dependency !== "No critical dependency" ? recordsList([["Attention", "Current", employee.dependency, `Review ${employee.name}'s coverage, retention and backup readiness.`]]) : '<div class="empty-state"><h2>No urgent profile risk</h2><p>Use tabs for detailed evidence and development history.</p></div>'}</article>
         <article class="card"><h2>Recommended Actions</h2>${actionList(employee)}</article>
@@ -1003,8 +1021,9 @@ function renderCapability() {
       ${aiMeta("Capability analysis", "2026-07-14", "Team goals and evidence", high.length ? "High" : "Moderate", "Current")}
       <h2>${high.length} high-severity capability scenarios</h2>
       <p>AI analyzed annual goals, current people coverage and evidence quality. The most useful next step is to approve learning or backup actions, not to generate more reports.</p>
-      <div class="button-row"><button class="secondary-button" data-drawer="briefing">View Evidence</button><button class="primary-button" data-toast="Analysis accepted for human review.">Accept</button><button class="ghost-button" data-toast="Analysis dismissed.">Dismiss</button></div>
+      <div class="button-row"><button class="secondary-button" data-drawer="briefing">View Evidence</button><button class="secondary-button" data-action="promptAI">Generate with Prompt</button><button class="primary-button" data-toast="Analysis accepted for human review.">Accept</button><button class="ghost-button" data-toast="Analysis dismissed.">Dismiss</button></div>
     </article>
+    ${renderPromptOutputs("capability")}
     <section>
       <div class="section-header"><div><h2>Key Risks</h2><p>Missing capabilities, single-point dependency and backup gaps.</p></div></div>
       <div class="capability-list">${scopedCapabilities.filter((item) => item.severity === "High").map(capabilityItem).join("") || '<div class="empty-state"><h2>No high-severity risk</h2><p>Select another scope or refresh analysis.</p></div>'}</div>
@@ -1040,7 +1059,9 @@ function renderOrganization() {
       ${aiMeta("Organization summary", "2026-07-14", "2026 structure", "High", "Current")}
       <h2>8 business units, ${organization.businessUnits.reduce((sum, unit) => sum + unit.teams.length, 0)} teams and ${employees.length} people</h2>
       <p>The mock organization now represents a multi-year research center with labs, platforms and operations teams.</p>
+      <div class="button-row"><button class="secondary-button" data-drawer="briefing">View Evidence</button><button class="secondary-button" data-action="promptAI">Generate with Prompt</button><button class="primary-button" data-toast="Organization summary accepted.">Accept</button><button class="ghost-button" data-toast="Organization summary dismissed.">Dismiss</button></div>
     </article>
+    ${renderPromptOutputs("organization")}
     <div class="grid two">
       <article class="card"><h2>Structure</h2><div class="timeline">${organization.businessUnits.map((unit) => `<div class="timeline-item"><h3>${unit.name} <span class="badge">${unit.type}</span></h3><p>${unit.teams.join(", ")}</p><p class="muted">${employees.filter((employee) => employee.unit === unit.name).length} people</p></div>`).join("")}</div></article>
       <article class="card"><h2>Annual Goals</h2>${recordsList(annualGoals.slice(0, 10))}</article>
@@ -1143,6 +1164,7 @@ function openActionDrawer(action) {
     createTalentAction: "Create Talent Action",
     createLearningAction: "Create Learning Action",
     generateAnalysis: "Generate AI Analysis",
+    promptAI: "Generate AI Intelligence",
   };
   el.drawerEyebrow.textContent = "Workflow";
   el.drawerTitle.textContent = titles[action] || "Action";
@@ -1274,6 +1296,20 @@ function actionDrawerContent(action, employee) {
       <div class="button-row"><button class="primary-button" data-toast="CSV export prepared for the selected scope.">Prepare CSV</button><button class="secondary-button" data-action="exportEmployees">Refresh preview</button></div>
     `;
   }
+  if (action === "promptAI") {
+    return `
+      <form data-action-form class="form-grid">
+        ${selectField("AI intelligence type", "intelligenceType", ["Executive summary", "Risk analysis", "Recommended actions", "Evidence gaps", "Development opportunities"], "Risk analysis")}
+        ${selectField("Evidence scope", "evidenceScope", aiScopeOptions(), aiScopeOptions()[0])}
+        ${textareaField("Prompt", "prompt", defaultPromptForPage())}
+        <div class="form-wide ai-panel">
+          ${aiMeta("Controlled generation", "2026-07-14", "Selected scope", "Pending", "User requested")}
+          <p>The new intelligence will be generated as a reviewable draft. It will not overwrite existing talent judgments, capability validation or confirmed actions.</p>
+        </div>
+        ${formActions("Generate intelligence")}
+      </form>
+    `;
+  }
   if (action === "generateAnalysis") {
     return `
       <h3>AI analysis stages</h3>
@@ -1388,6 +1424,19 @@ function handleActionSubmit(action, form) {
       employees.push(created);
     }
     finishAction("3 employees imported.");
+    return;
+  }
+  if (action === "promptAI") {
+    const page = state.page;
+    state.aiOutputs.unshift({
+      page,
+      date: "2026-07-14",
+      scope: data.evidenceScope,
+      prompt: data.prompt,
+      title: `${data.intelligenceType} generated from prompt`,
+      response: generatePromptResponse(data.prompt, data.intelligenceType, page),
+    });
+    finishAction("AI intelligence generated from prompt.");
   }
 }
 
@@ -1401,6 +1450,42 @@ function finishAction(message) {
 
 function nextEmployeeNumber() {
   return `00${String(120000 + employees.length + 1).slice(-6)}`;
+}
+
+function aiScopeOptions() {
+  const options = [el.scopeSummary.textContent.replace("Viewing: ", "") || "Current page context"];
+  if (state.page === "talent") {
+    const employee = employees.find((item) => item.id === state.selectedEmployee) || employees[0];
+    options.unshift(`${employee.name} profile evidence`);
+  }
+  if (state.page === "capability") options.unshift("Capability gaps and learning action evidence");
+  if (state.page === "organization") options.unshift("Research Center structure and annual goals");
+  return options;
+}
+
+function defaultPromptForPage() {
+  if (state.page === "talent") return "Summarize the most important evidence gaps and next best talent action for this employee.";
+  if (state.page === "capability") return "Identify the highest-impact internal learning action for the selected capability gaps.";
+  if (state.page === "organization") return "Summarize which labs have the most urgent operating model or capability coverage concerns.";
+  return "What are the three most important leadership decisions for this scope this month?";
+}
+
+function generatePromptResponse(prompt, type, page) {
+  const scoped = employeesInScope();
+  const scopedCapabilities = capabilitiesInScope();
+  const highRisks = scopedCapabilities.filter((item) => item.severity === "High");
+  if (page === "talent") {
+    const employee = employees.find((item) => item.id === state.selectedEmployee) || employees[0];
+    return `${type}: ${employee.name} has strongest evidence in ${employee.capabilities[0].name}. Based on the prompt, the next review should focus on ${employee.dependency === "No critical dependency" ? "evidence quality and development history" : employee.dependency}. Recommended follow-up: create or update one talent action with manager-visible evidence.`;
+  }
+  if (page === "capability") {
+    const gap = highRisks[0] || scopedCapabilities[0];
+    return `${type}: The strongest signal is ${gap?.team || "the selected scope"} / ${gap?.name || "capability coverage"}. The recommended response is to prioritize internal development first, assign an owner, and require project contribution plus manager validation as completion evidence.`;
+  }
+  if (page === "organization") {
+    return `${type}: The Research Center has ${organization.businessUnits.length} business units and ${employees.length} people. The prompt points to cross-lab operating risk, so the next useful review is comparing annual goals with confirmed capability depth in GPU, Storage, Wireless and AI Platform teams.`;
+  }
+  return `${type}: In this scope, ${highRisks.length} high-severity capability risks and ${scoped.filter((employee) => employee.retentionRisk === "High").length} high retention-risk profiles need attention. The best next action is to review evidence, approve one backup or learning action, and dismiss low-evidence recommendations until better records are available.`;
 }
 
 function escapeHtml(value) {
