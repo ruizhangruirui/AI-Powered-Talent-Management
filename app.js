@@ -587,6 +587,7 @@ const el = {
   nav: document.querySelector("#primaryNav"),
   roleSelect: document.querySelector("#roleSelect"),
   roleScope: document.querySelector("#roleScope"),
+  scopeFilter: document.querySelector(".scope-filter"),
   centerFilter: document.querySelector("#centerFilter"),
   businessFilter: document.querySelector("#businessFilter"),
   teamFilter: document.querySelector("#teamFilter"),
@@ -734,6 +735,7 @@ function setHeader(title, subtitle, actions = "") {
 }
 
 function renderPage() {
+  el.scopeFilter.hidden = state.page === "talent";
   updateScopeSummary();
   const pageMap = {
     overview: renderOverview,

@@ -236,6 +236,10 @@ h3 {
   background: var(--surface);
 }
 
+.scope-filter[hidden] {
+  display: none;
+}
+
 .scope-filter p {
   margin: 0;
   padding: var(--space-12);
