@@ -755,17 +755,31 @@ function renderOverview() {
   const critical = scopedCapabilities.filter((capability) => capability.severity === "High");
   const risks = scoped.filter((employee) => employee.retentionRisk === "High" || employee.dependency !== "No critical dependency");
   const openActions = scoped.flatMap((employee) => employee.actions.filter((action) => action.status !== "Completed").map((action) => ({ employee, action })));
+  const decisions = [
+    ...critical.slice(0, 3).map((capability) => ({
+      label: capability.gap,
+      title: `${capability.team}: ${capability.name}`,
+      detail: capability.recommendation,
+      tone: "danger",
+    })),
+    ...risks.slice(0, 2).map((employee) => ({
+      label: "Talent risk",
+      title: employee.name,
+      detail: employee.dependency,
+      tone: "warning",
+    })),
+  ];
   setHeader(
     "Dashboard",
-    "What requires leadership attention in this Research Center scope.",
+    "What requires attention today?",
     `<button class="secondary-button" data-toast="AI analysis refreshed for the selected scope.">Refresh AI Analysis</button>
      <button class="primary-button" data-toast="Review queue opened with ${critical.length + risks.length} items.">Review Attention Queue</button>`
   );
   el.content.innerHTML = `
     <article class="ai-panel">
       ${aiMeta("Scope briefing", "2026-07-14", "2026 annual plan and evidence", "High", "Current")}
-      <h2>${critical.length} critical capability risks need review</h2>
-      <p>The selected scope contains ${scoped.length} people. The most important work is to resolve backup gaps, single-point dependencies and open learning actions before adding new analysis layers.</p>
+      <h2>${critical.length} capability risks need a decision</h2>
+      <p>Focus today on backup gaps, single-point dependencies and overdue learning actions.</p>
       <div class="button-row">
         <button class="secondary-button" data-drawer="briefing">View Evidence</button>
         <button class="secondary-button" data-action="promptAI">Generate with Prompt</button>
@@ -775,29 +789,31 @@ function renderOverview() {
     </article>
     ${renderPromptOutputs("overview")}
     <section>
-      <div class="section-header"><div><h2>Key Risks</h2><p>Most urgent items first.</p></div></div>
-      <div class="grid three">
-        ${attentionCard("Capability gaps", critical.length, critical.slice(0, 3).map((item) => `${item.team}: ${item.name} (${item.gap})`), "danger")}
-        ${attentionCard("High-priority talent risks", risks.length, risks.slice(0, 3).map((employee) => `${employee.name}: ${employee.dependency}`), "warning")}
-        ${attentionCard("Learning actions requiring attention", openActions.length, openActions.slice(0, 3).map(({ employee, action }) => `${employee.name}: ${action.type} for ${action.capability}`), "blue")}
-      </div>
+      <div class="section-header"><div><h2>Decision Queue</h2><p>Review in order.</p></div></div>
+      ${decisionList(decisions)}
     </section>
-    <section>
-      <div class="section-header"><div><h2>Recommended Actions</h2><p>Approve, edit or dismiss; AI does not create final records silently.</p></div></div>
+    <details class="quiet-details">
+      <summary>Recommended actions (${Math.min(scopedCapabilities.length, 8)})</summary>
       <div class="table-wrap">${recommendationTable(scopedCapabilities.slice(0, 8))}</div>
-    </section>
+    </details>
   `;
   bindDrawerButtons();
 }
 
-function attentionCard(title, count, lines, tone) {
+function decisionList(items) {
+  if (!items.length) return `<div class="empty-state"><h2>No urgent decisions</h2><p>This scope has no immediate review item.</p></div>`;
   return `
-    <article class="card">
-      <div class="section-header"><div><h2>${title}</h2><p><span class="badge ${tone}">${count} items</span></p></div></div>
-      <div class="timeline">
-        ${lines.length ? lines.map((line) => `<div class="timeline-item"><p>${line}</p></div>`).join("") : '<div class="empty-state"><h2>No urgent item</h2><p>This scope has no immediate attention item in this category.</p></div>'}
-      </div>
-    </article>
+    <div class="decision-list">
+      ${items.map((item) => `
+        <div class="decision-row">
+          <span class="badge ${item.tone}">${item.label}</span>
+          <div>
+            <h3>${item.title}</h3>
+            <p>${item.detail}</p>
+          </div>
+        </div>
+      `).join("")}
+    </div>
   `;
 }
 
@@ -806,7 +822,7 @@ function metric(label, value, note) {
 }
 
 function aiMeta(label, date, period, confidence, freshness) {
-  return `<div class="ai-meta"><span class="badge ai">AI-generated</span><span class="badge">${label}</span><span class="badge">Generated ${date}</span><span class="badge">${period}</span><span class="badge">Confidence ${confidence}</span><span class="badge blue">${freshness}</span></div>`;
+  return `<div class="ai-meta"><span class="badge ai">AI-generated</span><span class="badge">${label}</span><span class="badge blue">${freshness}</span></div>`;
 }
 
 function renderPromptOutputs(page) {
@@ -931,19 +947,14 @@ function renderTalent() {
         <div>
           <p class="eyebrow">Employee Profile</p>
           <h2>${employee.name}</h2>
-          <p>${employee.number} · ${employee.title} · ${employee.level} · ${employee.contract} · Started ${employee.startDate}</p>
-          <p class="muted">${employee.reportingLine}</p>
+          <p>${employee.title} · ${employee.level} · ${employee.team}</p>
           <div class="tag-row">${employee.tags.map((tag) => `<span class="badge">${tag}</span>`).join("")}${employee.awards.map((award) => `<span class="badge blue">${award}</span>`).join("")}</div>
         </div>
-        <div class="button-row"><button class="secondary-button" data-drawer="employee-${employee.id}">View Evidence</button></div>
       </div>
       <div class="indicator-grid">
         ${indicator("Impact", employee.currentImpact)}
         ${indicator("Potential", employee.growthPotential)}
         ${indicator("Retention Risk", visibleTalentValue("retentionRisk", employee))}
-        ${indicator("Promotion", visibleTalentValue("promotionReadiness", employee))}
-        ${indicator("Open Actions", employee.openActions)}
-        ${indicator("Critical Dependency", employee.dependency)}
       </div>
     </section>
     <nav class="tabs" aria-label="Employee profile tabs">${tabs.map((tab) => `<button class="tab ${tab === state.talentTab ? "active" : ""}" data-tab="${tab}">${tab}</button>`).join("")}</nav>
@@ -977,10 +988,14 @@ function renderTalentTab(employee) {
         <div class="button-row"><button class="secondary-button" data-drawer="employee-${employee.id}">View Evidence</button><button class="secondary-button" data-action="promptAI">Generate with Prompt</button><button class="primary-button" data-toast="Talent summary accepted.">Accept</button><button class="ghost-button" data-toast="Talent summary dismissed.">Dismiss</button></div>
       </article>
       ${renderPromptOutputs("talent")}
-      <div class="grid two">
-        <article class="card"><h2>Key Risks</h2>${employee.retentionRisk === "High" || employee.dependency !== "No critical dependency" ? recordsList([["Attention", "Current", employee.dependency, `Review ${employee.name}'s coverage, retention and backup readiness.`]]) : '<div class="empty-state"><h2>No urgent profile risk</h2><p>Use tabs for detailed evidence and development history.</p></div>'}</article>
-        <article class="card"><h2>Recommended Actions</h2>${actionList(employee)}</article>
-      </div>
+      ${decisionList([
+        employee.retentionRisk === "High" || employee.dependency !== "No critical dependency"
+          ? { label: "Review", title: "Primary attention", detail: employee.dependency, tone: employee.retentionRisk === "High" ? "danger" : "warning" }
+          : { label: "Stable", title: "No urgent profile risk", detail: "Use tabs only when evidence detail is needed.", tone: "blue" },
+        employee.openActions
+          ? { label: "Action", title: `${employee.openActions} open talent action`, detail: "Review owner, due date and required evidence.", tone: "warning" }
+          : { label: "Action", title: "No open talent action", detail: "Create one only when evidence requires follow-up.", tone: "blue" },
+      ])}
     `;
   }
   if (state.talentTab === "Performance Evidence") return `<div class="card"><h2>Manager Records</h2>${recordsList(employee.records)}</div>`;
@@ -1019,27 +1034,38 @@ function renderCapability() {
   el.content.innerHTML = `
     <article class="ai-panel">
       ${aiMeta("Capability analysis", "2026-07-14", "Team goals and evidence", high.length ? "High" : "Moderate", "Current")}
-      <h2>${high.length} high-severity capability scenarios</h2>
-      <p>AI analyzed annual goals, current people coverage and evidence quality. The most useful next step is to approve learning or backup actions, not to generate more reports.</p>
+      <h2>Can this team achieve its goals?</h2>
+      <p>${high.length ? `${high.length} high-severity gaps block goal readiness.` : "No high-severity gap is visible in this scope."}</p>
       <div class="button-row"><button class="secondary-button" data-drawer="briefing">View Evidence</button><button class="secondary-button" data-action="promptAI">Generate with Prompt</button><button class="primary-button" data-toast="Analysis accepted for human review.">Accept</button><button class="ghost-button" data-toast="Analysis dismissed.">Dismiss</button></div>
     </article>
     ${renderPromptOutputs("capability")}
     <section>
-      <div class="section-header"><div><h2>Key Risks</h2><p>Missing capabilities, single-point dependency and backup gaps.</p></div></div>
-      <div class="capability-list">${scopedCapabilities.filter((item) => item.severity === "High").map(capabilityItem).join("") || '<div class="empty-state"><h2>No high-severity risk</h2><p>Select another scope or refresh analysis.</p></div>'}</div>
+      <div class="section-header"><div><h2>Goal Readiness Flow</h2><p>Goal → capability → coverage → gap → action.</p></div></div>
+      <div class="capability-flow">${scopedCapabilities.filter((item) => item.severity === "High").slice(0, 4).map(capabilityFlowItem).join("") || '<div class="empty-state"><h2>No high-severity risk</h2><p>Select another scope or refresh analysis.</p></div>'}</div>
     </section>
-    <section>
-      <div class="section-header"><div><h2>Recommended Learning Actions</h2><p>Internal development is prioritized before external hiring.</p></div></div>
+    <details class="quiet-details">
+      <summary>Recommended learning actions</summary>
       <div class="table-wrap">${recommendationTable(scopedCapabilities)}</div>
-    </section>
-    <section>
-      <details class="card">
-        <summary><strong>Detailed capability requirements and coverage</strong></summary>
-        <div class="capability-list">${scopedCapabilities.map(capabilityItem).join("")}</div>
-      </details>
-    </section>
+    </details>
+    <details class="quiet-details">
+      <summary>Detailed capability requirements and coverage</summary>
+      <div class="capability-list">${scopedCapabilities.map(capabilityItem).join("")}</div>
+    </details>
   `;
   bindDrawerButtons();
+}
+
+function capabilityFlowItem(capability) {
+  const coverage = capability.coverage.length ? capability.coverage.map((item) => `${item[0]} (${item[2]})`).join(", ") : "No validated coverage";
+  return `
+    <article class="flow-row">
+      <div><span>Goal</span><strong>${capability.goal}</strong></div>
+      <div><span>Capability</span><strong>${capability.name}</strong></div>
+      <div><span>Coverage</span><strong>${coverage}</strong></div>
+      <div><span>Gap</span><strong>${capability.gap}</strong></div>
+      <div><span>Action</span><strong>${capability.recommendation}</strong></div>
+    </article>
+  `;
 }
 
 function capabilityItem(capability) {

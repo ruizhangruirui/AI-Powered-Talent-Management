@@ -303,6 +303,36 @@ h3 {
   color: var(--muted);
 }
 
+.decision-list {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.decision-row {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: var(--space-16);
+  align-items: start;
+  padding: var(--space-16) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.decision-row h3,
+.decision-row p {
+  margin-bottom: var(--space-4);
+}
+
+.quiet-details {
+  padding: var(--space-16) 0;
+  border-top: 1px solid var(--border);
+}
+
+.quiet-details summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 700;
+}
+
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -567,6 +597,32 @@ tr:last-child td {
   gap: var(--space-16);
 }
 
+.capability-flow {
+  display: grid;
+  gap: var(--space-16);
+}
+
+.flow-row {
+  display: grid;
+  grid-template-columns: 1.4fr 0.9fr 1fr 0.7fr 1.4fr;
+  gap: var(--space-16);
+  padding: var(--space-16) 0;
+  border-top: 1px solid var(--border);
+}
+
+.flow-row span {
+  display: block;
+  margin-bottom: var(--space-4);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.flow-row strong {
+  font-weight: 600;
+}
+
 .capability-item {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.8fr) minmax(180px, 0.8fr);
@@ -728,6 +784,10 @@ tr:last-child td {
   .capability-item {
     grid-template-columns: 1fr;
   }
+
+  .flow-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 760px) {
@@ -757,7 +817,8 @@ tr:last-child td {
   .grid.three,
   .employee-grid,
   .indicator-grid,
-  .workflow {
+  .workflow,
+  .decision-row {
     grid-template-columns: 1fr;
   }
 
