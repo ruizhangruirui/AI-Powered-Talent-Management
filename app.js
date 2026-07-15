@@ -1,624 +1,89 @@
-const organization = {
-  centers: ["Advanced Research Center"],
-  businessUnits: [
-    { name: "GPU Research Lab", type: "Research Lab", teams: ["GPU Architecture", "GPU Compiler", "GPU Runtime", "Performance Optimization"] },
-    { name: "Storage System Research Lab", type: "Research Lab", teams: ["Distributed Storage", "Filesystem", "Storage Performance", "Data Reliability"] },
-    { name: "Camera Technology Research Lab", type: "Research Lab", teams: ["Computational Photography", "Image Processing", "ISP", "Computer Vision"] },
-    { name: "Wireless Technologies Research Lab", type: "Research Lab", teams: ["5G Research", "6G Research", "Radio Algorithms", "Signal Processing"] },
-    { name: "Networking Research Lab", type: "Research Lab", teams: ["Network Architecture", "Routing", "Switching", "Network Security"] },
-    { name: "AI Platform", type: "Platform", teams: ["LLM Platform", "AI Infrastructure", "MLOps"] },
-    { name: "Research Infrastructure Platform", type: "Platform", teams: ["IT Infrastructure", "DevOps", "Internal Tools"] },
-    { name: "HR & Operations", type: "Operations", teams: ["HR", "Recruiting", "Administration", "Finance", "Procurement"] },
-  ],
-};
-
-const teamProfiles = {
-  "GPU Architecture": {
-    titles: ["Research Scientist", "Research Engineer", "GPU Architecture Engineer", "Principal Engineer"],
-    capabilities: ["GPU Architecture", "Parallel Computing", "CUDA", "Performance Modeling", "Memory Hierarchy", "System Architecture", "Technical Leadership"],
-    goal: "Define next-generation GPU architecture targets for AI and graphics workloads.",
-    riskCapability: "Memory Hierarchy",
-  },
-  "GPU Compiler": {
-    titles: ["GPU Compiler Engineer", "Compiler Engineer", "Research Engineer", "Staff Engineer"],
-    capabilities: ["Compiler", "LLVM", "CUDA", "Parallel Computing", "Performance Optimization", "Runtime Codegen", "Technical Leadership"],
-    goal: "Improve GPU compiler performance and reduce kernel launch overhead.",
-    riskCapability: "Runtime Codegen",
-  },
-  "GPU Runtime": {
-    titles: ["GPU Runtime Engineer", "Systems Engineer", "Research Engineer", "Platform Engineer"],
-    capabilities: ["GPU Runtime", "CUDA", "Scheduling", "Driver Integration", "Performance Optimization", "Observability"],
-    goal: "Improve runtime stability for multi-tenant research workloads.",
-    riskCapability: "Driver Integration",
-  },
-  "Performance Optimization": {
-    titles: ["Performance Engineer", "Research Engineer", "Benchmark Engineer", "Staff Engineer"],
-    capabilities: ["Performance Optimization", "Benchmarking", "CUDA", "Profiling", "Parallel Computing", "Technical Mentoring"],
-    goal: "Increase benchmark performance for critical internal GPU kernels.",
-    riskCapability: "Profiling",
-  },
-  "Distributed Storage": {
-    titles: ["Distributed Systems Engineer", "Storage Researcher", "Research Engineer", "Staff Engineer"],
-    capabilities: ["Distributed Systems", "Storage", "Replication", "Consistency", "Data Reliability", "Performance Optimization"],
-    goal: "Increase distributed storage reliability for research datasets.",
-    riskCapability: "Consistency",
-  },
-  Filesystem: {
-    titles: ["Filesystem Engineer", "Storage Researcher", "Systems Engineer", "Senior Engineer"],
-    capabilities: ["Filesystem", "Linux Kernel", "Storage Performance", "Data Reliability", "Debugging", "Technical Design"],
-    goal: "Modernize filesystem behavior for large model training artifacts.",
-    riskCapability: "Linux Kernel",
-  },
-  "Storage Performance": {
-    titles: ["Storage Performance Engineer", "Benchmark Engineer", "Systems Engineer", "Research Engineer"],
-    capabilities: ["Storage Performance", "Benchmarking", "Profiling", "Distributed Systems", "Observability", "Performance Optimization"],
-    goal: "Reduce storage tail latency for shared experiment clusters.",
-    riskCapability: "Tail Latency Analysis",
-  },
-  "Data Reliability": {
-    titles: ["Reliability Engineer", "Storage Researcher", "Data Reliability Engineer", "Senior Engineer"],
-    capabilities: ["Data Reliability", "Fault Injection", "Replication", "Observability", "Incident Review", "Technical Leadership"],
-    goal: "Improve recovery confidence for high-value research datasets.",
-    riskCapability: "Fault Injection",
-  },
-  "Computational Photography": {
-    titles: ["Camera Algorithm Engineer", "Research Scientist", "Computer Vision Engineer", "Principal Engineer"],
-    capabilities: ["Computational Photography", "Image Processing", "Computer Vision", "HDR", "OpenCV", "Model Evaluation"],
-    goal: "Develop next-generation image enhancement algorithms.",
-    riskCapability: "HDR",
-  },
-  "Image Processing": {
-    titles: ["Image Processing Engineer", "Camera Algorithm Engineer", "Research Engineer", "Senior Engineer"],
-    capabilities: ["Image Processing", "ISP", "OpenCV", "Computer Vision", "Color Science", "Performance Optimization"],
-    goal: "Improve image pipeline quality for low-light and motion scenarios.",
-    riskCapability: "Color Science",
-  },
-  ISP: {
-    titles: ["ISP Engineer", "Camera Systems Engineer", "Research Engineer", "Staff Engineer"],
-    capabilities: ["ISP", "Image Processing", "Sensor Calibration", "Color Science", "Pipeline Optimization", "Technical Leadership"],
-    goal: "Stabilize ISP tuning workflow across new sensor platforms.",
-    riskCapability: "Sensor Calibration",
-  },
-  "Computer Vision": {
-    titles: ["Computer Vision Engineer", "Research Scientist", "ML Research Engineer", "Staff Engineer"],
-    capabilities: ["Computer Vision", "OpenCV", "Model Evaluation", "Python", "Dataset Curation", "Technical Mentoring"],
-    goal: "Improve scene understanding models for camera research prototypes.",
-    riskCapability: "Dataset Curation",
-  },
-  "5G Research": {
-    titles: ["Wireless Research Scientist", "Radio Algorithm Engineer", "Signal Processing Engineer", "Senior Engineer"],
-    capabilities: ["5G", "Radio Algorithms", "Signal Processing", "Beamforming", "Simulation", "Technical Design"],
-    goal: "Improve 5G radio performance in dense urban scenarios.",
-    riskCapability: "Beamforming",
-  },
-  "6G Research": {
-    titles: ["Wireless Research Scientist", "6G Research Engineer", "Signal Processing Engineer", "Principal Engineer"],
-    capabilities: ["6G", "Signal Processing", "Radio Algorithms", "Simulation", "Standards Research", "Technical Leadership"],
-    goal: "Research 6G candidate technologies for long-range planning.",
-    riskCapability: "Standards Research",
-  },
-  "Radio Algorithms": {
-    titles: ["Radio Algorithm Engineer", "Wireless Research Scientist", "Research Engineer", "Staff Engineer"],
-    capabilities: ["Radio Algorithms", "Beamforming", "Signal Processing", "Simulation", "Performance Optimization", "Mentoring"],
-    goal: "Improve radio algorithms for new antenna configurations.",
-    riskCapability: "Antenna Modeling",
-  },
-  "Signal Processing": {
-    titles: ["Signal Processing Engineer", "Wireless Research Scientist", "Research Engineer", "Senior Engineer"],
-    capabilities: ["Signal Processing", "Beamforming", "Python", "Simulation", "Algorithm Evaluation", "Technical Design"],
-    goal: "Improve signal quality analysis tooling for wireless experiments.",
-    riskCapability: "Algorithm Evaluation",
-  },
-  "Network Architecture": {
-    titles: ["Network Architect", "Network Software Engineer", "Research Engineer", "Principal Engineer"],
-    capabilities: ["Network Architecture", "SDN", "Routing", "Switching", "Network Security", "Technical Leadership"],
-    goal: "Improve software-defined networking platform architecture.",
-    riskCapability: "SDN",
-  },
-  Routing: {
-    titles: ["Routing Engineer", "Network Software Engineer", "Systems Engineer", "Senior Engineer"],
-    capabilities: ["Routing", "Network Architecture", "Linux Networking", "Performance Optimization", "Incident Review", "Technical Design"],
-    goal: "Improve routing resilience for research cluster traffic.",
-    riskCapability: "Linux Networking",
-  },
-  Switching: {
-    titles: ["Switching Engineer", "Network Software Engineer", "Platform Engineer", "Research Engineer"],
-    capabilities: ["Switching", "Network Architecture", "SDN", "Observability", "Performance Optimization", "Debugging"],
-    goal: "Improve switching reliability for high-throughput research workloads.",
-    riskCapability: "Switch Fabric Debugging",
-  },
-  "Network Security": {
-    titles: ["Network Security Engineer", "Security Research Engineer", "Network Software Engineer", "Staff Engineer"],
-    capabilities: ["Network Security", "Threat Modeling", "SDN", "Incident Review", "Access Control", "Technical Leadership"],
-    goal: "Reduce security exposure in research network segmentation.",
-    riskCapability: "Threat Modeling",
-  },
-  "LLM Platform": {
-    titles: ["LLM Platform Engineer", "MLOps Engineer", "Research Engineer", "Staff Engineer"],
-    capabilities: ["LLM Engineering", "Python", "MLOps", "Evaluation Framework", "Agent Architecture", "Prompt Evaluation", "Kubernetes"],
-    goal: "Develop internal AI Agent platform for research teams.",
-    riskCapability: "Agent Architecture",
-  },
-  "AI Infrastructure": {
-    titles: ["AI Infrastructure Engineer", "Cloud Engineer", "Platform Engineer", "Senior Engineer"],
-    capabilities: ["Cloud Infrastructure", "Kubernetes", "GPU Scheduling", "Observability", "MLOps", "Incident Review"],
-    goal: "Improve internal AI training and inference infrastructure reliability.",
-    riskCapability: "GPU Scheduling",
-  },
-  MLOps: {
-    titles: ["MLOps Engineer", "Platform Engineer", "Research Engineer", "Senior Engineer"],
-    capabilities: ["MLOps", "Kubernetes", "Model Evaluation", "Python", "CI/CD", "Observability"],
-    goal: "Standardize model delivery and evaluation workflows.",
-    riskCapability: "Model Evaluation",
-  },
-  "IT Infrastructure": {
-    titles: ["System Administrator", "Cloud Engineer", "Infrastructure Engineer", "Senior Engineer"],
-    capabilities: ["IT Infrastructure", "Cloud Infrastructure", "Access Control", "Incident Review", "Automation", "Service Operations"],
-    goal: "Improve reliability of research center infrastructure services.",
-    riskCapability: "Access Control",
-  },
-  DevOps: {
-    titles: ["DevOps Engineer", "Platform Engineer", "Cloud Engineer", "Senior Engineer"],
-    capabilities: ["DevOps", "CI/CD", "Kubernetes", "Automation", "Observability", "Service Operations"],
-    goal: "Reduce deployment friction for research tools.",
-    riskCapability: "CI/CD",
-  },
-  "Internal Tools": {
-    titles: ["Internal Tools Engineer", "Platform Engineer", "Software Engineer", "Staff Engineer"],
-    capabilities: ["Internal Tools", "Python", "Workflow Automation", "Product Thinking", "Service Operations", "User Research"],
-    goal: "Improve internal tools for experiment tracking and research operations.",
-    riskCapability: "Workflow Automation",
-  },
-  HR: {
-    titles: ["HRBP", "Organization Development Specialist", "Talent Management Partner", "HR Specialist"],
-    capabilities: ["Talent Management", "Organization Development", "Employee Relations", "Leadership Coaching", "Talent Calibration", "Workforce Planning"],
-    goal: "Improve talent calibration and manager support across research labs.",
-    riskCapability: "Talent Calibration",
-  },
-  Recruiting: {
-    titles: ["Recruiter", "Technical Recruiter", "Recruiting Specialist", "Talent Sourcer"],
-    capabilities: ["Recruitment", "Talent Mapping", "Interview Coordination", "Candidate Assessment", "Market Research", "Stakeholder Management"],
-    goal: "Support hiring for critical research capabilities.",
-    riskCapability: "Talent Mapping",
-  },
-  Administration: {
-    titles: ["Administrative Specialist", "Operations Specialist", "Office Administrator", "Program Coordinator"],
-    capabilities: ["Administration", "Procurement Coordination", "Event Operations", "Vendor Coordination", "Service Operations", "Workflow Automation"],
-    goal: "Improve research center administrative service quality.",
-    riskCapability: "Vendor Coordination",
-  },
-  Finance: {
-    titles: ["Finance Specialist", "Financial Analyst", "Operations Analyst", "Budget Specialist"],
-    capabilities: ["Finance", "Budget Planning", "Procurement", "Cost Analysis", "Reporting", "Stakeholder Management"],
-    goal: "Improve project-level cost visibility for research investments.",
-    riskCapability: "Cost Analysis",
-  },
-  Procurement: {
-    titles: ["Procurement Specialist", "Vendor Manager", "Operations Specialist", "Sourcing Specialist"],
-    capabilities: ["Procurement", "Vendor Management", "Contract Coordination", "Cost Analysis", "Service Operations", "Stakeholder Management"],
-    goal: "Improve procurement cycle time for research hardware and services.",
-    riskCapability: "Vendor Management",
-  },
-};
+const STORAGE_KEY = "researchTalentSimple.v1";
 
 const roles = {
   owner: {
     label: "Owner",
-    scope: "All Research Center data and administration",
-    businessUnits: "all",
+    scope: "All Research Center data",
+    units: "all",
     teams: "all",
-    admin: true,
+    canAddEmployee: true,
+    canImport: true,
+    canExport: true,
+    canEditEmployee: true,
+    canArchiveEmployee: true,
     canEditOrg: true,
-    canEditTalentJudgment: true,
-    canAddEmployees: true,
-    canArchiveEmployees: true,
-    canImportExport: true,
+    canManageSettings: true,
     canAddManagerRecord: true,
-    canAddTalentInsight: true,
+    canAddHrbpInsight: true,
+    canEditTalentJudgment: true,
+    canCreateAction: true,
   },
   director: {
     label: "Research Center Director",
-    scope: "Global read and review access",
-    businessUnits: "all",
+    scope: "All Research Center review access",
+    units: "all",
     teams: "all",
-    admin: false,
-    canEditOrg: false,
-    canEditTalentJudgment: false,
-    canAddEmployees: false,
-    canArchiveEmployees: false,
-    canImportExport: false,
-    canAddManagerRecord: false,
-    canAddTalentInsight: false,
+    canExport: true,
   },
   labDirector: {
-    label: "Lab Director / PLR",
+    label: "Lab Director",
     scope: "GPU Research Lab",
-    businessUnits: ["GPU Research Lab"],
+    units: ["GPU Research Lab"],
     teams: "all",
-    admin: false,
-    canEditOrg: false,
-    canEditTalentJudgment: false,
-    canAddEmployees: false,
-    canArchiveEmployees: false,
-    canImportExport: false,
     canAddManagerRecord: true,
-    canAddTalentInsight: false,
+    canCreateAction: true,
   },
   teamLead: {
     label: "Team Lead",
-    scope: "GPU Compiler",
-    businessUnits: ["GPU Research Lab"],
-    teams: ["GPU Compiler"],
-    admin: false,
-    canEditOrg: false,
-    canEditTalentJudgment: false,
-    canAddEmployees: false,
-    canArchiveEmployees: false,
-    canImportExport: false,
+    scope: "GPU Compiler Team",
+    units: ["GPU Research Lab"],
+    teams: ["GPU Compiler Team"],
     canAddManagerRecord: true,
-    canAddTalentInsight: false,
+    canCreateAction: true,
   },
   hrbp: {
     label: "HRBP",
     scope: "GPU Compiler, Storage Performance, LLM Platform and MLOps",
-    businessUnits: ["GPU Research Lab", "Storage System Research Lab", "AI Platform"],
-    teams: ["GPU Compiler", "Storage Performance", "LLM Platform", "MLOps"],
-    admin: false,
-    canEditOrg: false,
+    units: ["GPU Research Lab", "Storage Systems Research Lab", "Platform & Operations"],
+    teams: ["GPU Compiler Team", "Storage Performance Team", "AI Platform Team", "MLOps Team"],
+    canExport: true,
+    canAddHrbpInsight: true,
     canEditTalentJudgment: true,
-    canAddEmployees: false,
-    canArchiveEmployees: false,
-    canImportExport: false,
-    canAddManagerRecord: false,
-    canAddTalentInsight: true,
+    canCreateAction: true,
   },
 };
 
 const navItems = [
-  ["home", "Home", "Role-specific work queue"],
-  ["organization", "Organization", "Research Center structure at a glance"],
-  ["people", "People", "Find employees and open profiles"],
-  ["talentTeam", "Development Hub", "Team, people and culture development"],
-  ["administration", "Administration", "Owner-only configuration and governance"],
+  ["organization", "Organization Overview"],
+  ["people", "People Library"],
+  ["talent", "Team Management"],
+  ["settings", "Settings"],
 ];
 
-const adminGroups = {
-  Organization: ["Business Units & Teams", "Employee Transfers"],
-  "People Operations": ["Add Employee", "Import Employees", "Archive Employee", "Former Employees", "Export Employees"],
-  Access: ["User Accounts", "Role Assignment", "Scope Assignment", "HRBP Coverage"],
-  "Talent Configuration": ["Talent Tags", "Awards", "Talent Action Types", "Activity Types"],
-};
-
+const roleKeys = Object.keys(roles);
 const firstNames = ["Alice", "Brian", "Carla", "David", "Elena", "Farid", "Grace", "Hao", "Iris", "Jonas", "Keiko", "Lina", "Maya", "Nikhil", "Olivia", "Priya", "Rui", "Sofia", "Tomas", "Wei", "Yara", "Zoe", "Marco", "Anika", "Daniel", "Mei", "Victor", "Nora", "Ahmed", "Julia"];
 const lastNames = ["Chen", "Singh", "Novak", "Meyer", "Hoffmann", "Kumar", "Garcia", "Wang", "Tanaka", "Smith", "Rossi", "Patel", "Kim", "Li", "Schneider", "Ivanov", "Zhang", "Andersson", "Brown", "Liu", "Martinez", "Dubois", "Khan", "Fischer", "Nguyen", "Silva", "Wilson", "Moreau", "Sato", "Bauer"];
-const levels = ["Junior Engineer", "Engineer", "Senior Engineer", "Staff Engineer", "Principal Engineer", "Distinguished Engineer"];
-const talentTags = ["AI", "Technical Leader", "High Potential", "Key Position", "Outstanding Talent", "Mentor", "Domain Expert", "Critical Backup"];
-const awards = ["Annual Innovation Award", "Technical Breakthrough Award", "Research Impact Award", "Collaboration Award", "Patent Contribution Award"];
-const evidenceTypes = ["Project contribution", "Technical innovation", "Cross-team collaboration", "Mentoring", "Technical leadership", "Management observation", "Recent achievement"];
-const actionTypes = ["Learning", "Mentoring", "Knowledge Transfer", "Backup Development", "Succession", "Internal Mobility"];
-const configData = {
-  talentTags: talentTags.map((name, index) => ({ id: `tag-${index + 1}`, name, active: true })),
-  awards: awards.map((name, index) => ({ id: `award-${index + 1}`, name, active: true })),
-  talentActionTypes: actionTypes.map((name, index) => ({ id: `action-${index + 1}`, name, active: true })),
-  activityTypes: ["Team Event", "Technical Sharing", "Summit", "Cross-team collaboration"].map((name, index) => ({ id: `activity-${index + 1}`, name, active: true })),
-  activities: [
-    { id: "act-1", type: "Technical Sharing", unit: "GPU Research Lab", team: "GPU Compiler", date: "2026-05-18", owner: "GPU Compiler Lead", note: "Compiler backend knowledge sharing with runtime team." },
-    { id: "act-2", type: "Cross-team collaboration", unit: "AI Platform", team: "LLM Platform", date: "2026-06-06", owner: "LLM Platform Lead", note: "Evaluation platform working session with MLOps." },
-    { id: "act-3", type: "Team Event", unit: "Storage System Research Lab", team: "Data Reliability", date: "2026-06-21", owner: "Data Reliability Lead", note: "Incident review practice and team retro." },
-  ],
-  users: [
-    { id: "u1", name: "Rui Zhang", role: "Owner", scope: "All Research Center", active: true },
-    { id: "u2", name: "GPU Compiler Lead", role: "Team Lead", scope: "GPU Compiler", active: true },
-    { id: "u3", name: "Research HRBP", role: "HRBP", scope: "GPU Compiler, Storage Performance, LLM Platform, MLOps", active: true },
-  ],
-};
-const capabilityLevels = ["Basic", "Working", "Advanced", "Expert"];
-const impactLevels = ["Emerging", "Medium", "High"];
-const potentialLevels = ["Medium", "High", "Exceptional"];
+const jobTitles = ["Research Engineer", "Senior Research Engineer", "Staff Engineer", "Principal Engineer", "Research Scientist", "Systems Engineer", "Algorithm Engineer", "Platform Engineer"];
+const levels = ["P2", "P3", "P4", "P5", "P6", "P7"];
+const contracts = ["Employee", "Leased Labour", "Intern"];
 
-function buildDataset() {
-  const teamCounts = distributeEmployees();
-  const people = [];
-  let sequence = 0;
-  organization.businessUnits.forEach((unit) => {
-    unit.teams.forEach((team) => {
-      const count = teamCounts[team] || 4;
-      const profile = teamProfiles[team];
-      for (let index = 0; index < count; index += 1) {
-        sequence += 1;
-        people.push(createEmployee(sequence, unit, team, profile, index));
-      }
-    });
-  });
-  people.forEach((employee) => {
-    employee.manager = findManager(employee, people);
-    employee.reportingLine = `${employee.manager} > ${employee.team} > ${employee.unit}`;
-    employee.records = createManagerRecords(employee);
-    employee.insights = employee.idNumber % 10 < 3 ? createTalentInsights(employee) : [];
-    employee.growthPath = createGrowthPath(employee);
-    employee.actions = createTalentActions(employee);
-    employee.openActions = employee.actions.filter((action) => action.status !== "Completed").length;
-    employee.summary = createSummary(employee);
-  });
-  return people;
-}
+const orgTemplate = [
+  ["GPU Research Lab", "Research Lab", "Rui Zhang", ["GPU Architecture Team", "GPU Compiler Team", "GPU Runtime Team", "Performance Optimization Team"]],
+  ["Storage Systems Research Lab", "Research Lab", "Nora Fischer", ["Distributed Storage Team", "Filesystem Team", "Storage Performance Team", "Data Reliability Team"]],
+  ["Camera Technology Research Lab", "Research Lab", "Keiko Tanaka", ["Computational Photography Team", "Image Processing Team", "ISP Team", "Computer Vision Team"]],
+  ["Wireless Technologies Research Lab", "Research Lab", "Hao Wang", ["5G Research Team", "6G Research Team", "Radio Algorithms Team", "Signal Processing Team"]],
+  ["Networking Research Lab", "Research Lab", "Sofia Rossi", ["Network Architecture Team", "Routing Team", "Switching Team", "Network Security Team"]],
+  ["Platform & Operations", "Platform & Operations", "Daniel Smith", ["AI Platform Team", "Research IT Team", "DevOps Team", "MLOps Team", "HR Team", "Recruiting Team", "Administration Team", "Finance Team", "Procurement Team"]],
+];
+const extraStaffTeams = new Set(["GPU Architecture Team", "GPU Compiler Team", "GPU Runtime Team", "Performance Optimization Team", "Distributed Storage Team", "Filesystem Team", "Storage Performance Team"]);
 
-function distributeEmployees() {
-  const teams = organization.businessUnits.flatMap((unit) => unit.teams);
-  const counts = {};
-  teams.forEach((team) => {
-    const isOperations = ["HR", "Recruiting", "Administration", "Finance", "Procurement"].includes(team);
-    const isPlatform = ["LLM Platform", "AI Infrastructure", "MLOps", "IT Infrastructure", "DevOps", "Internal Tools"].includes(team);
-    counts[team] = isOperations ? 4 : isPlatform ? 7 : 6;
-  });
-  ["GPU Compiler", "GPU Architecture", "Distributed Storage", "Computer Vision", "6G Research", "Network Security", "LLM Platform", "AI Infrastructure"].forEach((team) => {
-    counts[team] += 2;
-  });
-  let total = Object.values(counts).reduce((sum, count) => sum + count, 0);
-  let cursor = 0;
-  while (total < 200) {
-    counts[teams[cursor % teams.length]] += 1;
-    total += 1;
-    cursor += 1;
-  }
-  while (total > 200) {
-    const team = teams[cursor % teams.length];
-    if (counts[team] > 4) {
-      counts[team] -= 1;
-      total -= 1;
-    }
-    cursor += 1;
-  }
-  return counts;
-}
-
-function createEmployee(sequence, unit, team, profile, teamIndex) {
-  const contract = sequence <= 160 ? "Employee" : sequence <= 190 ? "Leased Labour" : "Intern";
-  const level = teamIndex === 0 && !unit.name.includes("Operations") ? "Team Lead" : contract === "Intern" ? "Junior Engineer" : levels[(sequence + teamIndex) % levels.length];
-  const title = teamIndex === 0 && level === "Team Lead" ? "Team Lead" : profile.titles[(sequence + teamIndex) % profile.titles.length];
-  const first = firstNames[sequence % firstNames.length];
-  const last = lastNames[(sequence * 7) % lastNames.length];
-  const startYear = 2018 + (sequence % 8);
-  const startMonth = `${1 + (sequence % 12)}`.padStart(2, "0");
-  const startDay = `${1 + ((sequence * 3) % 27)}`.padStart(2, "0");
-  const capabilityCount = 3 + (sequence % 6);
-  const capabilities = profile.capabilities.slice(0, capabilityCount).map((name, index) => ({
-    name,
-    level: capabilityLevels[Math.min(3, Math.floor((sequence + index) % 5))],
-    source: index < 2 ? "Manager-confirmed" : sequence % 3 === 0 ? "AI-inferred" : "Project evidence",
-    evidenceQuality: index < 2 ? "Strong" : sequence % 4 === 0 ? "Weak" : "Moderate",
-  }));
-  const tags = [];
-  if (sequence % 5 === 0) tags.push("High Potential");
-  if (sequence % 7 === 0) tags.push("Technical Leader");
-  if (sequence % 11 === 0) tags.push("Key Position");
-  if (sequence % 13 === 0) tags.push("Outstanding Talent");
-  if (!tags.length && sequence % 3 === 0) tags.push(talentTags[sequence % talentTags.length]);
-  return {
-    id: `e${sequence}`,
-    idNumber: sequence,
-    number: employeeNumber(sequence, contract),
-    name: `${first} ${last}`,
-    title,
-    level,
-    unit: unit.name,
-    team,
-    contract,
-    startDate: `${startYear}-${startMonth}-${startDay}`,
-    manager: "",
-    reportingLine: "",
-    tags,
-    awards: sequence % 16 === 0 ? [awards[sequence % awards.length]] : [],
-    currentImpact: impactLevels[sequence % impactLevels.length],
-    growthPotential: potentialLevels[(sequence + 1) % potentialLevels.length],
-    retentionRisk: sequence % 17 === 0 ? "High" : sequence % 6 === 0 ? "Medium" : "Low",
-    promotionReadiness: sequence % 9 === 0 ? "Potentially Ready in 6-12 Months" : sequence % 4 === 0 ? "Evidence Needed" : "Not Ready",
-    dependency: sequence % 11 === 0 ? `Primary owner for ${profile.riskCapability}` : sequence % 7 === 0 ? `Backup candidate for ${profile.riskCapability}` : "No critical dependency",
-    nineBox: `${impactLevels[sequence % impactLevels.length]} Impact / ${potentialLevels[(sequence + 1) % potentialLevels.length]} Potential`,
-    capabilities,
-  };
-}
-
-function employeeNumber(sequence, contract) {
-  if (contract === "Employee") return `00${String(120000 + sequence).slice(-6)}`;
-  if (contract === "Leased Labour") return sequence % 2 === 0 ? `84${String(230000 + sequence).slice(-6)}` : `wx${String(4000 + sequence)}`;
-  return `500${String(10000 + sequence).slice(-5)}`;
-}
-
-function findManager(employee, people) {
-  if (employee.level === "Team Lead") return `${employee.unit} Director`;
-  const lead = people.find((person) => person.team === employee.team && person.level === "Team Lead");
-  return lead ? lead.name : `${employee.team} Lead`;
-}
-
-function createManagerRecords(employee) {
-  const count = 3 + (employee.idNumber % 6);
-  return Array.from({ length: count }, (_, index) => {
-    const capability = employee.capabilities[index % employee.capabilities.length].name;
-    const month = `${1 + ((employee.idNumber + index) % 6)}`.padStart(2, "0");
-    const day = `${6 + ((employee.idNumber * index + 3) % 21)}`.padStart(2, "0");
-    return [
-      evidenceTypes[(employee.idNumber + index) % evidenceTypes.length],
-      `2026-${month}-${day}`,
-      `${capability} evidence`,
-      `${employee.name} contributed to ${employee.team} work involving ${capability}, with visible impact on the team's annual goal.`,
-    ];
-  });
-}
-
-function createTalentInsights(employee) {
-  const capability = employee.capabilities[0].name;
-  return [
-    ["Strength", "2026-05-12", "HRBP", `${employee.name} shows consistent professional evidence in ${capability}.`],
-    ["Growth Opportunity", "2026-06-08", "HRBP", `Broader cross-team exposure would strengthen readiness for larger responsibility.`],
-    employee.retentionRisk === "High"
-      ? ["Talent Risk", "2026-06-21", "HRBP", `Dependency risk is elevated because ${employee.name} is attached to critical ${capability} coverage.`]
-      : ["Development Suggestion", "2026-06-21", "HRBP", `Create a focused learning or mentoring action connected to ${capability}.`],
-  ];
-}
-
-function createGrowthPath(employee) {
-  return [
-    ["Major project", "2026-03-01", `${employee.team} annual priority contribution`, `Delivered evidence connected to ${employee.capabilities[0].name}.`],
-    ["Development milestone", "2025-09-15", `${employee.capabilities[1]?.name || employee.capabilities[0].name} capability development`, "Manager validated progress through project work."],
-    ["Role change", employee.startDate, employee.title, `Joined ${employee.unit} / ${employee.team}.`],
-  ];
-}
-
-function createTalentActions(employee) {
-  const actions = [];
-  if (employee.idNumber % 4 === 0) {
-    actions.push({ type: "Learning", status: "Open", capability: employee.capabilities[0].name, owner: employee.manager, due: "2026-09-30" });
-  }
-  if (employee.idNumber % 9 === 0) {
-    actions.push({ type: "Key Role Backup", status: "In Progress", capability: employee.capabilities[1]?.name || employee.capabilities[0].name, owner: employee.manager, due: "2026-10-31" });
-  }
-  if (employee.idNumber % 10 === 0) {
-    actions.push({ type: "Mentoring", status: "Pending Manager Confirmation", capability: employee.capabilities[0].name, owner: employee.manager, due: "2026-08-31", source: "HRBP recommendation", requiresManagerConfirmation: true });
-  }
-  if (employee.idNumber % 14 === 0) {
-    actions.push({ type: actionTypes[employee.idNumber % actionTypes.length], status: "Completed", capability: employee.capabilities[0].name, owner: employee.manager, due: "2026-04-30" });
-  }
-  return actions;
-}
-
-function createSummary(employee) {
-  const capability = employee.capabilities[0].name;
-  const risk = employee.retentionRisk === "High" ? " Retention-related dependency should be reviewed by HRBP." : "";
-  return `${employee.name} is a ${employee.title} in ${employee.team} with strongest evidence in ${capability}. Current records show ${employee.currentImpact.toLowerCase()} impact and ${employee.growthPotential.toLowerCase()} growth potential.${risk}`;
-}
-
-const employees = buildDataset();
-
-const capabilities = [
-  {
-    name: "Runtime Codegen",
-    category: "GPU",
-    team: "GPU Compiler",
-    goal: teamProfiles["GPU Compiler"].goal,
-    target: "Advanced",
-    requiredPeople: "1 Primary, 2 Backup",
-    gap: "Backup Gap",
-    severity: "High",
-    recommendation: "Create backup coverage by pairing two Senior Engineers with the current compiler owner on the Q3 codegen project.",
-  },
-  {
-    name: "Fault Injection",
-    category: "Storage",
-    team: "Data Reliability",
-    goal: teamProfiles["Data Reliability"].goal,
-    target: "Working",
-    requiredPeople: "1 Primary, 1 Backup",
-    gap: "No Coverage",
-    severity: "High",
-    recommendation: "Start an internal learning action before considering external hiring; Distributed Storage has adjacent reliability expertise.",
-  },
-  {
-    name: "HDR",
-    category: "Camera",
-    team: "Computational Photography",
-    goal: teamProfiles["Computational Photography"].goal,
-    target: "Expert",
-    requiredPeople: "1 Primary, 1 Secondary",
-    gap: "Single-Point Risk",
-    severity: "High",
-    recommendation: "Create knowledge transfer from the primary HDR owner and assign one Computer Vision engineer as secondary coverage.",
-  },
-  {
-    name: "Standards Research",
-    category: "Wireless",
-    team: "6G Research",
-    goal: teamProfiles["6G Research"].goal,
-    target: "Advanced",
-    requiredPeople: "2 Primary",
-    gap: "Depth Gap",
-    severity: "Medium",
-    recommendation: "Assign one senior radio researcher to standards work and add monthly evidence reviews.",
-  },
-  {
-    name: "Threat Modeling",
-    category: "Networking",
-    team: "Network Security",
-    goal: teamProfiles["Network Security"].goal,
-    target: "Working",
-    requiredPeople: "1 Primary, 1 Backup",
-    gap: "Evidence Gap",
-    severity: "Medium",
-    recommendation: "Ask Network Security managers to validate recent project evidence before confirming coverage.",
-  },
-  {
-    name: "Agent Architecture",
-    category: "AI Platform",
-    team: "LLM Platform",
-    goal: teamProfiles["LLM Platform"].goal,
-    target: "Advanced",
-    requiredPeople: "1 Primary, 2 Backup",
-    gap: "Backup Gap",
-    severity: "High",
-    recommendation: "Create a 90-day mentoring and prototype action for two LLM Platform engineers.",
-  },
-  {
-    name: "GPU Scheduling",
-    category: "AI Infrastructure",
-    team: "AI Infrastructure",
-    goal: teamProfiles["AI Infrastructure"].goal,
-    target: "Working",
-    requiredPeople: "1 Primary, 1 Backup",
-    gap: "Capacity Gap",
-    severity: "Medium",
-    recommendation: "Use cross-team support from GPU Runtime and create a learning action owned by AI Infrastructure.",
-  },
-  {
-    name: "Talent Calibration",
-    category: "HR",
-    team: "HR",
-    goal: teamProfiles.HR.goal,
-    target: "Working",
-    requiredPeople: "2 Primary",
-    gap: "Future Gap",
-    severity: "Medium",
-    recommendation: "Develop calibration facilitation capability before Q4 promotion review.",
-  },
-].map((capability) => ({
-  ...capability,
-  coverage: buildCoverage(capability),
-}));
-
-const annualGoals = organization.businessUnits.flatMap((unit) =>
-  unit.teams.map((team) => {
-    const profile = teamProfiles[team];
-    return [profile.goal, team, "2026 Annual Goal", `Requires ${profile.capabilities.slice(0, 4).join(", ")} coverage.`];
-  })
-);
-
-const state = {
-  page: "home",
-  role: "owner",
-  selectedEmployee: "e1",
-  talentTab: "Overview",
-  talentTeamView: "Team/Lab Development",
-  developmentView: "Requires Attention",
-  adminSection: "Business Units & Teams",
-  search: "",
-  orgSearch: "",
-  adminSearch: "",
-  actionContext: {},
-  aiOutputs: [],
-};
+let state = loadState();
 
 const el = {
   nav: document.querySelector("#primaryNav"),
   roleSelect: document.querySelector("#roleSelect"),
-  roleScope: document.querySelector("#roleScope"),
-  scopeFilter: document.querySelector(".scope-filter"),
-  centerFilter: document.querySelector("#centerFilter"),
-  businessFilter: document.querySelector("#businessFilter"),
-  teamFilter: document.querySelector("#teamFilter"),
-  periodFilter: document.querySelector("#periodFilter"),
-  scopeSummary: document.querySelector("#scopeSummary"),
-  pageTitle: document.querySelector("#pageTitle"),
-  pageSubtitle: document.querySelector("#pageSubtitle"),
-  topbarActions: document.querySelector("#topbarActions"),
+  title: document.querySelector("#pageTitle"),
+  actions: document.querySelector("#topbarActions"),
   content: document.querySelector("#contentArea"),
   drawer: document.querySelector("#drawer"),
   drawerBackdrop: document.querySelector("#drawerBackdrop"),
@@ -629,1769 +94,1702 @@ const el = {
   toast: document.querySelector("#toast"),
 };
 
-function buildCoverage(capability) {
-  const teamPeople = employees.filter((employee) => employee.team === capability.team);
-  const evidence = teamPeople
-    .filter((employee) => employee.capabilities.some((item) => item.name === capability.name || item.name.includes(capability.name.split(" ")[0])))
-    .slice(0, capability.gap === "No Coverage" ? 0 : capability.gap === "Single-Point Risk" ? 1 : 3);
-  return evidence.map((employee, index) => [
-    employee.name,
-    index === 0 ? capability.target : "Working",
-    index === 0 ? "Primary" : index === 1 ? "Secondary" : "Backup",
-    index === 0 ? "Strong" : capability.gap === "Evidence Gap" ? "Weak" : "Moderate",
-    index === 0 ? "Manager-confirmed" : "AI-inferred",
-  ]);
+function defaultState() {
+  const config = {
+    tags: ["High Potential", "Technical Leader", "Key Person", "Domain Expert", "Mentor", "Critical Backup"].map((name, index) => item(`tag-${index}`, name)),
+    awards: ["Annual Innovation Award", "Technical Breakthrough Award", "Research Impact Award", "Collaboration Award"].map((name, index) => item(`award-${index}`, name)),
+    actionTypes: ["Learning", "IDP", "Mentoring", "Knowledge Transfer", "Backup Development", "Succession", "Internal Mobility", "Retention Action"].map((name, index) => item(`action-${index}`, name)),
+    activityTypes: ["Team Event", "Technical Sharing", "Summit", "Cross-team Collaboration", "Team Building"].map((name, index) => item(`activity-${index}`, name)),
+  };
+  const units = orgTemplate.map(([name, type, leader, teams], index) => ({
+    id: `u${index + 1}`,
+    name,
+    type,
+    leader,
+    teams: teams.map((teamName, teamIndex) => ({ id: `t${index + 1}-${teamIndex + 1}`, name: teamName, lead: "", active: true })),
+    active: true,
+  }));
+  const people = buildPeople(units, config);
+  const teamPlans = {};
+  units.forEach((unit) => unit.teams.forEach((team) => {
+    teamPlans[team.id] = {
+      situation: "",
+      goal: "",
+      gap: "",
+      work: "",
+      history: [],
+    };
+  }));
+  const roleAssignments = defaultRoleAssignments(people, units);
+  return {
+    page: "organization",
+    role: "owner",
+    system: { language: "English", appearance: "Light" },
+    settingsSection: "Organization",
+    talentTab: "Team Plan",
+    selectedEmployeeId: people[0].id,
+    editingTeamPlanId: "",
+    editingTeamPlanRecordId: "",
+    filters: { search: "", unit: "All", team: "All", contract: "All", tag: "All", year: "2026" },
+    expanded: { root: true },
+    config,
+    units,
+    people,
+    archived: [],
+    archivedActions: [],
+    roleAssignments,
+    aiInsights: { team: {}, person: {} },
+    teamPlans,
+    teamActions: [
+      { id: "team-action-1", teamId: "t1-2", type: "Knowledge Transfer", startDate: "2026-07-15", due: "2026-09-15", owner: "Team Lead", status: "Open", description: "Create backup coverage for compiler optimization work." },
+      { id: "team-action-2", teamId: "t2-3", type: "Cross-team Collaboration", startDate: "2026-08-01", due: "2026-10-05", owner: "HRBP", status: "Open", description: "Pair storage performance engineers with platform operations for applied project exposure." },
+    ],
+    activities: [
+      { id: "act-1", type: "Technical Sharing", teamId: "t1-2", date: "2026-06-12", participants: 18, description: "Compiler optimization lessons shared with runtime engineers." },
+      { id: "act-2", type: "Cross-team Collaboration", teamId: "t2-3", date: "2026-06-20", participants: 12, description: "Storage performance review with platform operations." },
+    ],
+  };
+}
+
+function item(id, name) {
+  return { id, name, active: true };
+}
+
+function defaultRoleAssignments(people, units) {
+  const firstPersonInTeam = (teamId) => people.find((person) => person.teamId === teamId)?.id || "";
+  const firstPersonInUnit = (unitId) => people.find((person) => person.unitId === unitId)?.id || "";
+  return {
+    owner: [{ personId: people[0]?.id || "", units: "all", teams: "all" }],
+    director: [{ personId: people[1]?.id || "", units: "all", teams: "all" }],
+    labDirector: units.slice(0, 2).map((unit) => ({ personId: firstPersonInUnit(unit.id), units: [unit.name], teams: "all" })),
+    teamLead: units[0]?.teams.slice(0, 2).map((team) => ({ personId: firstPersonInTeam(team.id), units: [units[0].name], teams: [team.name] })) || [],
+    hrbp: [{ personId: people.find((person) => person.teamId === "t6-4")?.id || people[0]?.id || "", units: ["GPU Research Lab", "Storage Systems Research Lab", "Platform & Operations"], teams: ["GPU Compiler Team", "Storage Performance Team", "AI Platform Team", "MLOps Team"] }],
+  };
+}
+
+function buildPeople(units, config) {
+  const people = [];
+  let n = 0;
+  units.forEach((unit) => unit.teams.forEach((team) => {
+    const baseCount = unit.name === "Platform & Operations" && /HR|Recruiting|Administration|Finance|Procurement/.test(team.name) ? 5 : 7;
+    const count = baseCount + (extraStaffTeams.has(team.name) ? 1 : 0);
+    for (let i = 0; i < count; i += 1) {
+      n += 1;
+      const contract = n <= 160 ? contracts[0] : n <= 190 ? contracts[1] : contracts[2];
+      const startYear = 2017 + (n % 9);
+      const startMonth = String((n % 12) + 1).padStart(2, "0");
+      const employee = {
+        id: `e${n}`,
+        number: contract === "Employee" ? `00${120000 + n}` : contract === "Leased Labour" ? `84${230000 + n}` : `500${10000 + n}`,
+        name: `${firstNames[n % firstNames.length]} ${lastNames[(n * 7) % lastNames.length]}`,
+        unitId: unit.id,
+        teamId: team.id,
+        title: i === 0 ? "Team Lead" : jobTitles[(n + i) % jobTitles.length],
+        level: i === 0 ? "P6" : levels[(n + i) % levels.length],
+        contract,
+        startDate: `${startYear}-${startMonth}-${String((n * 3) % 27 + 1).padStart(2, "0")}`,
+        manager: i === 0 ? unit.leader : "",
+        tags: [n % 5 === 0 ? "High Potential" : "", n % 7 === 0 ? "Technical Leader" : "", n % 11 === 0 ? "Key Person" : ""].filter(Boolean).slice(0, 3),
+        awards: n % 16 === 0 ? [config.awards[n % config.awards.length].name] : [],
+        summary: "",
+        retentionRisk: n % 17 === 0 ? "High" : n % 6 === 0 ? "Medium" : "Low",
+        promotionReadiness: n % 9 === 0 ? "Ready in 6-12 months" : n % 4 === 0 ? "Evidence needed" : "Not ready",
+        successionStatus: n % 11 === 0 ? "Backup required" : "No formal succession case",
+        internalMobility: n % 8 === 0 ? "Ready for adjacent project exposure" : "No active mobility plan",
+        records: [],
+        hrbpInsights: [],
+        talentReviews: [],
+        actions: [],
+        history: [],
+      };
+      people.push(employee);
+    }
+  }));
+  people.forEach((person) => {
+    const lead = people.find((candidate) => candidate.teamId === person.teamId && candidate.title === "Team Lead");
+    person.manager = person.title === "Team Lead" ? unitById(person.unitId, units).leader : lead?.name || person.manager;
+    const team = teamById(person.teamId, units);
+    if (person.title === "Team Lead") team.lead = person.name;
+    person.summary = `${person.name} is a ${person.title} in ${team.name}. Recent records show reliable contribution and useful evidence for ${team.name.replace(" Team", "").toLowerCase()} priorities.`;
+    person.records = [
+      record("Outstanding contribution", "2026-05-18", "Delivered visible technical contribution on the team roadmap."),
+      record("Project performance", "2026-06-08", "Improved delivery quality during a key research milestone."),
+    ];
+    if (person.retentionRisk !== "Low") {
+      person.hrbpInsights = [record("Talent Risk", "2026-06-21", `Retention risk is ${person.retentionRisk.toLowerCase()}; review workload, backup coverage and manager support.`)];
+    }
+    if (person.retentionRisk !== "Low" || person.promotionReadiness !== "Not ready") {
+      person.talentReviews = [talentReviewRecord(person, "2026-06-21")];
+    }
+    if (nudge(person)) {
+      person.actions = [{ id: `a-${person.id}`, type: "Learning", status: "Open", owner: person.manager, due: "2026-09-30", description: "Build backup coverage and refresh evidence through a practical project." }];
+    }
+    person.history = [
+      record("Role Change", person.startDate, `Joined ${team.name} as ${person.title}.`),
+      record("Key Project", "2026-03-15", "Contributed to annual research priority delivery."),
+    ];
+  });
+  return people.slice(0, 200);
+}
+
+function nudge(person) {
+  const numeric = Number(person.id.replace("e", ""));
+  return numeric % 4 === 0 || numeric % 9 === 0;
+}
+
+function record(type, date, text) {
+  return { id: `${type}-${date}-${Math.random().toString(16).slice(2)}`, type, date, text };
+}
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    return saved?.people?.length && saved?.units?.length && saved?.config?.tags ? hydrateState(saved) : defaultState();
+  } catch {
+    return defaultState();
+  }
+}
+
+function hydrateState(saved) {
+  saved.editingTeamPlanId = "";
+  saved.editingTeamPlanRecordId = "";
+  saved.archivedActions = saved.archivedActions || [];
+  saved.roleAssignments = saved.roleAssignments || defaultRoleAssignments(saved.people, saved.units);
+  saved.aiInsights = saved.aiInsights || { team: {}, person: {} };
+  saved.aiInsights.team = saved.aiInsights.team || {};
+  saved.aiInsights.person = saved.aiInsights.person || {};
+  saved.teamActions = saved.teamActions || [];
+  saved.teamPlans = saved.teamPlans || {};
+  saved.units.forEach((unit) => unit.teams.forEach((team) => {
+    const plan = saved.teamPlans[team.id] || {};
+    const isLegacyDefault = !plan.history?.length
+      && plan.situation === `${team.name} can support the 2026 roadmap with stable delivery capacity.`
+      && plan.goal === `Deliver the annual research priorities for ${team.name}.`
+      && plan.gap === "Backup coverage and evidence freshness need attention for a few key skills."
+      && plan.work === "Complete manager evidence review, create backup learning actions, and record monthly team activities.";
+    saved.teamPlans[team.id] = isLegacyDefault
+      ? { situation: "", goal: "", gap: "", work: "", history: [] }
+      : { situation: plan.situation || "", goal: plan.goal || "", gap: plan.gap || "", work: plan.work || "", history: plan.history || [] };
+  }));
+  return saved;
+}
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 function currentRole() {
   return roles[state.role];
 }
 
-function allowedBusinessUnits() {
-  const allowed = currentRole().businessUnits;
-  if (allowed === "all") return organization.businessUnits.map((unit) => unit.name);
-  return allowed;
+function unitById(id, units = state.units) {
+  return units.find((unit) => unit.id === id);
 }
 
-function allowedTeamsFor(unitName) {
-  const unit = organization.businessUnits.find((item) => item.name === unitName);
-  const allTeams = unit ? unit.teams : [];
-  const allowed = currentRole().teams;
-  if (allowed === "all") return allTeams;
-  return allTeams.filter((team) => allowed.includes(team));
+function teamById(id, units = state.units) {
+  return units.flatMap((unit) => unit.teams).find((team) => team.id === id);
 }
 
-function employeesInScope() {
+function roleAllowsPerson(person) {
   const role = currentRole();
-  return employees.filter((employee) => {
-    if (employee.archived) return false;
-    const unitOk = role.businessUnits === "all" || role.businessUnits.includes(employee.unit);
-    const teamOk = role.teams === "all" || role.teams.includes(employee.team);
-    const selectedUnit = el.businessFilter.value;
-    const selectedTeam = el.teamFilter.value;
-    const filterUnitOk = selectedUnit === "All permitted units" || employee.unit === selectedUnit;
-    const filterTeamOk = selectedTeam === "All permitted teams" || employee.team === selectedTeam;
-    return unitOk && teamOk && filterUnitOk && filterTeamOk;
+  const unit = unitById(person.unitId);
+  const team = teamById(person.teamId);
+  return (role.units === "all" || role.units.includes(unit.name)) && (role.teams === "all" || role.teams.includes(team.name));
+}
+
+function scopedPeople() {
+  return state.people.filter(roleAllowsPerson).filter((person) => {
+    const { search, unit, team, contract, tag } = state.filters;
+    const query = search.trim().toLowerCase();
+    return (!query || person.name.toLowerCase().includes(query) || person.number.toLowerCase().includes(query))
+      && (unit === "All" || person.unitId === unit)
+      && (team === "All" || person.teamId === team)
+      && (contract === "All" || person.contract === contract)
+      && (tag === "All" || person.tags.includes(tag));
   });
 }
 
-function capabilitiesInScope() {
-  const teams = new Set(employeesInScope().map((employee) => employee.team));
-  return capabilities.filter((capability) => teams.has(capability.team) || currentRole().teams === "all");
+function scopedUnits() {
+  const role = currentRole();
+  return state.units.filter((unit) => role.units === "all" || role.units.includes(unit.name));
 }
 
-function setOptions(select, values, selectedValue) {
-  select.innerHTML = values.map((value) => `<option>${value}</option>`).join("");
-  if (values.includes(selectedValue)) select.value = selectedValue;
-}
-
-function activeConfig(key) {
-  return configData[key].filter((item) => item.active);
+function scopedTeams() {
+  const role = currentRole();
+  return scopedUnits().flatMap((unit) => unit.teams.filter((team) => role.teams === "all" || role.teams.includes(team.name)).map((team) => ({ ...team, unitId: unit.id })));
 }
 
 function init() {
-  el.roleSelect.innerHTML = Object.entries(roles).map(([key, role]) => `<option value="${key}">${role.label}</option>`).join("");
+  document.body.classList.toggle("high-contrast", state.system?.appearance === "High contrast");
+  el.roleSelect.innerHTML = roleKeys.map((key) => `<option value="${key}">${roles[key].label}</option>`).join("");
   el.roleSelect.value = state.role;
-  setOptions(el.centerFilter, organization.centers, organization.centers[0]);
-  bindEvents();
-  render();
-}
-
-function bindEvents() {
   el.roleSelect.addEventListener("change", () => {
     state.role = el.roleSelect.value;
-    state.page = "home";
+    state.filters.unit = "All";
+    state.filters.team = "All";
+    if (state.page === "settings" && !currentRole().canManageSettings) state.page = "organization";
+    save();
     render();
   });
-  el.businessFilter.addEventListener("change", () => {
-    renderFilters(false);
-    renderPage();
-  });
-  el.teamFilter.addEventListener("change", renderPage);
-  el.periodFilter.addEventListener("change", renderPage);
-  el.closeDrawer.addEventListener("click", closeDrawer);
-  el.drawerBackdrop.addEventListener("click", closeDrawer);
+  el.closeDrawer.addEventListener("click", () => closeDrawer());
+  el.drawerBackdrop.addEventListener("click", () => closeDrawer());
+  render();
 }
 
 function render() {
   renderNav();
-  renderFilters(true);
-  renderPage();
+  if (state.page === "settings" && !currentRole().canManageSettings) state.page = "organization";
+  const pages = { organization: renderOrganization, people: renderPeople, talent: renderTalent, settings: renderSettings };
+  pages[state.page]();
+  save();
 }
 
 function renderNav() {
-  const role = currentRole();
-  el.roleScope.textContent = role.scope;
   el.nav.innerHTML = navItems
-    .filter(([key]) => key !== "administration" || role.admin)
-    .map(([key, label, description]) => `<button class="nav-button ${state.page === key ? "active" : ""}" data-page="${key}" title="${description}"><span>${navIcon(key)}</span>${label}</button>`)
+    .filter(([page]) => page !== "settings" || currentRole().canManageSettings)
+    .map(([page, label]) => `<button class="nav-button ${state.page === page ? "active" : ""}" data-page="${page}">${label}</button>`)
     .join("");
-  el.nav.querySelectorAll("button").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.page = button.dataset.page;
-      renderPage();
-      renderNav();
-    });
-  });
+  el.nav.querySelectorAll("button").forEach((button) => button.addEventListener("click", () => {
+    state.page = button.dataset.page;
+    render();
+  }));
 }
 
-function navIcon(key) {
-  return { home: "⌂", organization: "╬", people: "◎", talentTeam: "▦", administration: "⚙" }[key];
-}
-
-function renderFilters(reset) {
-  const units = ["All permitted units", ...allowedBusinessUnits()];
-  const defaultUnit = Array.isArray(currentRole().businessUnits) && currentRole().businessUnits.length === 1 ? currentRole().businessUnits[0] : units[0];
-  const selectedUnit = reset || !units.includes(el.businessFilter.value) ? defaultUnit : el.businessFilter.value;
-  setOptions(el.businessFilter, units, selectedUnit);
-  const teamSource = selectedUnit === "All permitted units" ? allowedBusinessUnits().flatMap((unit) => allowedTeamsFor(unit)) : allowedTeamsFor(selectedUnit);
-  const teams = ["All permitted teams", ...teamSource];
-  const defaultTeam = Array.isArray(currentRole().teams) && currentRole().teams.length === 1 ? currentRole().teams[0] : teams[0];
-  const selectedTeam = reset || !teams.includes(el.teamFilter.value) ? defaultTeam : el.teamFilter.value;
-  setOptions(el.teamFilter, teams, selectedTeam);
-  updateScopeSummary();
-}
-
-function updateScopeSummary() {
-  el.scopeSummary.textContent = `Viewing: ${[el.centerFilter.value, el.businessFilter.value, el.teamFilter.value, el.periodFilter.value].filter(Boolean).join(" / ")}`;
-}
-
-function setHeader(title, subtitle, actions = "") {
-  el.pageTitle.textContent = title;
-  el.pageSubtitle.textContent = subtitle;
-  el.topbarActions.innerHTML = actions;
-  bindToastButtons(el.topbarActions);
-  bindActionButtons(el.topbarActions);
-  bindNavigationButtons(el.topbarActions);
-}
-
-function renderPage() {
-  el.scopeFilter.hidden = true;
-  updateScopeSummary();
-  const pageMap = {
-    home: renderOverview,
-    people: renderPeople,
-    talent: renderTalent,
-    talentTeam: renderTalentTeam,
-    organization: renderOrganization,
-    administration: renderAdministration,
-  };
-  (pageMap[state.page] || renderOverview)();
-}
-
-function renderOverview() {
-  const scoped = employeesInScope();
-  const scopedCapabilities = capabilitiesInScope();
-  const critical = scopedCapabilities.filter((capability) => capability.severity === "High");
-  const risks = scoped.filter((employee) => employee.retentionRisk === "High" || employee.dependency !== "No critical dependency");
-  const openActions = scoped.flatMap((employee) => employee.actions.filter((action) => action.status !== "Completed").map((action) => ({ employee, action })));
-  const landing = roleLanding(scoped, critical, risks, openActions);
-  setHeader(
-    "Home",
-    landing.question,
-    ""
-  );
-  el.content.innerHTML = `
-    <section>
-      <div class="section-header"><div><h2>${landing.label}</h2><p>${landing.summary}</p></div></div>
-      ${decisionList(landing.items)}
-    </section>
-  `;
-  bindNavigationButtons(el.content);
-}
-
-function roleLanding(scoped, critical, risks, openActions) {
-  if (state.role === "hrbp") {
-    const staleInsights = scoped.filter((employee) => employee.insights.length && employee.idNumber % 2 === 0);
-    return {
-      label: "HRBP talent briefing",
-      question: "Which talent reviews need attention?",
-      conclusion: `${risks.slice(0, 5).length} talent reviews need HRBP attention`,
-      summary: "Focus on retention risk, promotion readiness and open talent actions in your assigned coverage.",
-      primaryAction: "Open Talent Review Queue",
-      items: [
-        ...risks.slice(0, 3).map((employee) => ({ label: "Retention", title: employee.name, detail: `${employee.retentionRisk} retention risk; ${employee.promotionReadiness}.`, tone: employee.retentionRisk === "High" ? "danger" : "warning", target: `employee:${employee.id}` })),
-        ...staleInsights.slice(0, 2).map((employee) => ({ label: "Insight", title: employee.name, detail: "Talent Insight should be refreshed before the next calibration review.", tone: "warning", target: `employee:${employee.id}:HRBP Records` })),
-      ],
-    };
-  }
-  if (state.role === "teamLead") {
-    const confirmations = scoped
-      .filter((employee) => employee.actions.some((action) => action.requiresManagerConfirmation && action.status === "Pending Manager Confirmation"))
-      .slice(0, 2);
-    return {
-      label: "Team lead briefing",
-      question: "What does my team need today?",
-      conclusion: `${openActions.length} actions or capability risks need follow-up`,
-      summary: "Focus on assigned team actions, recent employee evidence and missing backup coverage.",
-      primaryAction: "Open Team Tasks",
-      items: [
-        { label: "Team", title: currentRole().teams[0], detail: "Open the assigned team summary and team plan.", tone: "blue", target: `team:${currentRole().teams[0]}` },
-        ...confirmations.map((employee) => ({ label: "Confirm", title: employee.name, detail: "HRBP proposed a development action that needs manager confirmation.", tone: "warning", target: `employee:${employee.id}:Development` })),
-        ...openActions.slice(0, 2).map(({ employee, action }) => ({ label: "Action", title: employee.name, detail: `${action.type} for ${action.capability}; due ${action.due}.`, tone: "warning", target: `employee:${employee.id}:Development` })),
-        ...critical.slice(0, 2).map((capability) => ({ label: capability.gap, title: capability.name, detail: capability.recommendation, tone: "danger", target: `team:${capability.team}:Team/Lab Development` })),
-      ],
-    };
-  }
-  if (state.role === "labDirector") {
-    return {
-      label: "Lab readiness briefing",
-      question: "Which team in my lab needs attention?",
-      conclusion: `${critical.length} lab readiness risks need review`,
-      summary: "Focus on team-level readiness, missing backups and open development actions inside your assigned lab.",
-      primaryAction: "Review Lab Readiness",
-      items: [
-        { label: "Lab", title: currentRole().businessUnits[0], detail: "Open assigned lab structure and teams.", tone: "blue", target: `unit:${currentRole().businessUnits[0]}` },
-        ...critical.slice(0, 3).map((capability) => ({ label: capability.gap, title: capability.team, detail: `${capability.name}: ${capability.recommendation}`, tone: "danger", target: `team:${capability.team}:Team/Lab Development` })),
-        ...openActions.slice(0, 1).map(({ employee, action }) => ({ label: "Action", title: employee.name, detail: `${action.type} due ${action.due}.`, tone: "warning", target: `employee:${employee.id}:Development` })),
-      ],
-    };
-  }
-  if (state.role === "director") {
-    return {
-      label: "Research Center briefing",
-      question: "What requires leadership attention?",
-      conclusion: `${critical.length} organization-level risks require review`,
-      summary: "Focus on major capability risks, teams requiring attention and promotion calibration candidates.",
-      primaryAction: "Review Leadership Queue",
-      items: [
-        ...critical.slice(0, 3).map((capability) => ({ label: capability.gap, title: `${capability.team}: ${capability.name}`, detail: capability.recommendation, tone: "danger", target: `team:${capability.team}:Team/Lab Development` })),
-        ...risks.slice(0, 2).map((employee) => ({ label: "Dependency", title: employee.name, detail: employee.dependency, tone: "warning", target: `employee:${employee.id}` })),
-      ],
-    };
-  }
-  return {
-    label: "Owner briefing",
-    question: "What requires attention now?",
-    conclusion: `${critical.length} capability risks and ${openActions.length} open actions need governance`,
-    summary: "Focus on critical decisions, pending approvals, organizational changes and system configuration issues.",
-    primaryAction: "Review Owner Queue",
-    items: [
-      { label: "Approval", title: "Pending employee and organization changes", detail: "Review People Operations and Business Unit changes.", tone: "blue", target: "admin:Business Units & Teams" },
-      ...critical.slice(0, 2).map((capability) => ({ label: capability.gap, title: `${capability.team}: ${capability.name}`, detail: capability.recommendation, tone: "danger", target: `team:${capability.team}:Team/Lab Development` })),
-      { label: "Governance", title: "Access and HRBP coverage", detail: "Review role assignments and HRBP coverage after recent structure changes.", tone: "warning", target: "admin:HRBP Coverage" },
-      ...openActions.slice(0, 1).map(({ employee, action }) => ({ label: "Approval", title: employee.name, detail: `${action.type} for ${action.capability} needs owner visibility.`, tone: "blue", target: `employee:${employee.id}:Development` })),
-    ],
-  };
-}
-
-function decisionList(items) {
-  if (!items.length) return `<div class="empty-state"><h2>No urgent decisions</h2><p>This scope has no immediate review item.</p></div>`;
-  return `
-    <div class="decision-list">
-      ${items.map((item) => `
-        <button class="decision-row" ${item.target ? `data-target="${item.target}"` : "disabled"}>
-          <span class="badge ${item.tone}">${item.label}</span>
-          <div>
-            <h3>${item.title}</h3>
-            <p>${item.detail}</p>
-          </div>
-        </button>
-      `).join("")}
-    </div>
-  `;
-}
-
-function metric(label, value, note) {
-  return `<div class="metric"><strong>${value}</strong><span>${label}</span><p class="muted">${note}</p></div>`;
-}
-
-function aiMeta(label, date, period, confidence, freshness) {
-  return `<div class="ai-meta"><span class="badge ai">AI-generated</span><span class="badge">${label}</span><span class="badge blue">${freshness}</span></div>`;
-}
-
-function renderPromptOutputs(page) {
-  const outputs = state.aiOutputs.filter((output) => output.page === page);
-  if (!outputs.length) return "";
-  return `
-    <section class="grid">
-      ${outputs.map((output) => `
-        <article class="ai-panel">
-          ${aiMeta("Prompt-generated intelligence", output.date, output.scope, "Moderate", "Requires Review")}
-          <h2>${output.title}</h2>
-          <p><strong>Prompt:</strong> ${escapeHtml(output.prompt)}</p>
-          <p>${escapeHtml(output.response)}</p>
-          <div class="button-row"><button class="secondary-button" data-drawer="briefing">View Evidence</button></div>
-        </article>
-      `).join("")}
-    </section>
-  `;
-}
-
-function recommendationTable(items = capabilitiesInScope()) {
-  return `
-    <table>
-      <thead><tr><th>Recommendation</th><th>Team</th><th>Gap</th><th>Owner</th><th></th></tr></thead>
-      <tbody>
-        ${items.map((capability) => `
-          <tr>
-            <td>${capability.recommendation}</td>
-            <td>${capability.team}</td>
-            <td><span class="badge ${capability.severity === "High" ? "danger" : "warning"}">${capability.gap}</span></td>
-            <td>${capability.gap === "Evidence Gap" ? "Manager + HRBP" : "Team Lead"}</td>
-            <td><button class="secondary-button" data-drawer="cap-${capability.name}">View Evidence</button></td>
-          </tr>
-        `).join("")}
-      </tbody>
-    </table>
-  `;
-}
-
-function tenure(employee) {
-  const start = new Date(employee.startDate);
-  const now = new Date("2026-07-14");
-  let months = (now.getFullYear() - start.getFullYear()) * 12 + now.getMonth() - start.getMonth();
-  if (now.getDate() < start.getDate()) months -= 1;
-  if (months < 12) return `${Math.max(1, months)} mo`;
-  const years = Math.floor(months / 12);
-  const remainingMonths = months % 12;
-  return remainingMonths ? `${years}y ${remainingMonths}m` : `${years}y`;
-}
-
-function attentionIndicator(employee) {
-  if (employee.retentionRisk === "High") return '<span class="badge danger">Attention</span>';
-  if (employee.openActions) return '<span class="badge warning">Open action</span>';
-  if (employee.dependency !== "No critical dependency") return '<span class="badge warning">Key person</span>';
-  return "";
-}
-
-function bindEmployeeLinks(root = document) {
-  root.querySelectorAll("[data-employee]").forEach((button) => {
-    if (button.dataset.employeeBound) return;
-    button.dataset.employeeBound = "true";
-    button.addEventListener("click", () => {
-      state.selectedEmployee = button.dataset.employee;
-      state.page = "talent";
-      state.talentTab = "Overview";
-      renderNav();
-      renderPage();
-    });
-  });
-}
-
-function renderPeople() {
-  const role = currentRole();
-  setHeader(
-    "People",
-    "Find and understand employees quickly.",
-    `${role.canAddEmployees ? '<button class="primary-button" data-action="addEmployee">Add Employee</button>' : ""}
-     ${role.canImportExport ? '<button class="secondary-button" data-action="importEmployees">Import Employees</button><button class="secondary-button" data-action="exportEmployees">Export Employees</button>' : ""}`
-  );
-  const scoped = employeesInScope();
-  const unitOptions = ["All permitted units", ...allowedBusinessUnits()];
-  const teamOptions = ["All permitted teams", ...(el.businessFilter.value === "All permitted units" ? allowedBusinessUnits().flatMap((unit) => allowedTeamsFor(unit)) : allowedTeamsFor(el.businessFilter.value))];
-  el.content.innerHTML = `
-    <section class="people-tools">
-      <div><label for="peopleSearch">Search by name or employee number</label><input id="peopleSearch" value="${state.search}" placeholder="Search people" /></div>
-      <div><label for="peopleUnitFilter">Business Unit</label><select id="peopleUnitFilter">${unitOptions.map((unit) => `<option ${unit === el.businessFilter.value ? "selected" : ""}>${unit}</option>`).join("")}</select></div>
-      <div><label for="peopleTeamFilter">Team</label><select id="peopleTeamFilter">${teamOptions.map((team) => `<option ${team === el.teamFilter.value ? "selected" : ""}>${team}</option>`).join("")}</select></div>
-      <div><label for="contractFilter">Contract type</label><select id="contractFilter"><option>All contracts</option><option>Employee</option><option>Leased Labour</option><option>Intern</option></select></div>
-      <div><label for="tagFilter">Talent tag</label><select id="tagFilter"><option>All tags</option>${activeConfig("talentTags").map((item) => `<option>${item.name}</option>`).join("")}</select></div>
-    </section>
-    <section>
-      <div class="section-header"><div><h2>People in Scope</h2><p id="peopleCount"></p></div></div>
-      <div class="people-card-grid" id="peopleCards"></div>
-    </section>
-  `;
-  const searchInput = document.querySelector("#peopleSearch");
-  const unitFilter = document.querySelector("#peopleUnitFilter");
-  const teamFilter = document.querySelector("#peopleTeamFilter");
-  const contractFilter = document.querySelector("#contractFilter");
-  const tagFilter = document.querySelector("#tagFilter");
-  const refreshCards = () => renderPeopleCards(employeesInScope());
-  searchInput.addEventListener("input", () => {
-    state.search = searchInput.value;
-    refreshCards();
-  });
-  unitFilter.addEventListener("change", () => {
-    el.businessFilter.value = unitFilter.value;
-    renderFilters(false);
-    renderPage();
-  });
-  teamFilter.addEventListener("change", () => {
-    el.teamFilter.value = teamFilter.value;
-    renderPage();
-  });
-  contractFilter.addEventListener("change", refreshCards);
-  tagFilter.addEventListener("change", refreshCards);
-  renderPeopleCards(scoped);
-}
-
-function renderPeopleCards(scoped) {
-  const query = state.search.trim().toLowerCase();
-  const contract = document.querySelector("#contractFilter")?.value || "All contracts";
-  const tag = document.querySelector("#tagFilter")?.value || "All tags";
-  const filtered = scoped.filter((employee) => {
-    const queryOk = !query || employee.name.toLowerCase().includes(query) || employee.number.toLowerCase().includes(query);
-    const contractOk = contract === "All contracts" || employee.contract === contract;
-    const tagOk = tag === "All tags" || employee.tags.includes(tag);
-    return queryOk && contractOk && tagOk;
-  });
-  document.querySelector("#peopleCount").textContent = `Showing ${Math.min(filtered.length, 36)} of ${filtered.length} people. Use search or filters to narrow the list.`;
-  document.querySelector("#peopleCards").innerHTML = filtered.length
-    ? filtered.slice(0, 36).map((employee) => `
-          <article class="employee-card compact">
-            <header>
-              <div>
-                <h3>${employee.name}</h3>
-                <p class="muted">${employee.number}</p>
-              </div>
-              ${attentionIndicator(employee)}
-            </header>
-            <dl class="profile-facts">
-              <div><dt>Job title</dt><dd>${employee.title}</dd></div>
-              <div><dt>Level</dt><dd>${employee.level}</dd></div>
-              <div><dt>Team</dt><dd>${employee.team}</dd></div>
-              <div><dt>Tenure</dt><dd>${tenure(employee)}</dd></div>
-              <div><dt>Contract</dt><dd>${employee.contract}</dd></div>
-            </dl>
-            <div class="tag-row">${employee.tags.slice(0, 2).map((item) => `<span class="badge">${item}</span>`).join("") || '<span class="muted">No talent tag</span>'}</div>
-            <button class="secondary-button" data-employee="${employee.id}">Open Profile</button>
-          </article>
-        `).join("")
-    : `<div class="empty-state"><h2>No people match this scope</h2><p>Adjust filters or select another permitted organization scope.</p></div>`;
-  bindEmployeeLinks();
-}
-
-function renderTalent() {
-  const scoped = employeesInScope();
-  const employee = scoped.find((item) => item.id === state.selectedEmployee) || scoped[0] || employees[0];
-  state.selectedEmployee = employee.id;
-  setHeader(
-    "Employee Profile",
-    "One employee profile with role-based sections and actions.",
-    `${currentRole().canAddEmployees ? '<button class="secondary-button" data-action="editEmployee">Edit Employee</button>' : ""}
-     ${currentRole().canArchiveEmployees ? '<button class="danger-button" data-action="archiveEmployee">Archive Employee</button>' : ""}
-     ${!currentRole().canArchiveEmployees ? '<button class="primary-button" data-action="createTalentAction">Create Talent Action</button>' : ""}`
-  );
-  const tabs = ["Overview", "Manager Records", "HRBP Records", "Development", "History"];
-  el.content.innerHTML = `
-    <section class="talent-header">
-      <div class="talent-header-main">
-        <div>
-          <p class="eyebrow">Employee Profile</p>
-          <h2>${employee.name}</h2>
-          <p>${employee.number} · ${employee.title}</p>
-          <dl class="profile-facts header-facts">
-            <div><dt>Level</dt><dd>${employee.level}</dd></div>
-            <div><dt>Business Unit</dt><dd>${employee.unit}</dd></div>
-            <div><dt>Team</dt><dd>${employee.team}</dd></div>
-            <div><dt>Contract</dt><dd>${employee.contract}</dd></div>
-            <div><dt>Tenure</dt><dd>${tenure(employee)}</dd></div>
-          </dl>
-          <div class="tag-row">
-            ${employee.tags.map((tag) => `<span class="badge">${tag}</span>`).join("") || '<span class="muted">No talent tag</span>'}
-            ${employee.awards.map((award) => `<span class="badge blue">${award}</span>`).join("") || ""}
-          </div>
-        </div>
-      </div>
-      <div class="indicator-grid">
-        ${indicator("Impact", employee.currentImpact)}
-        ${indicator("Potential", employee.growthPotential)}
-        ${indicator("Retention Risk", visibleTalentValue("retentionRisk", employee))}
-        ${indicator("Open Actions", employee.openActions || "None")}
-      </div>
-    </section>
-    <nav class="tabs" aria-label="Employee profile tabs">${tabs.map((tab) => `<button class="tab ${tab === state.talentTab ? "active" : ""}" data-tab="${tab}">${tab}</button>`).join("")}</nav>
-    <section>${renderTalentTab(employee)}</section>
-  `;
-  document.querySelectorAll("[data-tab]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.talentTab = button.dataset.tab;
-      renderPage();
-    });
-  });
-  bindDrawerButtons();
-}
-
-function visibleTalentValue(field, employee) {
-  if ((field === "retentionRisk" || field === "promotionReadiness") && state.role === "teamLead") return "Restricted";
-  return employee[field];
-}
-
-function indicator(label, value) {
-  return `<div class="indicator"><span>${label}</span><strong>${value}</strong></div>`;
-}
-
-function renderTalentTab(employee) {
-  if (state.talentTab === "Overview") {
-    return `
-      <div class="grid two">
-        <article class="ai-panel">
-          ${aiMeta("AI Talent Summary", "2026-07-14", "Last 12 months", "Moderate", "Current")}
-          <h2>${employee.currentImpact} impact with ${employee.growthPotential.toLowerCase()} potential</h2>
-          <ul>
-            <li>Strongest evidence: ${employee.capabilities[0].name}.</li>
-            <li>${employee.dependency}</li>
-            <li>${employee.openActions ? `${employee.openActions} open development action.` : "No open development action."}</li>
-          </ul>
-          <p><strong>Suggestions:</strong> Review current action ownership; keep manager evidence current before calibration.</p>
-          <div class="button-row"><button class="secondary-button" data-drawer="employee-${employee.id}">View Evidence</button></div>
-        </article>
-        <article class="card"><h2>Important Open Actions</h2>${actionList(employee, true)}</article>
-      </div>
-      <article class="card"><h2>Recent Change</h2>${recordsList(employee.growthPath.slice(0, 1))}</article>
-    `;
-  }
-  if (state.talentTab === "Manager Records") {
-    return `<div class="card"><div class="section-header"><div><h2>Manager Records</h2><p>Professional and business evidence from managers.</p></div>${currentRole().canAddManagerRecord ? '<button class="primary-button" data-action="addManagerRecord">Add Manager Record</button>' : ""}</div>${recordsList(employee.records)}</div>`;
-  }
-  if (state.talentTab === "HRBP Records") {
-    if (!currentRole().canAddTalentInsight) return restrictedState();
-    return `<div class="card"><div class="section-header"><div><h2>HRBP Records</h2><p>Talent insight, risk, development suggestion and retention consideration.</p></div><button class="primary-button" data-action="addTalentInsight">Add HRBP Record</button></div>${employee.insights.length ? recordsList(employee.insights) : '<div class="empty-state"><h2>No HRBP record</h2><p>Not every employee has a formal HRBP record.</p></div>'}</div>`;
-  }
-  if (state.talentTab === "Development") {
-    return `<div class="grid two">
-      <article class="card"><h2>Development Actions</h2>${actionList(employee)}</article>
-      <article class="card"><h2>Readiness and Backup</h2>
-        <dl class="profile-facts">
-          <div><dt>Promotion readiness</dt><dd>${visibleTalentValue("promotionReadiness", employee)}</dd></div>
-          <div><dt>Succession / backup</dt><dd>${employee.dependency}</dd></div>
-          <div><dt>Mentoring focus</dt><dd>${employee.capabilities[0].name}</dd></div>
-          <div><dt>Internal mobility</dt><dd>${employee.team} adjacent project exposure</dd></div>
-        </dl>
-        <div class="button-row"><button class="primary-button" data-action="createTalentAction">Create Talent Action</button></div>
-      </article>
-    </div>`;
-  }
-  return `<div class="card"><h2>History</h2>${recordsList([...employee.growthPath, ...employee.awards.map((award) => ["Award", "2026-01-15", award, "Historical award record retained on the profile."])])}</div>`;
-}
-
-function recordsList(records) {
-  return `<div class="timeline">${records.map((record) => `<div class="timeline-item"><h3>${record[0]} <span class="badge">${record[1]}</span></h3><p><strong>${record[2]}</strong></p><p>${record[3]}</p></div>`).join("")}</div>`;
-}
-
-function restrictedState() {
-  return `<div class="empty-state"><h2>Restricted HRBP judgments</h2><p>This role can add manager evidence but cannot view or edit HRBP-only talent judgments.</p></div>`;
-}
-
-function actionList(employee, importantOnly = false) {
-  if (!employee.actions.length) return `<div class="empty-state"><h2>No open talent action</h2><p>Create an action when evidence, risk or capability coverage requires follow-up.</p></div>`;
-  const actions = employee.actions.map((action, index) => ({ action, index }));
-  const visible = importantOnly ? actions.filter(({ action }) => action.status !== "Completed").slice(0, 3) : actions;
-  return `<div class="timeline">${visible.map(({ action, index }) => `<div class="timeline-item"><h3>${action.type} <span class="badge ${action.status === "Completed" ? "blue" : action.status === "Pending Manager Confirmation" ? "warning" : "warning"}">${action.status}</span></h3><p>Target: ${action.capability}. Owner: ${action.owner}. Due: ${action.due}.</p>${action.source ? `<p class="muted">Source: ${action.source}</p>` : ""}${action.requiresManagerConfirmation && currentRole().canAddManagerRecord ? `<div class="button-row"><button class="primary-button" data-action="confirmTalentAction" data-employee-id="${employee.id}" data-action-index="${index}">Confirm Action</button></div>` : ""}</div>`).join("")}</div>`;
-}
-
-function renderTalentTeam() {
-  const tabs = ["Team/Lab Development", "People Insights", "Development Actions", "Culture Management"];
-  const scoped = employeesInScope();
-  const unitOptions = ["All permitted units", ...allowedBusinessUnits()];
-  const teamOptions = ["All permitted teams", ...(el.businessFilter.value === "All permitted units" ? allowedBusinessUnits().flatMap((unit) => allowedTeamsFor(unit)) : allowedTeamsFor(el.businessFilter.value))];
-  setHeader(
-    "Development Hub",
-    "Develop teams, people and culture with evidence-based actions.",
-    `<button class="primary-button" data-action="createTalentAction">Create Talent Action</button>`
-  );
-  el.content.innerHTML = `
-    <section class="people-tools">
-      <div><label for="teamUnitFilter">Business Unit</label><select id="teamUnitFilter">${unitOptions.map((unit) => `<option ${unit === el.businessFilter.value ? "selected" : ""}>${unit}</option>`).join("")}</select></div>
-      <div><label for="teamScopeFilter">Team</label><select id="teamScopeFilter">${teamOptions.map((team) => `<option ${team === el.teamFilter.value ? "selected" : ""}>${team}</option>`).join("")}</select></div>
-      <div><label for="teamYearFilter">Year</label><select id="teamYearFilter"><option ${el.periodFilter.value === "2026" ? "selected" : ""}>2026</option><option ${el.periodFilter.value === "2025" ? "selected" : ""}>2025</option></select></div>
-    </section>
-    <nav class="tabs" aria-label="Development Hub tabs">${tabs.map((tab) => `<button class="tab ${tab === state.talentTeamView ? "active" : ""}" data-talent-team-view="${tab}">${tab}</button>`).join("")}</nav>
-    <section>${renderTalentTeamTab(scoped)}</section>
-  `;
-  document.querySelector("#teamUnitFilter").addEventListener("change", (event) => {
-    el.businessFilter.value = event.target.value;
-    renderFilters(false);
-    renderPage();
-  });
-  document.querySelector("#teamScopeFilter").addEventListener("change", (event) => {
-    el.teamFilter.value = event.target.value;
-    renderPage();
-  });
-  document.querySelector("#teamYearFilter").addEventListener("change", (event) => {
-    el.periodFilter.value = event.target.value;
-    renderPage();
-  });
-  document.querySelectorAll("[data-talent-team-view]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.talentTeamView = button.dataset.talentTeamView;
-      renderPage();
-    });
-  });
-  bindEmployeeLinks();
-  bindDrawerButtons();
-}
-
-function selectedTeamLabel() {
-  return el.teamFilter.value === "All permitted teams" ? "selected teams" : el.teamFilter.value;
-}
-
-function selectedCapabilities() {
-  return capabilitiesInScope().filter((item) => el.teamFilter.value === "All permitted teams" || item.team === el.teamFilter.value);
-}
-
-function renderTalentTeamTab(scoped) {
-  if (state.talentTeamView === "Team/Lab Development") {
-    const scopedCapabilities = selectedCapabilities();
-    const primaryGap = scopedCapabilities.find((item) => item.severity === "High") || scopedCapabilities[0];
-    const open = scoped.flatMap((employee) => employee.actions.filter((action) => action.status !== "Completed"));
-    const progress = scoped.length ? Math.round((scoped.filter((employee) => employee.openActions === 0).length / scoped.length) * 100) : 0;
-    return `
-      <section class="development-summary">
-        <div>
-          <span>Current Situation</span>
-          <strong>${scoped.length} people / ${open.length} open actions</strong>
-          <p>${selectedTeamLabel()} · ${el.periodFilter.value}</p>
-        </div>
-        <div>
-          <span>Main Gap</span>
-          <strong>${primaryGap?.gap || "No major gap"}</strong>
-          <p>${primaryGap?.name || "Coverage stable"}</p>
-        </div>
-        <div>
-          <span>Major Action</span>
-          <strong>${primaryGap ? primaryGap.recommendation : "Maintain development cadence"}</strong>
-        </div>
-        <div>
-          <span>Progress Tracking</span>
-          <strong>${progress}% stable</strong>
-          <p>${scoped.filter((employee) => employee.openActions === 0).length} people without open actions</p>
-        </div>
-      </section>
-      <article class="ai-panel">
-          ${aiMeta("AI Team Summary", "2026-07-14", "Team goals and evidence", primaryGap?.severity || "Moderate", "Current")}
-          <h2>${selectedTeamLabel()} development focus</h2>
-          <p>${primaryGap ? `Strength exists around active project evidence, while the main gap is ${primaryGap.gap} for ${primaryGap.name}. The key dependency is ${primaryGap.recommendation}` : "No major team gap is visible in the selected scope."}</p>
-          <div class="button-row"><button class="secondary-button" data-drawer="briefing">View Evidence</button></div>
-      </article>
-      <section>
-        <div class="section-header"><div><h2>Gap, Action and Progress</h2><p>Team/lab development items for follow-up.</p></div></div>
-        <div class="capability-flow">${scopedCapabilities.slice(0, 4).map(capabilityFlowItem).join("") || '<div class="empty-state"><h2>No team plan data</h2><p>Select a team or permitted business unit.</p></div>'}</div>
-      </section>
-    `;
-  }
-  if (state.talentTeamView === "People Insights") {
-    const attention = talentReviewItems(scoped, "Requires Attention");
-    const contractRows = distributionRows(scoped, "contract");
-    const levelRows = distributionRows(scoped, "level");
-    const highImpactRisk = scoped.filter((employee) => employee.currentImpact === "High" && (employee.retentionRisk === "High" || employee.dependency !== "No critical dependency"));
-    return `
-      <section class="development-summary">
-        <div><span>People</span><strong>${scoped.length}</strong><p>${selectedTeamLabel()}</p></div>
-        <div><span>Contract Mix</span><strong>${contractRows.map((row) => `${row.label}: ${row.count}`).join(" / ")}</strong></div>
-        <div><span>Level Mix</span><strong>${levelRows.slice(0, 3).map((row) => `${row.label}: ${row.count}`).join(" / ")}</strong></div>
-        <div><span>High Impact / High Risk</span><strong>${highImpactRisk.length}</strong><p>Open individual evidence before action.</p></div>
-      </section>
-      <article class="ai-panel">
-        ${aiMeta("AI People Analysis", "2026-07-14", "Manager and HRBP records", "Moderate", "Current")}
-        <h2>${attention.length} people require review</h2>
-        <p>AI combines manager evidence, skill signals, HRBP observations and awards to surface retention, promotion and high-impact risk review candidates.</p>
-      </article>
-      <div class="section-header"><div><h2>People Requiring Attention</h2><p>Retention analysis, promotion analysis, high-impact risk and backup needs.</p></div></div>
-      <div class="table-wrap">${talentReviewTable(attention.slice(0, 12))}</div>
-    `;
-  }
-  if (state.talentTeamView === "Development Actions") {
-    const rows = scoped.flatMap((employee) => employee.actions.map((action) => ({ employee, action })));
-    return `
-      <div class="section-header"><div><h2>Development Actions</h2><p>Learning, mentoring, knowledge transfer, backup development, succession and mobility.</p></div><button class="primary-button" data-action="createTalentAction">Create Action</button></div>
-      <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Action</th><th>Capability</th><th>Owner</th><th>Status</th><th></th></tr></thead><tbody>
-        ${rows.length ? rows.map(({ employee, action }) => `<tr><td><strong>${employee.name}</strong><br><span class="muted">${employee.team}</span></td><td>${action.type}</td><td>${action.capability}</td><td>${action.owner}</td><td><span class="badge ${action.status === "Completed" ? "blue" : "warning"}">${action.status}</span></td><td><button class="secondary-button" data-employee="${employee.id}">Open Profile</button></td></tr>`).join("") : '<tr><td colspan="6">No development actions in the selected scope.</td></tr>'}
-      </tbody></table></div>
-    `;
-  }
-  const visibleActivities = configData.activities.filter((activity) => {
-    const unitOk = el.businessFilter.value === "All permitted units" || activity.unit === el.businessFilter.value;
-    const teamOk = el.teamFilter.value === "All permitted teams" || activity.team === el.teamFilter.value;
-    return unitOk && teamOk;
-  });
-  return `
-    <div class="section-header"><div><h2>Culture Management</h2><p>Record team activities, technical sharing, summits and cross-team collaboration.</p></div><button class="primary-button" data-action="addActivity">Add Activity</button></div>
-    <div class="table-wrap"><table><thead><tr><th>Activity</th><th>Team</th><th>Date</th><th>Owner</th><th>Note</th><th></th></tr></thead><tbody>
-      ${visibleActivities.map((activity) => `<tr><td>${activity.type}</td><td>${activity.team}</td><td>${activity.date}</td><td>${activity.owner}</td><td>${activity.note}</td><td><button class="danger-button" data-action="deleteActivity" data-activity-id="${activity.id}">Delete</button></td></tr>`).join("") || '<tr><td colspan="6">No activities match this scope.</td></tr>'}
-    </tbody></table></div>
-  `;
-}
-
-function distributionRows(items, field) {
-  const counts = items.reduce((acc, item) => {
-    acc[item[field]] = (acc[item[field]] || 0) + 1;
-    return acc;
-  }, {});
-  return Object.entries(counts).map(([label, count]) => ({ label, count })).sort((a, b) => b.count - a.count);
-}
-
-function renderTeamReadiness() {
-  const scopedCapabilities = capabilitiesInScope();
-  const high = scopedCapabilities.filter((item) => item.severity === "High");
-  setHeader(
-    "Team Readiness",
-    "Can this team achieve its goals?",
-    `<button class="primary-button" data-action="generateAnalysis">Generate AI Analysis</button>
-     <button class="secondary-button" data-toast="Team readiness refreshed.">Refresh Analysis</button>
-     <button class="secondary-button" data-action="createLearningAction">Create Learning Action</button>`
-  );
-  el.content.innerHTML = `
-    <article class="ai-panel">
-      ${aiMeta("Team readiness assessment", "2026-07-14", "Team goals and evidence", high.length ? "High" : "Moderate", "Current")}
-      <h2>Can this team achieve its goals?</h2>
-      <p>${high.length ? `${high.length} high-severity gaps block goal readiness.` : "No high-severity gap is visible in this scope."}</p>
-      <div class="button-row"><button class="secondary-button" data-drawer="briefing">View Evidence</button></div>
-    </article>
-    ${renderPromptOutputs("teamReadiness")}
-    <section>
-      <div class="section-header"><div><h2>Goal Readiness Flow</h2><p>Goal → capability → coverage → gap → action.</p></div></div>
-      <div class="capability-flow">${scopedCapabilities.filter((item) => item.severity === "High").slice(0, 4).map(capabilityFlowItem).join("") || '<div class="empty-state"><h2>No high-severity risk</h2><p>Select another scope or refresh analysis.</p></div>'}</div>
-    </section>
-    <details class="quiet-details">
-      <summary>Recommended learning actions</summary>
-      <div class="table-wrap">${recommendationTable(scopedCapabilities)}</div>
-    </details>
-    <details class="quiet-details">
-      <summary>Detailed capability requirements and coverage</summary>
-      <div class="capability-list">${scopedCapabilities.map(capabilityItem).join("")}</div>
-    </details>
-  `;
-  bindDrawerButtons();
-}
-
-function renderTalentDevelopment() {
-  const scoped = employeesInScope();
-  const views = ["Requires Attention", "Promotion Review", "Retention Review", "Development Actions"];
-  const attention = talentReviewItems(scoped, state.developmentView);
-  setHeader(
-    "Talent & Development",
-    "Who requires development, review or talent action?",
-    `${currentRole().canAddTalentInsight ? '<button class="secondary-button" data-action="addTalentInsight">Add HRBP Record</button>' : ""}
-     <button class="primary-button" data-action="createTalentAction">Create Talent Action</button>`
-  );
-  el.content.innerHTML = `
-    <nav class="tabs" aria-label="Talent development views">${views.map((view) => `<button class="tab ${view === state.developmentView ? "active" : ""}" data-development-view="${view}">${view}</button>`).join("")}</nav>
-    <article class="ai-panel">
-      ${aiMeta("Talent review briefing", "2026-07-14", "Assigned coverage", "Moderate", "Current")}
-      <h2>${attention.length} people require review</h2>
-      <p>Prioritize employees with retention risk, promotion readiness evidence gaps or overdue development actions.</p>
-      <div class="button-row"><button class="secondary-button" data-drawer="briefing">View Evidence</button></div>
-    </article>
-    ${renderPromptOutputs("development")}
-    ${decisionList(attention.slice(0, 5))}
-    <details class="quiet-details">
-      <summary>View all review items (${attention.length})</summary>
-      <div class="table-wrap">${talentReviewTable(attention)}</div>
-    </details>
-  `;
-  document.querySelectorAll("[data-development-view]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.developmentView = button.dataset.developmentView;
-      renderPage();
-    });
-  });
-  document.querySelectorAll("[data-employee]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.selectedEmployee = button.dataset.employee;
-      state.page = "talent";
-      state.talentTab = "Overview";
-      renderNav();
-      renderPage();
-    });
-  });
-  bindDrawerButtons();
-}
-
-function talentReviewItems(scoped, view) {
-  return scoped
-    .filter((employee) => {
-      if (view === "Promotion Review") return employee.promotionReadiness !== "Not Ready";
-      if (view === "Retention Review") return employee.retentionRisk !== "Low";
-      if (view === "Development Actions") return employee.openActions > 0;
-      return employee.retentionRisk === "High" || employee.openActions > 0 || employee.promotionReadiness === "Potentially Ready in 6-12 Months";
-    })
-    .map((employee) => ({
-      employee,
-      label: employee.retentionRisk === "High" ? "Retention" : employee.openActions ? "Action" : "Promotion",
-      title: employee.name,
-      detail: `${employee.title}; ${employee.retentionRisk} retention risk; ${employee.openActions} open actions.`,
-      tone: employee.retentionRisk === "High" ? "danger" : employee.openActions ? "warning" : "blue",
-      status: employee.promotionReadiness,
-      evidence: employee.capabilities[0].evidenceQuality,
-      nextAction: employee.openActions ? "Review action evidence" : "Open employee profile",
-    }));
-}
-
-function talentReviewTable(items) {
-  return `
-    <table>
-      <thead><tr><th>Employee</th><th>Reason</th><th>Status</th><th>Evidence</th><th>Next action</th><th></th></tr></thead>
-      <tbody>
-        ${items.map((item) => `
-          <tr>
-            <td><strong>${item.employee.name}</strong><br><span class="muted">${item.employee.team}</span></td>
-            <td>${item.detail}</td>
-            <td>${item.status}</td>
-            <td>${item.evidence}</td>
-            <td>${item.nextAction}</td>
-            <td><button class="secondary-button" data-employee="${item.employee.id}">Open Profile</button></td>
-          </tr>
-        `).join("")}
-      </tbody>
-    </table>
-  `;
-}
-
-function capabilityFlowItem(capability) {
-  const coverage = capability.coverage.length ? capability.coverage.map((item) => `${item[0]} (${item[2]})`).join(", ") : "No validated coverage";
-  return `
-    <article class="flow-row">
-      <div><span>Goal</span><strong>${capability.goal}</strong></div>
-      <div><span>Capability</span><strong>${capability.name}</strong></div>
-      <div><span>Coverage</span><strong>${coverage}</strong></div>
-      <div><span>Gap</span><strong>${capability.gap}</strong></div>
-      <div><span>Action</span><strong>${capability.recommendation}</strong></div>
-    </article>
-  `;
-}
-
-function capabilityItem(capability) {
-  return `
-    <article class="capability-item">
-      <div><h3>${capability.name}</h3><p>${capability.category} · ${capability.team}</p><p class="muted">${capability.goal}</p></div>
-      <div><p><strong>Required:</strong> ${capability.requiredPeople} at ${capability.target}</p><p><strong>Current coverage:</strong> ${capability.coverage.length ? capability.coverage.map((item) => `${item[0]} (${item[2]})`).join(", ") : "No validated coverage"}</p><p><strong>Recommendation:</strong> ${capability.recommendation}</p></div>
-      <div><p><span class="badge ${capability.severity === "High" ? "danger" : "warning"}">${capability.gap}</span></p><p><span class="badge ai">AI Suggested</span></p><button class="secondary-button" data-drawer="cap-${capability.name}">View Evidence</button></div>
-    </article>
-  `;
-}
-
-function employeesForTeam(team) {
-  return employees.filter((employee) => !employee.archived && employee.team === team);
-}
-
-function employeesForUnit(unitName) {
-  return employees.filter((employee) => !employee.archived && employee.unit === unitName);
-}
-
-function teamLeadName(team) {
-  const lead = employeesForTeam(team).find((employee) => employee.level === "Team Lead");
-  return lead ? lead.name : `${team} Lead`;
-}
-
-function unitLeaderName(unit) {
-  const lead = employeesForUnit(unit.name).find((employee) => employee.level === "Team Lead");
-  return lead ? `${lead.name} / ${unit.type} Lead` : `${unit.name} Director`;
-}
-
-function renderOrganizationTree() {
-  const query = state.orgSearch.trim().toLowerCase();
-  const units = organization.businessUnits
-    .map((unit) => {
-      const teams = unit.teams
-        .map((team) => {
-          const members = employeesForTeam(team);
-          const matchingMembers = query ? members.filter((employee) => [employee.name, employee.number, employee.title].some((value) => value.toLowerCase().includes(query))) : members;
-          const teamMatches = !query || team.toLowerCase().includes(query) || matchingMembers.length;
-          return teamMatches ? { team, members: matchingMembers.length ? matchingMembers : members.slice(0, 4), total: members.length } : null;
-        })
-        .filter(Boolean);
-      const unitMatches = !query || unit.name.toLowerCase().includes(query) || unit.type.toLowerCase().includes(query) || teams.length;
-      return unitMatches ? { unit, teams } : null;
-    })
-    .filter(Boolean);
-
-  if (!units.length) return `<div class="empty-state"><h2>No organization match</h2><p>Search by employee, team or business unit.</p></div>`;
-
-  return `
-    <details class="org-root" open>
-      <summary>
-        <span>
-          <strong>${organization.centers[0]}</strong>
-          <small>${organization.businessUnits.length} business units · ${organization.businessUnits.reduce((sum, unit) => sum + unit.teams.length, 0)} teams · ${employees.filter((employee) => !employee.archived).length} employees</small>
-        </span>
-      </summary>
-      <div class="org-tree">
-        ${units.map(({ unit, teams }) => {
-          const unitCount = employeesForUnit(unit.name).length;
-          return `
-            <details class="org-node unit">
-              <summary>
-                <span>
-                  <strong>${unit.name}</strong>
-                  <small>${unit.type} · Leader: ${unitLeaderName(unit)} · ${unit.teams.length} teams · ${unitCount} employees</small>
-                </span>
-                <button class="ghost-button" data-drawer="unit-${unit.name}">Open Unit</button>
-              </summary>
-              <div class="org-children">
-                ${teams.map(({ team, members, total }) => `
-                  <details class="org-node team" ${query ? "open" : ""}>
-                    <summary>
-                      <span>
-                        <strong>${team}</strong>
-                        <small>Team Lead: ${teamLeadName(team)} · ${total} employees</small>
-                      </span>
-                      <button class="ghost-button" data-drawer="team-${team}">Open Team</button>
-                    </summary>
-                    <div class="org-people">
-                      ${members.map((employee) => `
-                        <button class="org-person" data-employee="${employee.id}">
-                          <strong>${employee.name}</strong>
-                          <span>${employee.number} · ${employee.title}</span>
-                        </button>
-                      `).join("")}
-                    </div>
-                  </details>
-                `).join("")}
-              </div>
-            </details>
-          `;
-        }).join("")}
-      </div>
-    </details>
-  `;
+function setHeader(title, actions = "") {
+  el.title.textContent = title;
+  el.actions.innerHTML = actions;
+  bindActions(el.actions);
 }
 
 function renderOrganization() {
-  setHeader("Organization", "Understand the complete Research Center structure at a glance.", `${currentRole().canEditOrg ? '<button class="primary-button" data-target="admin:Business Units & Teams">Edit Structure</button>' : ""}`);
+  setHeader(
+    "Organization Overview",
+    currentRole().canEditOrg ? `<button class="primary-button" data-action="settingsOrg">Manage Organization</button>` : ""
+  );
+  const people = state.people.filter(roleAllowsPerson);
   el.content.innerHTML = `
-    <section class="people-tools org-tools">
-      <div><label for="orgSearch">Search employee, team or business unit</label><input id="orgSearch" value="${state.orgSearch}" placeholder="Search organization" /></div>
-    </section>
-    <section class="org-panel">
-      ${renderOrganizationTree()}
+    <section class="org-tree">
+      ${renderRootNode(people)}
     </section>
   `;
-  const searchInput = document.querySelector("#orgSearch");
-  searchInput.addEventListener("input", () => {
-    state.orgSearch = searchInput.value;
-    renderPage();
-  });
-  bindEmployeeLinks();
-  bindDrawerButtons();
+  bindActions(el.content);
+  bindExpanders();
 }
 
-function renderAdministration() {
-  if (!currentRole().admin) {
-    state.page = "organization";
-    renderNav();
-    renderPage();
-    return;
-  }
-  setHeader("Administration", "Owner-only configuration and governance.", "");
-  el.content.innerHTML = `
-    <div class="admin-layout">
-      <nav class="admin-nav" aria-label="Administration navigation">${Object.entries(adminGroups).map(([group, items]) => `<h3>${group}</h3>${items.map((item) => `<button class="${item === state.adminSection ? "active" : ""}" data-admin="${item}">${item}</button>`).join("")}`).join("")}</nav>
-      <section class="admin-panel"><p class="eyebrow">Administration / ${adminGroupFor(state.adminSection)}</p><h2>${state.adminSection}</h2>${adminContent(state.adminSection)}</section>
+function renderRootNode(people) {
+  const rootOpen = state.expanded.root;
+  return `
+    <div class="tree-node root">
+      <button class="tree-summary root-summary" data-expand="root">
+        <span class="root-title-block">
+          <strong>Von Neumann Research Center</strong>
+          <small>Center Director: Rui Zhang</small>
+        </span>
+        <span class="root-metrics">
+          <span>${scopedUnits().length}<small>Business Units</small></span>
+          <span>${scopedTeams().length}<small>Teams</small></span>
+          <span>${people.length}<small>Employees</small></span>
+        </span>
+        <span class="tree-toggle">${rootOpen ? "Collapse" : "Expand"}</span>
+      </button>
+      ${rootOpen ? `<div class="tree-children root-children">${scopedUnits().map(renderUnitNode).join("")}</div>` : ""}
     </div>
   `;
-  document.querySelectorAll("[data-admin]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.adminSection = button.dataset.admin;
-      renderPage();
-    });
-  });
-  const adminSearchInput = document.querySelector("#adminSearch");
-  if (adminSearchInput) {
-    adminSearchInput.addEventListener("input", () => {
-      state.adminSearch = adminSearchInput.value;
-      renderPage();
-    });
-  }
-  bindActionButtons(el.content);
 }
 
-function adminGroupFor(section) {
-  return Object.entries(adminGroups).find(([, items]) => items.includes(section))[0];
-}
-
-function adminContent(section) {
-  if (section === "Business Units & Teams") {
-    return `<div class="button-row"><button class="primary-button" data-action="addBusinessUnit">Add Business Unit</button><button class="secondary-button" data-action="addTeam">Add Team</button></div><div class="table-wrap"><table><thead><tr><th>Unit</th><th>Type</th><th>Teams</th><th>People</th><th></th></tr></thead><tbody>${organization.businessUnits.map((unit) => `<tr><td>${unit.name}</td><td>${unit.type}</td><td>${unit.teams.length}</td><td>${employeesForUnit(unit.name).length}</td><td><button class="secondary-button" data-action="editBusinessUnit" data-unit="${unit.name}">Edit</button></td></tr>`).join("")}</tbody></table></div>`;
-  }
-  if (section === "Employee Transfers") {
-    return `<p>Move an employee between permitted teams while preserving profile history.</p><div class="button-row"><button class="primary-button" data-action="transferEmployee">Transfer Employee</button></div>${transferPreview()}`;
-  }
-  if (section === "Add Employee") {
-    return `<p>Create one employee record and preserve audit history.</p><div class="button-row"><button class="primary-button" data-action="addEmployee">Add Employee</button></div>`;
-  }
-  if (section === "Import Employees") {
-    return `<p>Import employees in bulk with validation before records become active.</p><div class="button-row"><button class="primary-button" data-action="importEmployees">Import Employees</button></div>`;
-  }
-  if (section === "Archive Employee") {
-    return `<p>Archive an active employee while preserving records.</p><div class="button-row"><button class="danger-button" data-action="archiveEmployee">Archive Selected Employee</button></div>`;
-  }
-  if (section === "Former Employees") {
-    const archived = employees.filter((employee) => employee.archived);
-    return `<p>${archived.length} archived employee records.</p><div class="table-wrap"><table><thead><tr><th>Name</th><th>Number</th><th>Team</th><th>Reason</th></tr></thead><tbody>${archived.map((employee) => `<tr><td>${employee.name}</td><td>${employee.number}</td><td>${employee.team}</td><td>${employee.archive?.reason || "Archived"}</td></tr>`).join("") || '<tr><td colspan="4">No former employees yet.</td></tr>'}</tbody></table></div>`;
-  }
-  if (section === "Export Employees") {
-    return `<p>Export employee data for authorized operational review.</p><div class="button-row"><button class="primary-button" data-action="exportEmployees">Export Employees</button></div>`;
-  }
-  if (["User Accounts", "Role Assignment", "Scope Assignment", "HRBP Coverage"].includes(section)) {
-    return accessContent(section);
-  }
-  if (section === "Talent Tags") {
-    return configTable("talentTags", "Talent Tag");
-  }
-  if (section === "Awards") {
-    return configTable("awards", "Award");
-  }
-  if (section === "Talent Action Types") {
-    return configTable("talentActionTypes", "Talent Action Type");
-  }
-  if (section === "Activity Types") {
-    return configTable("activityTypes", "Activity Type");
-  }
-  return `<div class="empty-state"><h2>${section} is unavailable in this test build</h2><p>This item is hidden from normal workflows until implementation is complete.</p></div>`;
-}
-
-function accessContent(section) {
-  return `<p>${section} is editable for Owner role testing.</p><div class="table-wrap"><table><thead><tr><th>User</th><th>Role</th><th>Scope</th><th>Status</th></tr></thead><tbody>${configData.users.map((user) => `<tr><td>${user.name}</td><td>${user.role}</td><td>${user.scope}</td><td>${user.active ? "Active" : "Inactive"}</td></tr>`).join("")}</tbody></table></div><div class="button-row"><button class="primary-button" data-action="addUserAccount">Add User</button></div>`;
-}
-
-function configTable(key, label) {
-  const query = state.adminSearch.trim().toLowerCase();
-  const rows = configData[key].filter((item) => !query || item.name.toLowerCase().includes(query));
+function renderUnitNode(unit) {
+  if (!matchesOrg(unit)) return "";
+  const employees = state.people.filter((person) => person.unitId === unit.id && roleAllowsPerson(person));
+  const open = state.expanded[unit.id];
+  const teams = unit.teams.filter((team) => scopedTeams().some((scoped) => scoped.id === team.id));
   return `
-    <section class="people-tools org-tools"><div><label for="adminSearch">Search ${label}</label><input id="adminSearch" value="${state.adminSearch}" placeholder="Search ${label.toLowerCase()}" /></div></section>
-    <div class="button-row"><button class="primary-button" data-action="addConfigItem" data-config-key="${key}" data-config-label="${label}">Add ${label}</button></div>
-    <div class="table-wrap"><table><thead><tr><th>Name</th><th>Status</th><th>Affected records</th><th></th></tr></thead><tbody>${rows.map((item) => `<tr><td>${item.name}</td><td>${item.active ? "Active" : "Inactive"}</td><td>${affectedCount(key, item.name)}</td><td><button class="secondary-button" data-action="editConfigItem" data-config-key="${key}" data-config-id="${item.id}" data-config-label="${label}">Edit</button><button class="secondary-button" data-action="deactivateConfigItem" data-config-key="${key}" data-config-id="${item.id}">${item.active ? "Deactivate" : "Activate"}</button><button class="danger-button" data-action="deleteConfigItem" data-config-key="${key}" data-config-id="${item.id}">Delete</button></td></tr>`).join("")}</tbody></table></div>
+    <div class="tree-node">
+      <button class="tree-summary" data-expand="${unit.id}">
+        <span><strong>${unit.name}</strong><small>${unit.type} · Leader: ${unit.leader} · ${teams.length} Teams · ${employees.length} employees</small></span>
+        <span>${open ? "Collapse" : "Expand"}</span>
+      </button>
+      ${open ? `<div class="tree-children">${teams.map((team) => renderTeamNode(unit, team)).join("")}</div>` : ""}
+    </div>
   `;
 }
 
-function affectedCount(key, name) {
-  if (key === "talentTags") return employees.filter((employee) => employee.tags.includes(name)).length;
-  if (key === "awards") return employees.filter((employee) => employee.awards.includes(name)).length;
-  if (key === "talentActionTypes") return employees.flatMap((employee) => employee.actions).filter((action) => action.type === name).length;
-  return 0;
+function renderTeamNode(unit, team) {
+  const employees = state.people.filter((person) => person.teamId === team.id && roleAllowsPerson(person));
+  if (!matchesOrg(unit, team, employees)) return "";
+  const open = state.expanded[team.id];
+  return `
+    <div class="tree-node team">
+      <button class="tree-summary" data-expand="${team.id}">
+        <span><strong>${team.name}</strong><small>Team Lead: ${team.lead || "Unassigned"} · ${employees.length} employees</small></span>
+        <span>${open ? "Collapse" : "Expand"}</span>
+      </button>
+      ${open ? `<div class="people-rows">${employees.map((person) => `
+        <button class="person-row" data-open-employee="${person.id}">
+          <strong>${person.name}</strong><span>${person.title}</span><span>${person.number}</span>
+        </button>`).join("")}</div>` : ""}
+    </div>
+  `;
 }
 
-function transferPreview() {
-  return `<div class="table-wrap"><table><thead><tr><th>Recent employee</th><th>Current team</th><th>Business unit</th></tr></thead><tbody>${employeesInScope().slice(0, 5).map((employee) => `<tr><td>${employee.name}</td><td>${employee.team}</td><td>${employee.unit}</td></tr>`).join("")}</tbody></table></div>`;
+function matchesOrg(unit, team, employees = []) {
+  const q = state.filters.search.trim().toLowerCase();
+  if (!q) return true;
+  return unit.name.toLowerCase().includes(q)
+    || team?.name.toLowerCase().includes(q)
+    || employees.some((person) => person.name.toLowerCase().includes(q) || person.number.toLowerCase().includes(q));
 }
 
-function yesNo(value) {
-  return value ? '<span class="badge blue">Allowed</span>' : '<span class="badge">Read-only or hidden</span>';
+function bindExpanders() {
+  document.querySelectorAll("[data-expand]").forEach((button) => button.addEventListener("click", () => {
+    const key = button.dataset.expand;
+    state.expanded[key] = !state.expanded[key];
+    renderOrganization();
+  }));
 }
 
-function bindDrawerButtons() {
-  document.querySelectorAll("[data-drawer]").forEach((button) => button.addEventListener("click", () => openDrawer(button.dataset.drawer)));
-  bindToastButtons(document);
-  bindActionButtons(document);
-  bindNavigationButtons(document);
+function renderPeople() {
+  setHeader(
+    "People Library",
+    `${currentRole().canAddEmployee ? `<button class="primary-button" data-action="addEmployee">Add Employee</button>` : ""}`
+  );
+  const people = scopedPeople();
+  el.content.innerHTML = `
+    <section class="people-layout">
+      <div class="people-main">
+        <div class="people-grid">
+          ${people.slice(0, 60).map(personCard).join("") || empty("No employees found", "Adjust search or filters.")}
+        </div>
+      </div>
+      ${peopleFacetPanel()}
+    </section>
+  `;
+  bindFilters();
+  bindActions(el.content);
 }
 
-function bindNavigationButtons(root) {
-  root.querySelectorAll("[data-target]").forEach((button) => {
-    if (button.dataset.targetBound) return;
-    button.dataset.targetBound = "true";
-    button.addEventListener("click", () => openTarget(button.dataset.target));
+function peopleFacetPanel() {
+  const base = state.people.filter(roleAllowsPerson);
+  const unitContext = peopleForFacet("unit");
+  const teamContext = peopleForFacet("team");
+  const contractContext = peopleForFacet("contract");
+  const tagContext = peopleForFacet("tag");
+  const visibleTeams = state.filters.unit === "All" ? scopedTeams() : scopedTeams().filter((team) => team.unitId === state.filters.unit);
+  return `
+    <aside class="people-filter-panel" aria-label="People filters">
+      <div class="filter-panel-header">
+        <h2>Filters</h2>
+        <button class="secondary-button compact-button" data-filter-reset>Reset</button>
+      </div>
+      ${inputFilter("Search", "search", state.filters.search)}
+      <div class="facet-section">
+        <h3>Business Unit</h3>
+        ${scopedUnits().map((unit) => {
+          const unitPeople = unitContext.filter((person) => person.unitId === unit.id);
+          return facetButton("unit", unit.id, unit.name, unitPeople.length);
+        }).join("")}
+      </div>
+      <div class="facet-section">
+        <h3>Team</h3>
+        ${visibleTeams.map((team) => {
+          const teamPeople = teamContext.filter((person) => person.teamId === team.id && (state.filters.unit === "All" || person.unitId === state.filters.unit));
+          return facetButton("team", team.id, team.name, teamPeople.length);
+        }).join("")}
+      </div>
+      <div class="facet-section">
+        <h3>Contract Type</h3>
+        ${contracts.map((contract) => facetButton("contract", contract, contract, contractContext.filter((person) => person.contract === contract).length)).join("")}
+      </div>
+      <div class="facet-section">
+        <h3>Talent Tag</h3>
+        ${active("tags").map((tag) => facetButton("tag", tag.name, tag.name, tagContext.filter((person) => person.tags.includes(tag.name)).length)).join("")}
+      </div>
+    </aside>
+  `;
+}
+
+function peopleForFacet(excludeKey) {
+  return state.people.filter(roleAllowsPerson).filter((person) => {
+    const { search, unit, team, contract, tag } = state.filters;
+    const query = search.trim().toLowerCase();
+    return (!query || person.name.toLowerCase().includes(query) || person.number.toLowerCase().includes(query))
+      && (excludeKey === "unit" || unit === "All" || person.unitId === unit)
+      && (excludeKey === "team" || team === "All" || person.teamId === team)
+      && (excludeKey === "contract" || contract === "All" || person.contract === contract)
+      && (excludeKey === "tag" || tag === "All" || person.tags.includes(tag));
   });
 }
 
-function openTarget(target) {
-  const [type, id, tab] = target.split(":");
-  if (type === "employee") {
-    state.selectedEmployee = id;
-    state.page = "talent";
-    state.talentTab = tab || "Overview";
-  }
-  if (type === "team") {
-    const employee = employees.find((item) => item.team === id && !item.archived);
-    const unit = employee?.unit || allowedBusinessUnits()[0];
-    el.businessFilter.value = unit;
-    renderFilters(false);
-    el.teamFilter.value = id;
-    state.page = "talentTeam";
-    state.talentTeamView = normalizeDevelopmentTab(tab);
-  }
-  if (type === "unit") {
-    el.businessFilter.value = id;
-    renderFilters(false);
-    state.page = "organization";
-    state.orgSearch = id;
-  }
-  if (type === "admin" && currentRole().admin) {
-    state.page = "administration";
-    state.adminSection = id;
-  }
-  renderNav();
-  renderPage();
+function facetButton(key, value, label, count, note = "") {
+  const active = state.filters[key] === value;
+  return `
+    <button class="facet-button ${active ? "active" : ""}" data-filter-set="${key}" data-filter-value="${escapeAttr(value)}">
+      <span>${label}</span>
+      <strong>${count}</strong>
+      ${note ? `<small>${note}</small>` : ""}
+    </button>
+  `;
 }
 
-function normalizeDevelopmentTab(tab) {
-  if (!tab || tab === "Team Plan") return "Team/Lab Development";
-  if (tab === "Talent Review") return "People Insights";
-  if (tab === "Team Activities") return "Culture Management";
-  return tab;
+function personCard(person) {
+  const team = teamById(person.teamId);
+  const statusBadge = person.retentionRisk === "High"
+    ? `<span class="badge danger">Attention</span>`
+    : person.actions.some((action) => action.status !== "Completed")
+      ? `<span class="badge warning">Open</span>`
+      : "";
+  return `
+    <article class="person-card">
+      <header>
+        <div><h3>${person.name}</h3><p>${person.number}</p></div>
+        ${statusBadge}
+      </header>
+      <dl class="facts">
+        <div><dt>Job title</dt><dd>${person.title}</dd></div>
+        <div><dt>Team</dt><dd>${team.name}</dd></div>
+        <div><dt>Tenure</dt><dd>${tenure(person.startDate)}</dd></div>
+        <div><dt>Contract</dt><dd>${person.contract}</dd></div>
+      </dl>
+      <div class="tags recognition-tags">${person.tags.slice(0, 2).map((tag) => `<span class="badge">${tag}</span>`).join("")}${person.awards[0] ? `<span class="badge blue">${person.awards[0]}</span>` : ""}</div>
+      <button class="secondary-button" data-open-employee="${person.id}">Open Profile</button>
+    </article>
+  `;
 }
 
-function bindToastButtons(root) {
-  root.querySelectorAll("[data-toast]").forEach((button) => {
-    if (button.dataset.toastBound) return;
-    button.dataset.toastBound = "true";
-    button.addEventListener("click", () => showToast(button.dataset.toast));
-  });
+function renderTalent() {
+  setHeader("Team Management");
+  const tabs = ["Team Plan", "Development Actions", "Team Activities"];
+  if (!tabs.includes(state.talentTab)) state.talentTab = "Team Plan";
+  el.content.innerHTML = `
+    <section class="filters">
+      ${selectFilter("Business Unit", "unit", [["All", "All Business Units"], ...scopedUnits().map((u) => [u.id, u.name])])}
+      ${selectFilter("Team", "team", [["All", "All Teams"], ...scopedTeams().map((t) => [t.id, t.name])])}
+    </section>
+    <nav class="tabs">${tabs.map((tab) => `<button class="tab ${state.talentTab === tab ? "active" : ""}" data-talent-tab="${tab}">${tab}</button>`).join("")}</nav>
+    <section>${renderTalentTab()}</section>
+  `;
+  bindFilters();
+  document.querySelectorAll("[data-talent-tab]").forEach((button) => button.addEventListener("click", () => {
+    state.talentTab = button.dataset.talentTab;
+    render();
+  }));
+  bindActions(el.content);
 }
 
-function bindActionButtons(root) {
-  root.querySelectorAll("[data-action]").forEach((button) => {
-    if (button.dataset.actionBound) return;
-    button.dataset.actionBound = "true";
-    button.addEventListener("click", () => {
-    if (button.dataset.action === "closeDrawer") {
-      closeDrawer();
-      return;
-    }
-    state.actionContext = { ...button.dataset };
-    openActionDrawer(button.dataset.action);
+function renderTalentTab() {
+  if (state.talentTab === "Team Plan") return renderTeamPlan();
+  if (state.talentTab === "Development Actions") return renderActions();
+  return renderActivities();
+}
+
+function selectedTeamId() {
+  return state.filters.team !== "All" ? state.filters.team : scopedTeams()[0]?.id;
+}
+
+function renderTeamPlan() {
+  const teamId = selectedTeamId();
+  const plan = state.teamPlans[teamId] || { situation: "", goal: "", gap: "", work: "", history: [] };
+  const planHistory = sortRecordsDesc((plan.history || []).map((record, index) => ({ ...record, sourceIndex: index })));
+  const isEditing = state.editingTeamPlanId === teamId;
+  const editingRecord = state.editingTeamPlanRecordId ? (plan.history || []).find((record) => record.id === state.editingTeamPlanRecordId) : null;
+  const editingValues = editingRecord ? planRecordData(editingRecord) : { situation: "", goal: "", gap: "", work: "", startDate: "", endDate: "" };
+  const canEdit = currentRole().canCreateAction || currentRole().canEditOrg;
+  return `
+    <div class="team-plan-stack">
+      <article class="panel">
+        <div class="section-header"><h2>${teamById(teamId)?.name || "Selected Team"} Plan</h2>${canEdit ? `<div class="section-actions"><button class="${isEditing ? "secondary-button" : "primary-button"}" data-action="${isEditing ? "cancelTeamPlanEdit" : "editTeamPlan"}">${isEditing ? "Cancel" : "Add Plan"}</button></div>` : ""}</div>
+        ${isEditing ? `<div class="form-grid team-plan-form">
+          ${textarea("Current Situation", "situation", editingValues.situation, !canEdit)}
+          ${textarea("Goal", "goal", editingValues.goal, !canEdit)}
+          ${textarea("Gap", "gap", editingValues.gap, !canEdit)}
+          ${textarea("Major Work / Action", "work", editingValues.work, !canEdit)}
+          ${field("Start date", "startDate", editingValues.startDate || currentDate(), "date")}
+          ${field("End date", "endDate", editingValues.endDate || "2026-12-31", "date")}
+          <div class="form-actions"><button class="primary-button" data-action="saveTeamPlan">Save Plan</button></div>
+        </div>` : ""}
+      </article>
+      <article class="panel">
+        <div class="section-header"><h2>Plan Details</h2></div>
+        ${planHistory.length ? planTimeline(teamId, planHistory) : empty("No plan history", "Save the team plan to create a dated record.")}
+      </article>
+      ${renderAiInsight("team", teamId)}
+    </div>
+  `;
+}
+
+function renderTalentReview() {
+  const rows = scopedPeople().filter((person) => person.retentionRisk !== "Low" || person.promotionReadiness !== "Not ready" || person.tags.includes("Key Person")).slice(0, 30);
+  return `<div class="table-wrap"><table><thead><tr><th>Employee</th><th>Reason</th><th>Status</th><th>Evidence Quality</th><th>Required Action</th></tr></thead><tbody>${rows.map((person) => `
+    <tr data-open-employee="${person.id}"><td><strong>${person.name}</strong><br>${person.number}</td><td>${person.retentionRisk !== "Low" ? "Retention Risk" : person.tags.includes("Key Person") ? "Key Person" : "Promotion Readiness"}</td><td>${person.retentionRisk} / ${safeTalent(person.promotionReadiness)}</td><td>${person.records.length >= 2 ? "Moderate" : "Limited"}</td><td>${person.actions[0]?.description || "Request additional evidence"}</td></tr>`).join("")}</tbody></table></div>`;
+}
+
+function renderActions() {
+  state.teamActions = state.teamActions || [];
+  const scopedTeamIds = new Set(scopedTeams().map((team) => team.id));
+  const selectedTeam = state.filters.team === "All" ? "" : state.filters.team;
+  const teamActionRows = state.teamActions.filter((action) => scopedTeamIds.has(action.teamId) && (!selectedTeam || action.teamId === selectedTeam));
+  const canCreate = currentRole().canCreateAction;
+  return `
+    <div class="development-action-stack">
+      <article class="panel">
+        <div class="section-header"><h2>Team Development Actions</h2>${canCreate ? `<button class="primary-button" data-action="createTeamAction">Add Team Action</button>` : ""}</div>
+        <div class="table-wrap"><table><thead><tr><th>Team</th><th>Type</th><th>Status</th><th>Time Period</th><th>Owner</th><th>Description</th><th></th></tr></thead><tbody>${teamActionRows.map((action) => `
+          <tr><td>${teamById(action.teamId)?.name || "Unknown"}</td><td>${action.type}</td><td><span class="status-pill ${action.status === "Completed" ? "done" : ""}">${action.status}</span></td><td>${action.startDate || "Not set"} - ${action.due}</td><td>${action.owner}</td><td>${action.description}</td><td>${action.status === "Completed" ? "" : `<button class="secondary-button action-table-button" data-action="completeTeamAction" data-action-id="${action.id}">Complete</button>`}</td></tr>`).join("") || `<tr><td colspan="7">No team development actions in this scope.</td></tr>`}</tbody></table></div>
+      </article>
+    </div>
+  `;
+}
+
+function renderActivities() {
+  return `
+    <div class="section-header"><h2>Team Activities</h2><button class="primary-button" data-action="addActivity">Add Activity</button></div>
+    <div class="table-wrap"><table><thead><tr><th>Activity type</th><th>Team</th><th>Date</th><th>Participants</th><th>Description</th></tr></thead><tbody>${state.activities.map((activity) => `
+      <tr><td>${activity.type}</td><td>${teamById(activity.teamId)?.name || "Unknown"}</td><td>${activity.date}</td><td>${activity.participants}</td><td>${activity.description}</td></tr>`).join("")}</tbody></table></div>
+  `;
+}
+
+function renderSettings() {
+  setHeader("Settings");
+  const sections = ["Organization", "People Operations", "Access & Roles", "Talent Configuration", "System"];
+  el.content.innerHTML = `
+    <section class="settings-layout">
+      <nav class="settings-nav">${sections.map((section) => `<button class="${state.settingsSection === section ? "active" : ""}" data-settings="${section}">${section}</button>`).join("")}</nav>
+      <div class="panel">${renderSettingsSection()}</div>
+    </section>
+  `;
+  document.querySelectorAll("[data-settings]").forEach((button) => button.addEventListener("click", () => {
+    state.settingsSection = button.dataset.settings;
+    render();
+  }));
+  bindActions(el.content);
+}
+
+function renderSettingsSection() {
+  if (state.settingsSection === "Organization") {
+    return `
+      <div class="section-header"><h2>Organization</h2><div class="section-actions"><button class="secondary-button settings-action-button" data-action="addUnit">Add Business Unit</button><button class="secondary-button settings-action-button" data-action="addTeam">Add Team</button><button class="secondary-button settings-action-button" data-action="transferEmployee">Employee Transfer</button></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Business Unit</th><th>Type</th><th>Leader</th><th>Teams</th><th>Employees</th><th></th></tr></thead><tbody>${state.units.map((unit) => `<tr><td>${unit.name}</td><td>${unit.type}</td><td>${unit.leader}</td><td>${unit.teams.length}</td><td>${state.people.filter((p) => p.unitId === unit.id).length}</td><td><button class="secondary-button" data-action="editUnit" data-unit="${unit.id}">Edit</button></td></tr>`).join("")}</tbody></table></div>
+    `;
+  }
+  if (state.settingsSection === "People Operations") {
+    return `<div class="button-grid"><button class="secondary-button settings-action-button" data-action="addEmployee">Add Employee</button><button class="secondary-button settings-action-button" data-action="importEmployees">Bulk Import</button><button class="secondary-button settings-action-button" data-action="bulkArchiveEmployees">Bulk Archive</button><button class="secondary-button settings-action-button" data-action="exportEmployees">Export Employees</button></div><h2>Former Employee Archive</h2><p>${state.archived.length} archived employees retained with historical records.</p>`;
+  }
+  if (state.settingsSection === "Access & Roles") {
+    return `<h2>Role definitions</h2><div class="table-wrap"><table><thead><tr><th>Role</th><th>Access scope</th><th>Assigned people</th><th></th></tr></thead><tbody>${Object.entries(roles).map(([key, role]) => `<tr><td>${role.label}</td><td>${roleAccessScopeText(key)}</td><td>${roleAssigneeText(key)}</td><td><button class="secondary-button" data-action="editRole" data-role-key="${key}">Edit</button></td></tr>`).join("")}</tbody></table></div>`;
+  }
+  if (state.settingsSection === "Talent Configuration") {
+    return `<div class="config-grid">${configTable("tags", "Talent Tags")}${configTable("awards", "Awards")}${configTable("actionTypes", "Talent Action Types")}${configTable("activityTypes", "Activity Types")}</div>`;
+  }
+  return `<div class="button-grid"><button class="secondary-button" data-action="language">Language: ${state.system?.language || "English"}</button><button class="secondary-button" data-action="appearance">Appearance: ${state.system?.appearance || "Light"}</button><button class="secondary-button" data-action="exportData">Export mock data</button><button class="secondary-button" data-action="importData">Import mock data</button><button class="danger-button" data-action="resetData">Data reset for prototype</button></div>`;
+}
+
+function configTable(key, title) {
+  return `<article><div class="section-header"><h2>${title}</h2><button class="primary-button" data-action="addConfig" data-config="${key}">Add</button></div><table><tbody>${state.config[key].map((item, index) => `<tr><td>${item.name}</td><td>${item.active ? "Active" : "Inactive"}</td><td><span class="config-actions"><button class="text-button" data-action="toggleConfig" data-config="${key}" data-index="${index}">${item.active ? "Deactivate" : "Activate"}</button>${item.active ? "" : `<button class="text-danger-button" data-action="deleteConfig" data-config="${key}" data-index="${index}">Delete</button>`}</span></td></tr>`).join("")}</tbody></table></article>`;
+}
+
+function roleForm(roleKey) {
+  const role = roles[roleKey];
+  const assignments = state.roleAssignments?.[roleKey] || [];
+  openDrawer("Edit Role Access", "Access & Roles", `
+    <form id="roleForm" class="form-grid">
+      ${field("Role label", "label", role.label)}
+      ${field("Access scope description", "scope", role.scope)}
+      <section class="profile-section full">
+        <div class="section-header"><h2>Permissions</h2></div>
+        <div class="permission-grid">
+          ${permissionCheckbox("canAddManagerRecord", "Add manager records", role.canAddManagerRecord)}
+          ${permissionCheckbox("canAddHrbpInsight", "Add HRBP insights", role.canAddHrbpInsight)}
+          ${permissionCheckbox("canEditTalentJudgment", "Edit talent judgment", role.canEditTalentJudgment)}
+          ${permissionCheckbox("canCreateAction", "Create team/employee actions", role.canCreateAction)}
+          ${permissionCheckbox("canExport", "Export employees/data", role.canExport)}
+          ${permissionCheckbox("canEditOrg", "Edit organization", role.canEditOrg)}
+          ${permissionCheckbox("canAddEmployee", "Add employees", role.canAddEmployee)}
+          ${permissionCheckbox("canArchiveEmployee", "Archive employees", role.canArchiveEmployee)}
+        </div>
+      </section>
+      <section class="profile-section full">
+        <div class="section-header"><h2>Assigned People</h2><button class="secondary-button compact-button" type="button" data-action="addRoleAssignment" data-role-key="${roleKey}">Add Person</button></div>
+        ${assignments.length ? `<div class="assignment-list">${assignments.map((assignment, index) => roleAssignmentRow(roleKey, assignment, index)).join("")}</div>` : `<div class="empty-state"><h2>No assigned people</h2><p>Add people so this role has clear ownership and scope.</p></div>`}
+      </section>
+      <div class="form-actions"><button class="primary-button">Save Role</button></div>
+    </form>
+  `);
+  bindActions(el.drawerBody);
+  document.querySelector("#roleForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const form = event.target;
+    const fields = form.elements;
+    role.label = fields.label.value;
+    role.scope = fields.scope.value;
+    ["canAddManagerRecord", "canAddHrbpInsight", "canEditTalentJudgment", "canCreateAction", "canExport", "canEditOrg", "canAddEmployee", "canArchiveEmployee"].forEach((key) => {
+      role[key] = Boolean(fields[key]?.checked);
     });
+    el.roleSelect.innerHTML = roleKeys.map((key) => `<option value="${key}">${roles[key].label}</option>`).join("");
+    el.roleSelect.value = state.role;
+    closeDrawer(true);
+    toast("Role access updated.");
+    render();
   });
 }
 
-function openDrawer(kind) {
-  el.drawerEyebrow.textContent = "Evidence and explainability";
-  el.drawerTitle.textContent = "Evidence details";
-  el.drawerBody.innerHTML = drawerContent(kind);
-  el.drawerBackdrop.hidden = false;
-  el.drawer.classList.add("open");
-  el.drawer.setAttribute("aria-hidden", "false");
-  bindToastButtons(el.drawerBody);
-  bindActionButtons(el.drawerBody);
-  bindNavigationButtons(el.drawerBody);
+function roleAssigneeText(roleKey) {
+  const assignments = state.roleAssignments?.[roleKey] || [];
+  return assignments.length ? assignments.map((assignment) => state.people.find((person) => person.id === assignment.personId)?.name).filter(Boolean).join(", ") : "No assigned people";
 }
 
-function openActionDrawer(action) {
-  const employee = employees.find((item) => item.id === state.selectedEmployee) || employees[0];
-  const titles = {
-    addEmployee: "Add Employee",
-    importEmployees: "Import Employees",
-    exportEmployees: "Export Employees",
-    editEmployee: "Edit Employee",
-    addManagerRecord: "Add Manager Record",
-    addTalentInsight: "Add HRBP Record",
-    createTalentAction: "Create Talent Action",
-    createLearningAction: "Create Learning Action",
-    archiveEmployee: "Archive Employee",
-    generateAnalysis: "Generate AI Analysis",
-    promptAI: "Generate AI Intelligence",
-    addBusinessUnit: "Add Business Unit",
-    editBusinessUnit: "Edit Business Unit",
-    addTeam: "Add Team",
-    transferEmployee: "Transfer Employee",
-    addConfigItem: `Add ${state.actionContext.configLabel || "Configuration Item"}`,
-    editConfigItem: `Edit ${state.actionContext.configLabel || "Configuration Item"}`,
-    deactivateConfigItem: "Change Configuration Status",
-    deleteConfigItem: "Delete Configuration Item",
-    addUserAccount: "Add User Account",
-    addActivity: "Add Culture Activity",
-    deleteActivity: "Delete Culture Activity",
-    confirmTalentAction: "Confirm Development Action",
-  };
-  el.drawerEyebrow.textContent = "Workflow";
-  el.drawerTitle.textContent = titles[action] || "Action";
-  el.drawerBody.innerHTML = actionDrawerContent(action, employee);
-  el.drawerBackdrop.hidden = false;
-  el.drawer.classList.add("open");
-  el.drawer.setAttribute("aria-hidden", "false");
-  bindToastButtons(el.drawerBody);
-  bindActionButtons(el.drawerBody);
-  const form = el.drawerBody.querySelector("form[data-action-form]");
-  if (form) {
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      handleActionSubmit(action, form);
-    });
-    const submitButton = form.querySelector("[data-action-submit]");
-    if (submitButton) {
-      submitButton.addEventListener("click", (event) => {
-        event.preventDefault();
-        if (form.reportValidity && !form.reportValidity()) return;
-        handleActionSubmit(action, form);
+function roleAccessScopeText(roleKey) {
+  const assignments = state.roleAssignments?.[roleKey] || [];
+  if (!assignments.length) return roles[roleKey].scope;
+  return assignments.map((assignment) => {
+    const person = state.people.find((item) => item.id === assignment.personId);
+    const unitText = assignment.units === "all" ? "All labs" : assignment.units.join(", ");
+    const teamText = assignment.teams === "all" ? "All teams" : assignment.teams.join(", ");
+    return `${person?.name || "Unassigned"}: ${unitText} / ${teamText}`;
+  }).join("<br>");
+}
+
+function roleAssignmentRow(roleKey, assignment, index) {
+  const person = state.people.find((item) => item.id === assignment.personId);
+  const unitText = assignment.units === "all" ? "All labs" : assignment.units.join(", ");
+  const teamText = assignment.teams === "all" ? "All teams" : assignment.teams.join(", ");
+  return `<article class="assignment-row"><div><strong>${person?.name || "Unknown person"}</strong><small>${person?.number || ""}</small></div><div><span>Labs</span><p>${unitText}</p></div><div><span>Teams</span><p>${teamText}</p></div><span class="assignment-actions"><button class="text-button" type="button" data-action="editRoleAssignment" data-role-key="${roleKey}" data-index="${index}">Edit Scope</button><button class="text-danger-button" type="button" data-action="removeRoleAssignment" data-role-key="${roleKey}" data-index="${index}">Remove</button></span></article>`;
+}
+
+function roleAssignmentForm(roleKey, index = -1) {
+  const assignment = index >= 0 ? state.roleAssignments?.[roleKey]?.[index] : null;
+  const isEdit = Boolean(assignment);
+  openDrawer(isEdit ? "Edit Role Scope" : "Assign Person to Role", "Access & Roles", `
+    <form id="roleAssignmentForm" class="form-grid">
+      ${selectField("Person", "personId", state.people.map((person) => [person.id, `${person.name} (${person.number})`]), assignment?.personId)}
+      <section class="profile-section full">
+        <div class="section-header"><h2>Lab Scope</h2><label class="inline-check"><input type="checkbox" name="allUnits" ${assignment?.units === "all" ? "checked" : ""} />All labs</label></div>
+        <div class="permission-grid">${state.units.map((unit) => checkboxField("units", unit.name, unit.name, assignment?.units === "all" || assignment?.units?.includes(unit.name), { unit: unit.name })).join("")}</div>
+      </section>
+      <section class="profile-section full">
+        <div class="section-header"><h2>Team Scope</h2><label class="inline-check"><input type="checkbox" name="allTeams" ${assignment?.teams === "all" ? "checked" : ""} />All teams in scoped labs</label></div>
+        <div class="permission-grid">${state.units.flatMap((unit) => unit.teams.map((team) => checkboxField("teams", team.name, `${unit.name} / ${team.name}`, assignment?.teams === "all" || assignment?.teams?.includes(team.name), { unit: unit.name }))).join("")}</div>
+      </section>
+      <div class="form-actions"><button class="primary-button">${isEdit ? "Save Scope" : "Assign Person"}</button></div>
+    </form>
+  `);
+  bindAssignmentScopeControls(document.querySelector("#roleAssignmentForm"));
+  document.querySelector("#roleAssignmentForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const form = event.target;
+    const fields = form.elements;
+    state.roleAssignments = state.roleAssignments || {};
+    state.roleAssignments[roleKey] = state.roleAssignments[roleKey] || [];
+    const nextAssignment = {
+      personId: fields.personId.value,
+      units: fields.allUnits.checked ? "all" : checkedValues(form, "units"),
+      teams: fields.allTeams.checked ? "all" : checkedValues(form, "teams"),
+    };
+    if (isEdit) state.roleAssignments[roleKey][index] = nextAssignment;
+    else state.roleAssignments[roleKey].push(nextAssignment);
+    save();
+    toast(isEdit ? "Role scope updated." : "Person assigned to role.");
+    roleForm(roleKey);
+  });
+}
+
+function removeRoleAssignment(roleKey, index) {
+  const assignments = state.roleAssignments?.[roleKey];
+  if (!assignments) return;
+  assignments.splice(index, 1);
+  save();
+  toast("Role assignment removed.");
+  roleForm(roleKey);
+}
+
+function permissionCheckbox(name, label, checked) {
+  return `<label class="inline-check"><input type="checkbox" name="${name}" ${checked ? "checked" : ""} />${label}</label>`;
+}
+
+function checkboxField(name, value, label, checked, data = {}) {
+  const dataAttrs = Object.entries(data).map(([key, val]) => `data-${key}="${escapeAttr(val)}"`).join(" ");
+  return `<label class="inline-check"><input type="checkbox" name="${name}" value="${escapeAttr(value)}" ${dataAttrs} ${checked ? "checked" : ""} />${label}</label>`;
+}
+
+function checkedValues(form, name) {
+  return [...form.querySelectorAll(`input[name='${name}']:checked`)].map((input) => input.value);
+}
+
+function bindAssignmentScopeControls(form) {
+  const syncTeams = () => {
+    const fields = form.elements;
+    if (fields.allTeams.checked) {
+      const selectedUnits = checkedValues(form, "units");
+      form.querySelectorAll("input[name='teams']").forEach((input) => {
+        input.checked = fields.allUnits.checked || selectedUnits.includes(input.dataset.unit);
       });
     }
+  };
+  form.elements.allUnits.addEventListener("change", () => {
+    form.querySelectorAll("input[name='units']").forEach((input) => {
+      input.checked = form.elements.allUnits.checked;
+    });
+    syncTeams();
+  });
+  form.elements.allTeams.addEventListener("change", syncTeams);
+  form.querySelectorAll("input[name='units']").forEach((input) => input.addEventListener("change", syncTeams));
+}
+
+function openEmployee(id) {
+  const person = state.people.find((item) => item.id === id);
+  if (!person || !roleAllowsPerson(person)) return;
+  state.returnToEmployeeId = "";
+  state.selectedEmployeeId = id;
+  const team = teamById(person.teamId);
+  const unit = unitById(person.unitId);
+  openDrawer(person.name, "", `
+    <div class="profile-head">
+      <p class="profile-subtitle">${person.number} · ${person.title}</p>
+      <dl class="profile-fact-grid">
+        <div><dt>Level</dt><dd>${person.level}</dd></div>
+        <div><dt>Business Unit</dt><dd>${unit.name}</dd></div>
+        <div><dt>Team</dt><dd>${team.name}</dd></div>
+        <div><dt>Contract</dt><dd>${person.contract}</dd></div>
+        <div><dt>Start Date</dt><dd>${person.startDate}</dd></div>
+        <div><dt>Tenure</dt><dd>${tenure(person.startDate)}</dd></div>
+        <div><dt>Manager</dt><dd>${person.manager}</dd></div>
+      </dl>
+      <div class="tags recognition-tags">${person.tags.map((tag) => `<span class="badge">${tag}</span>`).join("")}${person.awards.map((award) => `<span class="badge blue">${award}</span>`).join("")}</div>
+      ${currentRole().canEditEmployee ? `<div class="profile-actions"><button class="secondary-button compact-button" data-action="editEmployee" data-person="${person.id}">Edit Basic Info</button><button class="secondary-button compact-button" data-action="assignRecognition" data-person="${person.id}">Assign Tag / Award</button><button class="danger-button compact-button" data-action="archiveEmployee" data-person="${person.id}">Archive Employee</button></div>` : ""}
+    </div>
+    <nav class="tabs drawer-tabs">${["Overview", "Manager Records", "HRBP Insights", "Development History"].map((tab) => `<button class="tab ${tab === "Overview" ? "active" : ""}" data-profile-tab="${tab}" data-person="${person.id}">${tab}</button>`).join("")}</nav>
+    <div id="profileTab">${profileTab(person, "Overview")}</div>
+  `);
+  el.drawer.classList.add("profile-fullscreen");
+  document.querySelectorAll("[data-profile-tab]").forEach((button) => button.addEventListener("click", () => {
+    document.querySelectorAll("[data-profile-tab]").forEach((b) => b.classList.toggle("active", b === button));
+    document.querySelector("#profileTab").innerHTML = profileTab(person, button.dataset.profileTab);
+    bindActions(document.querySelector("#profileTab"));
+  }));
+  bindActions(el.drawerBody);
+}
+
+function profileTab(person, tab) {
+  if (tab === "Overview") {
+    return profileOverview(person);
+  }
+  if (tab === "Manager Records") return `<div class="section-header"><h2>Manager Records</h2>${currentRole().canAddManagerRecord ? `<button class="primary-button" data-action="addManagerRecord" data-person="${person.id}">Add Manager Record</button>` : ""}</div>${recordTimeline(person, "records")}`;
+  if (tab === "HRBP Insights") {
+    if (!currentRole().canAddHrbpInsight) return empty("Restricted HRBP Content", "This role cannot view or edit HRBP-only talent judgments.");
+    return `<div class="section-header"><h2>HRBP Insights</h2><button class="primary-button" data-action="addHrbpReview" data-person="${person.id}">Edit Talent Review</button></div><div class="profile-overview">${hrbpTalentSummary(person)}<section class="profile-section"><div class="section-header"><h2>Talent Review Timeline</h2></div>${recordTimeline(person, "talentReviews")}</section><section class="profile-section"><div class="section-header"><h2>HRBP Notes</h2></div>${recordTimeline(person, "hrbpInsights")}</section></div>`;
+  }
+  if (tab === "Development History") return `<div class="profile-overview"><section class="profile-section"><div class="section-header"><h2>Development Actions</h2><button class="secondary-button" data-action="createTalentAction" data-person="${person.id}">Add Development Action</button></div>${actionTimeline(person)}</section><section class="profile-section"><div class="section-header"><h2>History</h2><button class="secondary-button" data-action="addHistoryRecord" data-person="${person.id}">Add History Record</button></div>${recordTimeline(person, "history")}</section></div>`;
+  return "";
+}
+
+function hrbpTalentSummary(person) {
+  return `
+    <section class="talent-review-summary">
+      <article><span>Promotion Readiness</span><strong>${safeTalent(person.promotionReadiness)}</strong></article>
+      <article><span>Retention Risk</span><strong>${safeTalent(person.retentionRisk)}</strong></article>
+      <article><span>Succession</span><strong>${safeTalent(successionStatus(person))}</strong></article>
+      <article><span>Internal Mobility</span><strong>${safeTalent(internalMobility(person))}</strong></article>
+    </section>
+  `;
+}
+
+function successionStatus(person) {
+  return person.successionStatus || (person.tags.includes("Key Person") ? "Backup required" : "No formal succession case");
+}
+
+function internalMobility(person) {
+  return person.internalMobility || "No active mobility plan";
+}
+
+function renderAiInsight(scope, id) {
+  const memory = aiMemory(scope, id);
+  const hasInsight = Boolean(memory.lastInsight);
+  const insight = memory.lastInsight;
+  return `
+    <section class="${scope === "team" ? "ai-panel" : "profile-section ai-insight"}">
+      <div class="section-header">
+        <h2>${scope === "team" ? "AI Team Insight" : "AI Talent Insight"}</h2>
+      </div>
+      <textarea class="ai-prompt" data-ai-prompt="${scope}:${id}" placeholder="Example: focus on retention risk, evidence quality, or next actions."></textarea>
+      <div class="ai-prompt-actions"><button class="primary-button compact-button" data-action="regenerateAiInsight" data-ai-scope="${scope}" data-ai-id="${id}">${hasInsight ? "Generate New Insight" : "Generate Insight"}</button></div>
+      ${hasInsight ? `<div class="ai-generated-copy">
+        <p>${escapeHtml(insight.summary)}</p>
+        <ul class="insight-list">${insight.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}</ul>
+        <div class="ai-feedback-row">
+          <span>${escapeHtml(insight.evidence)}</span>
+          <div>
+            <button class="secondary-button compact-button" data-action="feedbackAiInsight" data-ai-scope="${scope}" data-ai-id="${id}" data-feedback="helpful">Helpful</button>
+            <button class="secondary-button compact-button" data-action="feedbackAiInsight" data-ai-scope="${scope}" data-ai-id="${id}" data-feedback="revise">Needs revision</button>
+          </div>
+        </div>
+      </div>` : `<div class="empty-state ai-empty-state"><h2>No AI insight generated</h2><p>Feed a prompt to generate an insight from the current records.</p></div>`}
+      ${memory.feedback?.length ? `<p class="evidence-note">Learning from ${memory.feedback.length} feedback signals. Last feedback: ${escapeHtml(memory.feedback[0].type)}.</p>` : ""}
+    </section>
+  `;
+}
+
+function aiMemory(scope, id) {
+  state.aiInsights = state.aiInsights || { team: {}, person: {} };
+  state.aiInsights[scope] = state.aiInsights[scope] || {};
+  state.aiInsights[scope][id] = state.aiInsights[scope][id] || { prompt: "", feedback: [], generatedAt: "", lastInsight: null };
+  return state.aiInsights[scope][id];
+}
+
+function generatePersonInsight(personId, memory) {
+  const person = state.people.find((item) => item.id === personId);
+  const openActions = person.actions.filter((action) => action.status !== "Completed");
+  const feedbackHint = memory.feedback?.some((item) => item.type === "revise") ? "Previous feedback asks for sharper, less generic wording." : "";
+  const prompt = (memory.prompt || "").toLowerCase();
+  const focus = prompt.includes("retention") ? `Retention risk is ${person.retentionRisk}; connect any recommendation to workload, manager support and backup coverage.`
+    : prompt.includes("action") ? `Prioritize next actions: ${openActions[0]?.description || "no open action currently exists."}`
+      : prompt.includes("evidence") ? `Evidence base: ${person.records.length} manager records and ${person.hrbpInsights.length} HRBP notes.`
+        : `Current talent view: promotion ${person.promotionReadiness}, retention ${person.retentionRisk}.`;
+  return {
+    summary: `${person.name} is a ${person.title} in ${teamById(person.teamId)?.name || "the selected team"}. ${feedbackHint}`,
+    points: [
+      focus,
+      person.records[0]?.text || "Manager evidence should be refreshed before stronger talent conclusions are made.",
+      openActions.length ? `${openActions.length} open development action(s) should be tracked to closure.` : "No open development action is currently blocking the profile.",
+    ],
+    evidence: `Based on ${person.records.length} manager records, ${person.hrbpInsights.length} HRBP notes, ${person.talentReviews?.length || 0} talent reviews and ${openActions.length} open actions.`,
+  };
+}
+
+function generateTeamInsight(teamId, memory) {
+  const team = teamById(teamId);
+  const people = state.people.filter((person) => person.teamId === teamId);
+  const openActions = (state.teamActions || []).filter((action) => action.teamId === teamId && action.status !== "Completed");
+  const highRisk = people.filter((person) => person.retentionRisk === "High").length;
+  const plan = state.teamPlans[teamId] || {};
+  const feedbackHint = memory.feedback?.some((item) => item.type === "revise") ? "Previous feedback asks for more actionable team-level guidance." : "";
+  const prompt = (memory.prompt || "").toLowerCase();
+  const focus = prompt.includes("retention") ? `${highRisk} employee(s) are currently high retention risk; review backup coverage and manager support.`
+    : prompt.includes("action") ? `${openActions.length} open team action(s) need owner and time-period tracking.`
+      : prompt.includes("plan") ? `Plan context: goal "${plan.goal || "not set"}"; gap "${plan.gap || "not set"}".`
+        : `${team?.name || "The selected team"} has ${people.length} people in scope and ${openActions.length} open team action(s).`;
+  return {
+    summary: `${team?.name || "The selected team"} insight is generated from current team plan, people risk and team actions. ${feedbackHint}`,
+    points: [
+      focus,
+      plan.work ? `Plan action direction: ${plan.work}` : "Add a plan-level action direction if the team needs a clearer management focus.",
+      openActions[0] ? `Nearest tracked action: ${openActions[0].description} (${openActions[0].startDate || "not set"} - ${openActions[0].due}).` : "Create a tracked team action when the plan needs execution detail.",
+    ],
+    evidence: `Based on ${people.length} employees, ${openActions.length} open team actions, ${plan.history?.length || 0} plan timeline records and ${state.activities.filter((activity) => activity.teamId === teamId).length} activities.`,
+  };
+}
+
+function talentReviewRecord(person, date = "2026-07-15") {
+  return {
+    id: `review-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    type: "Talent Review",
+    date,
+    text: `Promotion: ${person.promotionReadiness}. Retention: ${person.retentionRisk}. Succession: ${successionStatus(person)}. Mobility: ${internalMobility(person)}.`,
+  };
+}
+
+function talentReviewTimeline(person) {
+  return person.talentReviews?.length ? person.talentReviews : [talentReviewRecord(person, "2026-07-15")];
+}
+
+function profileOverview(person) {
+  return `
+    <div class="profile-overview">
+      <section class="profile-section overview-summary">
+        <div>
+          <h2>Overview</h2>
+          <p>${person.summary}</p>
+        </div>
+        <dl class="facts">
+          <div><dt>Retention Risk</dt><dd>${safeTalent(person.retentionRisk)}</dd></div>
+          <div><dt>Promotion</dt><dd>${safeTalent(person.promotionReadiness)}</dd></div>
+          <div><dt>Open Actions</dt><dd>${person.actions.filter((action) => action.status !== "Completed").length}</dd></div>
+          <div><dt>Evidence</dt><dd>${person.records.length} manager records</dd></div>
+        </dl>
+      </section>
+      ${renderAiInsight("person", person.id)}
+      <section class="profile-section">
+        <div class="section-header"><h2>Open Talent Actions</h2></div>
+        ${actionTimeline(person, false)}
+      </section>
+    </div>
+  `;
+}
+
+function safeTalent(value) {
+  return state.role === "teamLead" ? "Restricted" : value;
+}
+
+function miniActions(person) {
+  return actionTimeline(person);
+}
+
+function actionTimeline(person, canDelete = true) {
+  const records = person.actions.map((action, index) => ({ id: action.id || "", type: action.type, date: action.due, text: `${action.status}: ${action.description}`, sourceIndex: index }));
+  return records.length ? timeline(sortRecordsDesc(records), canDelete ? { personId: person.id, collection: "actions" } : {}) : empty("No open action", "Create an action when evidence or risk requires follow-up.");
+}
+
+function recordTimeline(person, collection, fallbackRecords) {
+  const records = (fallbackRecords || person[collection] || []).map((record, index) => ({ ...record, sourceIndex: index }));
+  return records.length ? timeline(sortRecordsDesc(records), { personId: person.id, collection }) : empty("No records", "Nothing has been recorded yet.");
+}
+
+function timeline(records, options = {}) {
+  return records?.length ? `<div class="timeline">${records.map((r, index) => `<div><div class="timeline-heading"><span class="timeline-title"><strong>${r.type}</strong><span>${r.date}</span></span>${options.collection ? `<button class="text-danger-button" data-action="deleteRecord" data-person="${options.personId}" data-collection="${options.collection}" data-record-id="${r.id || ""}" data-index="${r.sourceIndex ?? index}">Delete</button>` : ""}</div><p>${r.text}</p></div>`).join("")}</div>` : empty("No records", "Nothing has been recorded yet.");
+}
+
+function planTimeline(teamId, records) {
+  return `<div class="plan-detail-list">${records.map((record, index) => {
+    const data = planRecordData(record);
+    return `<article class="plan-detail-card"><div class="timeline-heading"><span class="timeline-title"><strong>${record.type}</strong><span>${record.date}</span></span><span class="timeline-actions"><button class="text-button" data-action="editTeamPlanRecord" data-record-id="${record.id || ""}">Edit</button><button class="text-danger-button" data-action="deleteTeamPlanRecord" data-record-id="${record.id || ""}" data-index="${record.sourceIndex ?? index}">Delete</button></span></div><dl class="plan-detail-fields">${planDetailField("Current Situation", data.situation)}${planDetailField("Goal", data.goal)}${planDetailField("Gap", data.gap)}${planDetailField("Major Work / Action", data.work)}${planDetailField("Time Period", `${data.startDate || "Not set"} - ${data.endDate || "Not set"}`)}</dl></article>`;
+  }).join("")}</div>`;
+}
+
+function planDetailField(label, value) {
+  return `<div><dt>${label}</dt><dd>${value || ""}</dd></div>`;
+}
+
+function planRecordData(record = {}) {
+  if (record.plan) return record.plan;
+  const html = String(record.text || "");
+  const text = html.replace(/<br\s*\/?>/gi, "\n");
+  const pick = (label) => {
+    const match = text.match(new RegExp(`${label}:\\s*([^\\n]*)`, "i"));
+    return match ? match[1].trim() : "";
+  };
+  return {
+    situation: pick("Situation"),
+    goal: pick("Goal"),
+    gap: pick("Gap"),
+    work: pick("Action"),
+    startDate: record.startDate || "",
+    endDate: record.endDate || "",
+  };
+}
+
+function planRecordText(plan) {
+  return `Situation: ${plan.situation || ""}<br>Goal: ${plan.goal || ""}<br>Gap: ${plan.gap || ""}<br>Action: ${plan.work || ""}<br>Time Period: ${plan.startDate || "Not set"} - ${plan.endDate || "Not set"}`;
+}
+
+function sortRecordsDesc(records = []) {
+  return [...records].sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+}
+
+function bindActions(root = document) {
+  root.querySelectorAll("[data-open-employee]").forEach((node) => node.addEventListener("click", () => openEmployee(node.dataset.openEmployee)));
+  root.querySelectorAll("[data-action]").forEach((node) => node.addEventListener("click", () => handleAction(node)));
+}
+
+function handleAction(node) {
+  const action = node.dataset.action;
+  rememberProfileReturn(node);
+  if (action === "settingsOrg") {
+    state.page = "settings";
+    state.settingsSection = "Organization";
+    render();
+  } else if (action === "addEmployee" && currentRole().canAddEmployee) employeeForm();
+  else if (action === "editEmployee" && currentRole().canEditEmployee) employeeForm(state.people.find((p) => p.id === (node.dataset.person || state.selectedEmployeeId)));
+  else if (action === "archiveEmployee" && currentRole().canArchiveEmployee) archiveForm(node.dataset.person);
+  else if (action === "bulkArchiveEmployees" && currentRole().canArchiveEmployee) bulkArchiveForm();
+  else if (action === "importEmployees" && currentRole().canImport) importForm();
+  else if (action === "exportEmployees" && currentRole().canExport) exportEmployeesForm();
+  else if (action === "exportData") exportData();
+  else if (action === "addUnit" && currentRole().canEditOrg) unitForm();
+  else if (action === "editUnit" && currentRole().canEditOrg) unitForm(unitById(node.dataset.unit));
+  else if (action === "addTeam" && currentRole().canEditOrg) teamForm();
+  else if (action === "transferEmployee" && currentRole().canEditOrg) transferForm();
+  else if (action === "addConfig" && currentRole().canManageSettings) configForm(node.dataset.config);
+  else if (action === "editRole" && currentRole().canManageSettings) roleForm(node.dataset.roleKey);
+  else if (action === "addRoleAssignment" && currentRole().canManageSettings) roleAssignmentForm(node.dataset.roleKey);
+  else if (action === "editRoleAssignment" && currentRole().canManageSettings) roleAssignmentForm(node.dataset.roleKey, Number(node.dataset.index));
+  else if (action === "removeRoleAssignment" && currentRole().canManageSettings) removeRoleAssignment(node.dataset.roleKey, Number(node.dataset.index));
+  else if (action === "toggleConfig" && currentRole().canManageSettings) toggleConfig(node.dataset.config, Number(node.dataset.index));
+  else if (action === "deleteConfig" && currentRole().canManageSettings) deleteConfig(node.dataset.config, Number(node.dataset.index));
+  else if (action === "addManagerRecord" && currentRole().canAddManagerRecord) recordForm(node.dataset.person, "records", "Add Manager Record");
+  else if (action === "addHrbpInsight" && currentRole().canAddHrbpInsight) recordForm(node.dataset.person, "hrbpInsights", "Add HRBP Insight");
+  else if (action === "addHistoryRecord" && currentRole().canEditEmployee) recordForm(node.dataset.person, "history", "Add History Record");
+  else if (action === "addHrbpReview" && currentRole().canAddHrbpInsight) hrbpReviewForm(node.dataset.person);
+  else if (action === "updateTalentRisk" && currentRole().canEditTalentJudgment) riskForm(node.dataset.person);
+  else if (action === "assignRecognition" && currentRole().canEditEmployee) recognitionForm(node.dataset.person);
+  else if (action === "createTalentAction" && currentRole().canCreateAction) actionForm(node.dataset.person);
+  else if (action === "createTeamAction" && currentRole().canCreateAction) teamActionForm(node.dataset.team);
+  else if (action === "addActivity" && currentRole().canCreateAction) activityForm();
+  else if (action === "completeAction") completeAction(node.dataset.person, Number(node.dataset.index));
+  else if (action === "completeTeamAction") completeTeamAction(node.dataset.actionId);
+  else if (action === "archiveAction") archiveAction(node.dataset.person, Number(node.dataset.index));
+  else if (action === "regenerateAiInsight") regenerateAiInsight(node.dataset.aiScope, node.dataset.aiId);
+  else if (action === "feedbackAiInsight") feedbackAiInsight(node.dataset.aiScope, node.dataset.aiId, node.dataset.feedback);
+  else if (action === "deleteRecord") deleteRecord(node.dataset.person, node.dataset.collection, node.dataset.recordId, Number(node.dataset.index));
+  else if (action === "editTeamPlan") editTeamPlan();
+  else if (action === "cancelTeamPlanEdit") cancelTeamPlanEdit();
+  else if (action === "editTeamPlanRecord") editTeamPlanRecord(node.dataset.recordId);
+  else if (action === "deleteTeamPlanRecord") deleteTeamPlanRecord(node.dataset.recordId, Number(node.dataset.index));
+  else if (action === "saveTeamPlan") saveTeamPlan();
+  else if (action === "language") toggleLanguage();
+  else if (action === "appearance") toggleAppearance();
+  else if (action === "importData") importDataForm();
+  else if (action === "resetData") resetData();
+  else toast("This role cannot perform that action.");
+}
+
+function rememberProfileReturn(node) {
+  const profileActions = new Set(["editEmployee", "assignRecognition", "addManagerRecord", "addHrbpReview", "createTalentAction", "addHistoryRecord"]);
+  if (el.drawer.classList.contains("profile-fullscreen") && profileActions.has(node.dataset.action)) {
+    state.returnToEmployeeId = node.dataset.person || state.selectedEmployeeId;
   }
 }
 
-function closeDrawer() {
-  el.drawerBackdrop.hidden = true;
+function employeeForm(person) {
+  const isEdit = Boolean(person);
+  openDrawer(isEdit ? "Edit Employee" : "Add Employee", "People Operations", `
+    <form id="employeeForm" class="form-grid">
+      ${field("Name", "name", person?.name || "")}${field("Employee number", "number", person?.number || nextNumber())}
+      ${selectField("Business Unit", "unitId", state.units.map((u) => [u.id, u.name]), person?.unitId)}
+      ${selectField("Team", "teamId", state.units.flatMap((u) => u.teams.map((t) => [t.id, t.name])), person?.teamId)}
+      ${field("Job title", "title", person?.title || "Research Engineer")}${field("Level", "level", person?.level || "P3")}
+      ${selectField("Contract type", "contract", contracts.map((c) => [c, c]), person?.contract)}
+      ${field("Start date", "startDate", person?.startDate || "2026-07-14", "date")}
+      ${field("Manager", "manager", person?.manager || "")}
+      <div class="form-actions"><button class="secondary-button" type="button" data-close>Cancel</button><button class="primary-button">Save</button></div>
+    </form>
+  `);
+  document.querySelector("#employeeForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = formData(event.target);
+    const returnId = state.returnToEmployeeId;
+    if (isEdit) Object.assign(person, data);
+    else state.people.push({ ...data, id: `e${Date.now()}`, tags: [], awards: [], retentionRisk: "Low", promotionReadiness: "Not ready", successionStatus: "No formal succession case", internalMobility: "No active mobility plan", summary: `${data.name} is a ${data.title}.`, records: [], hrbpInsights: [], talentReviews: [], actions: [], history: [record("Created", "2026-07-14", "Employee added to the prototype.")] });
+    closeDrawer(true);
+    toast(isEdit ? "Employee updated." : "Employee added.");
+    if (returnId && isEdit) openEmployee(person.id);
+    else render();
+  });
+}
+
+function unitForm(unit) {
+  openDrawer(unit ? "Edit Business Unit" : "Add Business Unit", "Organization", `
+    <form id="unitForm" class="form-grid">${field("Name", "name", unit?.name || "")}${field("Type", "type", unit?.type || "Research Lab")}${field("Leader", "leader", unit?.leader || "")}<div class="form-actions"><button class="primary-button">Save</button></div></form>
+  `);
+  document.querySelector("#unitForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = formData(event.target);
+    if (unit) Object.assign(unit, data);
+    else state.units.push({ id: `u${Date.now()}`, ...data, active: true, teams: [] });
+    closeDrawer();
+    toast("Organization updated.");
+    render();
+  });
+}
+
+function teamForm() {
+  openDrawer("Add Team", "Organization", `<form id="teamForm" class="form-grid">${selectField("Business Unit", "unitId", state.units.map((u) => [u.id, u.name]))}${field("Team name", "name", "")}${field("Team Lead", "lead", "")}<div class="form-actions"><button class="primary-button">Save</button></div></form>`);
+  document.querySelector("#teamForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = formData(event.target);
+    unitById(data.unitId).teams.push({ id: `t${Date.now()}`, name: data.name, lead: data.lead, active: true });
+    closeDrawer();
+    toast("Team added.");
+    render();
+  });
+}
+
+function transferForm() {
+  openDrawer("Employee Transfer", "Organization", `<form id="transferForm" class="form-grid">${selectField("Employee", "personId", state.people.map((p) => [p.id, `${p.name} (${p.number})`]))}${selectField("Target Team", "teamId", state.units.flatMap((u) => u.teams.map((t) => [t.id, `${u.name} / ${t.name}`])))}<div class="form-actions"><button class="primary-button">Transfer</button></div></form>`);
+  document.querySelector("#transferForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = formData(event.target);
+    const person = state.people.find((p) => p.id === data.personId);
+    const unit = state.units.find((u) => u.teams.some((t) => t.id === data.teamId));
+    person.teamId = data.teamId;
+    person.unitId = unit.id;
+    person.history.unshift(record("Team Transfer", "2026-07-14", `Transferred to ${teamById(data.teamId).name}.`));
+    closeDrawer();
+    toast("Employee transferred.");
+    render();
+  });
+}
+
+function recordForm(personId, key, title) {
+  const defaultType = key === "records" ? "Outstanding contribution" : key === "history" ? "Role Change" : "Talent Insight";
+  openDrawer(title, "Employee Profile", `<form id="recordForm" class="form-grid">${field("Record type", "type", defaultType)}${field("Date", "date", "2026-07-15", "date")}<label class="full">Content<textarea name="text" required></textarea></label><div class="form-actions"><button class="primary-button">Save</button></div></form>`);
+  document.querySelector("#recordForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    state.people.find((p) => p.id === personId)[key].unshift({ id: `record-${Date.now()}`, ...formData(event.target) });
+    closeDrawer(true);
+    save();
+    toast("Record added.");
+    openEmployee(personId);
+  });
+}
+
+function riskForm(personId) {
+  const person = state.people.find((p) => p.id === personId);
+  openDrawer("Update Talent Judgment", "HRBP Insights", `<form id="riskForm" class="form-grid">${selectField("Retention Risk", "retentionRisk", ["Low", "Medium", "High"].map((v) => [v, v]), person.retentionRisk)}${selectField("Promotion Readiness", "promotionReadiness", ["Not ready", "Evidence needed", "Ready in 6-12 months"].map((v) => [v, v]), person.promotionReadiness)}<div class="form-actions"><button class="primary-button">Save</button></div></form>`);
+  document.querySelector("#riskForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    Object.assign(person, formData(event.target));
+    closeDrawer(true);
+    save();
+    toast("Talent judgment updated.");
+    openEmployee(personId);
+  });
+}
+
+function hrbpReviewForm(personId) {
+  const person = state.people.find((p) => p.id === personId);
+  openDrawer("Edit Talent Review", "HRBP Insights", `
+    <form id="hrbpReviewForm" class="form-grid">
+      ${field("Record type", "type", "Talent Insight")}
+      ${field("Date", "date", "2026-07-15", "date")}
+      ${selectField("Retention Risk", "retentionRisk", ["Low", "Medium", "High"].map((v) => [v, v]), person.retentionRisk)}
+      ${selectField("Promotion Readiness", "promotionReadiness", ["Not ready", "Evidence needed", "Ready in 6-12 months"].map((v) => [v, v]), person.promotionReadiness)}
+      ${selectField("Succession", "successionStatus", ["No formal succession case", "Backup required", "Backup in development", "Successor identified"].map((v) => [v, v]), successionStatus(person))}
+      ${selectField("Internal Mobility", "internalMobility", ["No active mobility plan", "Adjacent project exposure", "Ready for adjacent project exposure", "Potential internal transfer"].map((v) => [v, v]), internalMobility(person))}
+      <label class="full">HRBP note<textarea name="text" placeholder="Optional note for this review"></textarea></label>
+      <div class="form-actions"><button class="primary-button">Save Review</button></div>
+    </form>
+  `);
+  document.querySelector("#hrbpReviewForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = formData(event.target);
+    person.retentionRisk = data.retentionRisk;
+    person.promotionReadiness = data.promotionReadiness;
+    person.successionStatus = data.successionStatus;
+    person.internalMobility = data.internalMobility;
+    person.talentReviews = person.talentReviews || [];
+    person.talentReviews.unshift(talentReviewRecord(person, data.date));
+    if (data.text.trim()) {
+      person.hrbpInsights.unshift({ id: `hrbp-${Date.now()}`, type: data.type, date: data.date, text: data.text });
+    }
+    closeDrawer(true);
+    save();
+    toast("HRBP review saved.");
+    openEmployee(personId);
+  });
+}
+
+function recognitionForm(personId) {
+  const person = state.people.find((p) => p.id === personId);
+  openDrawer("Assign Tag / Award", "Employee Profile", `
+    <form id="recognitionForm" class="form-grid">
+      ${selectField("Talent Tag", "tag", [["", "No new tag"], ...active("tags").map((tag) => [tag.name, tag.name])])}
+      ${selectField("Award", "award", [["", "No new award"], ...active("awards").map((award) => [award.name, award.name])])}
+      <div class="form-actions"><button class="primary-button">Save</button></div>
+    </form>
+  `);
+  document.querySelector("#recognitionForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = formData(event.target);
+    if (data.tag && !person.tags.includes(data.tag)) person.tags.push(data.tag);
+    if (data.award && !person.awards.includes(data.award)) person.awards.push(data.award);
+    closeDrawer(true);
+    toast("Tag and award assignment saved.");
+    openEmployee(personId);
+  });
+}
+
+function actionForm(personId) {
+  const lockedPerson = personId ? state.people.find((person) => person.id === personId) : null;
+  const employeeField = lockedPerson
+    ? `<div class="readonly-field"><span>Employee</span><strong>${lockedPerson.name}</strong><small>${lockedPerson.number} · ${teamById(lockedPerson.teamId)?.name || ""}</small></div><input type="hidden" name="personId" value="${lockedPerson.id}" />`
+    : selectField("Employee", "personId", scopedPeople().map((p) => [p.id, `${p.name} (${p.number})`]), personId);
+  openDrawer("Add Development Action", "Employee Profile", `<form id="actionForm" class="form-grid">${employeeField}${selectField("Action type", "type", active("actionTypes").map((a) => [a.name, a.name]))}${field("Due date", "due", "2026-09-30", "date")}${field("Owner", "owner", currentRole().label)}<label class="full">Action description<textarea name="description" required>Build backup coverage and refresh evidence through a practical project.</textarea></label><div class="form-actions"><button class="primary-button">Save Action</button></div></form>`);
+  document.querySelector("#actionForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = formData(event.target);
+    const person = state.people.find((p) => p.id === data.personId);
+    const returnId = state.returnToEmployeeId;
+    person.actions.unshift({ id: `a${Date.now()}`, ...data, status: "Open" });
+    closeDrawer(true);
+    save();
+    toast("Talent action created.");
+    if (returnId) openEmployee(data.personId);
+    else render();
+  });
+}
+
+function teamActionForm(teamId) {
+  const defaultTeamId = teamId || selectedTeamId();
+  openDrawer("Add Team Development Action", "Team Management", `
+    <form id="teamActionForm" class="form-grid">
+      ${selectField("Team", "teamId", scopedTeams().map((team) => [team.id, team.name]), defaultTeamId)}
+      ${selectField("Action type", "type", active("actionTypes").map((action) => [action.name, action.name]))}
+      ${field("Start date", "startDate", currentDate(), "date")}
+      ${field("Target date", "due", "2026-09-30", "date")}
+      ${field("Owner", "owner", currentRole().label)}
+      <label class="full">Action description<textarea name="description" required>Build shared capability and backup coverage for a team priority.</textarea></label>
+      <div class="form-actions"><button class="primary-button">Save Team Action</button></div>
+    </form>
+  `);
+  document.querySelector("#teamActionForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    state.teamActions = state.teamActions || [];
+    state.teamActions.unshift({ id: `team-action-${Date.now()}`, ...formData(event.target), status: "Open" });
+    closeDrawer(true);
+    save();
+    toast("Team development action created.");
+    render();
+  });
+}
+
+function activityForm() {
+  openDrawer("Add Activity", "Team Activities", `<form id="activityForm" class="form-grid">${selectField("Activity type", "type", active("activityTypes").map((a) => [a.name, a.name]))}${selectField("Team", "teamId", scopedTeams().map((t) => [t.id, t.name]))}${field("Date", "date", "2026-07-14", "date")}${field("Participants", "participants", "10", "number")}<label class="full">Short description<textarea name="description" required></textarea></label><div class="form-actions"><button class="primary-button">Save Activity</button></div></form>`);
+  document.querySelector("#activityForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    state.activities.unshift({ id: `act${Date.now()}`, ...formData(event.target) });
+    closeDrawer();
+    toast("Activity added.");
+    render();
+  });
+}
+
+function importForm() {
+  openDrawer("Bulk Import Employees", "People Operations", `
+    <div class="profile-overview">
+      <section class="profile-section">
+        <div class="section-header"><h2>Excel Template</h2><button class="secondary-button" data-action="downloadEmployeeTemplate">Download Template</button></div>
+      </section>
+      <form id="importForm" class="form-grid">
+        <label class="full">Upload completed template<input type="file" name="file" accept=".csv,.tsv,.txt,.xls,.xlsx" /></label>
+        <label class="full">Parsed rows<textarea name="rows" placeholder="name,employeeNumber,businessUnit,team,jobTitle,level,contract,startDate,manager"></textarea></label>
+        <div id="importPreview" class="full"></div>
+        <div class="form-actions"><button class="primary-button">Import Employees</button></div>
+      </form>
+    </div>
+  `);
+  document.querySelector("[data-action='downloadEmployeeTemplate']").addEventListener("click", downloadEmployeeTemplate);
+  const form = document.querySelector("#importForm");
+  form.file.addEventListener("change", () => {
+    const file = form.file.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      form.rows.value = String(reader.result || "");
+      renderImportPreview(form.rows.value);
+    };
+    reader.readAsText(file);
+  });
+  form.rows.addEventListener("input", () => renderImportPreview(form.rows.value));
+  document.querySelector("#importForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const rows = parseEmployeeRows(formData(event.target).rows);
+    rows.forEach((row) => {
+      const unit = state.units.find((u) => u.name === row.businessUnit || u.teams.some((t) => t.name === row.team)) || state.units[0];
+      const team = unit.teams.find((t) => t.name === row.team) || unit.teams[0];
+      state.people.push({ id: `e${Date.now()}${Math.random()}`, number: row.employeeNumber || nextNumber(), name: row.name, unitId: unit.id, teamId: team.id, title: row.jobTitle || "Research Engineer", level: row.level || "P3", contract: contracts.includes(row.contract) ? row.contract : "Employee", startDate: row.startDate || currentDate(), manager: row.manager || team.lead, tags: [], awards: [], retentionRisk: "Low", promotionReadiness: "Not ready", successionStatus: "No formal succession case", internalMobility: "No active mobility plan", summary: `${row.name} imported into ${team.name}.`, records: [], hrbpInsights: [], talentReviews: [], actions: [], history: [record("Imported", currentDate(), "Imported from employee template.")] });
+    });
+    closeDrawer(true);
+    toast(`${rows.length} employees imported.`);
+    render();
+  });
+}
+
+function downloadEmployeeTemplate() {
+  const headers = ["name", "employeeNumber", "businessUnit", "team", "jobTitle", "level", "contract", "startDate", "manager"];
+  const sample = ["Ava Stone", "00129999", "GPU Research Lab", "GPU Compiler Team", "Research Engineer", "P3", "Employee", currentDate(), "Lina Andersson"];
+  const table = `<table><tr>${headers.map((header) => `<th>${header}</th>`).join("")}</tr><tr>${sample.map((value) => `<td>${value}</td>`).join("")}</tr></table>`;
+  downloadBlob("employee_import_template.xls", table, "application/vnd.ms-excel");
+  toast("Employee template downloaded.");
+}
+
+function parseEmployeeRows(raw) {
+  return String(raw || "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean).filter((line) => !line.toLowerCase().startsWith("name,") && !line.toLowerCase().startsWith("name\t")).map((line) => {
+    const cells = line.includes("\t") ? line.split("\t") : line.split(",");
+    const [name, employeeNumber, businessUnit, team, jobTitle, level, contract, startDate, manager] = cells.map((cell) => cell.trim());
+    return { name, employeeNumber, businessUnit, team, jobTitle, level, contract, startDate, manager };
+  }).filter((row) => row.name);
+}
+
+function renderImportPreview(raw) {
+  const rows = parseEmployeeRows(raw);
+  const target = document.querySelector("#importPreview");
+  if (!target) return;
+  target.innerHTML = rows.length ? `<div class="table-wrap"><table><thead><tr><th>Name</th><th>Team</th><th>Title</th><th>Contract</th></tr></thead><tbody>${rows.slice(0, 8).map((row) => `<tr><td>${row.name}</td><td>${row.team}</td><td>${row.jobTitle}</td><td>${row.contract || "Employee"}</td></tr>`).join("")}</tbody></table></div>` : "";
+}
+
+function archiveForm(personId) {
+  const lockedPerson = personId ? state.people.find((person) => person.id === personId) : null;
+  const employeeField = lockedPerson
+    ? `<div class="readonly-field"><span>Employee</span><strong>${lockedPerson.name}</strong><small>${lockedPerson.number} · ${teamById(lockedPerson.teamId)?.name || ""}</small></div><input type="hidden" name="personId" value="${lockedPerson.id}" />`
+    : selectField("Employee", "personId", scopedPeople().map((p) => [p.id, `${p.name} (${p.number})`]));
+  openDrawer("Archive Employee", "People Operations", `<form id="archiveForm" class="form-grid">${employeeField}${field("Reason", "reason", "Prototype archive")}<div class="form-actions"><button class="danger-button">Archive</button></div></form>`);
+  document.querySelector("#archiveForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const { personId, reason } = formData(event.target);
+    const index = state.people.findIndex((p) => p.id === personId);
+    if (index >= 0) state.archived.push({ ...state.people.splice(index, 1)[0], archivedReason: reason, archivedDate: "2026-07-14" });
+    closeDrawer(true);
+    toast("Employee archived.");
+    render();
+  });
+}
+
+function bulkArchiveForm() {
+  openDrawer("Bulk Archive Employees", "People Operations", `<form id="bulkArchiveForm" class="form-grid">${employeeSelectionList()}${field("Reason", "reason", "Bulk archive")}<div class="form-actions"><button class="danger-button">Archive Selected</button></div></form>`);
+  document.querySelector("#bulkArchiveForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const selected = selectedEmployeeIds(event.target);
+    const reason = formData(event.target).reason;
+    state.people = state.people.filter((person) => {
+      if (!selected.includes(person.id)) return true;
+      state.archived.push({ ...person, archivedReason: reason, archivedDate: currentDate() });
+      return false;
+    });
+    closeDrawer(true);
+    toast(`${selected.length} employees archived.`);
+    render();
+  });
+}
+
+function exportEmployeesForm() {
+  openDrawer("Export Employees", "People Operations", `<form id="exportEmployeesForm" class="form-grid">${employeeSelectionList()}<div class="form-actions"><button class="primary-button">Export Selected</button></div></form>`);
+  document.querySelector("#exportEmployeesForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const selected = selectedEmployeeIds(event.target);
+    const people = state.people.filter((person) => selected.includes(person.id));
+    downloadBlob("employees_export.csv", employeeCsv(people), "text/csv");
+    closeDrawer(true);
+    toast(`${people.length} employees exported.`);
+  });
+}
+
+function employeeSelectionList() {
+  return `<div class="full selection-list">${scopedPeople().map((person) => `<label class="selection-row"><input type="checkbox" name="employeeIds" value="${person.id}" /><span><strong>${person.name}</strong><small>${person.number} · ${teamById(person.teamId)?.name || ""}</small></span></label>`).join("")}</div>`;
+}
+
+function selectedEmployeeIds(form) {
+  return [...form.querySelectorAll("input[name='employeeIds']:checked")].map((input) => input.value);
+}
+
+function employeeCsv(people) {
+  const headers = ["name", "employeeNumber", "businessUnit", "team", "jobTitle", "level", "contract", "startDate", "manager"];
+  const rows = people.map((person) => [person.name, person.number, unitById(person.unitId)?.name || "", teamById(person.teamId)?.name || "", person.title, person.level, person.contract, person.startDate, person.manager]);
+  return [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
+}
+
+function csvCell(value) {
+  return `"${String(value || "").replace(/"/g, '""')}"`;
+}
+
+function configForm(key) {
+  openDrawer("Add Configuration Item", "Talent Configuration", `<form id="configForm" class="form-grid">${field("Name", "name", "")}<div class="form-actions"><button class="primary-button">Save</button></div></form>`);
+  document.querySelector("#configForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    state.config[key].push(item(`${key}-${Date.now()}`, formData(event.target).name));
+    closeDrawer();
+    toast("Configuration item added.");
+    render();
+  });
+}
+
+function toggleConfig(key, index) {
+  state.config[key][index].active = !state.config[key][index].active;
+  toast("Configuration updated.");
+  render();
+}
+
+function deleteConfig(key, index) {
+  if (state.config[key][index]?.active) {
+    toast("Deactivate before deleting.");
+    return;
+  }
+  state.config[key].splice(index, 1);
+  toast("Configuration item deleted.");
+  render();
+}
+
+function completeAction(personId, index) {
+  const person = state.people.find((p) => p.id === personId);
+  person.actions[index].status = "Completed";
+  toast("Action completed.");
+  render();
+}
+
+function archiveAction(personId, index) {
+  const person = state.people.find((p) => p.id === personId);
+  if (!person?.actions?.[index]) return;
+  const [action] = person.actions.splice(index, 1);
+  state.archivedActions = state.archivedActions || [];
+  state.archivedActions.unshift({
+    ...action,
+    id: action.id || `archived-action-${Date.now()}`,
+    personId,
+    archivedDate: currentDate(),
+  });
+  toast("Action archived.");
+  render();
+}
+
+function regenerateAiInsight(scope, id) {
+  const memory = aiMemory(scope, id);
+  const promptField = document.querySelector(`[data-ai-prompt="${scope}:${id}"]`);
+  const prompt = (promptField?.value || "").trim() || memory.prompt || "";
+  memory.prompt = prompt;
+  memory.lastInsight = scope === "team" ? generateTeamInsight(id, memory) : generatePersonInsight(id, memory);
+  memory.generatedAt = currentDate();
+  save();
+  toast("AI insight generated.");
+  if (scope === "person") openEmployee(id);
+  else render();
+}
+
+function feedbackAiInsight(scope, id, feedback) {
+  const memory = aiMemory(scope, id);
+  memory.feedback = memory.feedback || [];
+  memory.feedback.unshift({ type: feedback, date: currentDate(), prompt: memory.prompt });
+  memory.lastInsight = scope === "team" ? generateTeamInsight(id, memory) : generatePersonInsight(id, memory);
+  memory.generatedAt = currentDate();
+  save();
+  toast(feedback === "helpful" ? "AI feedback saved." : "AI will adjust from this feedback.");
+  if (scope === "person") openEmployee(id);
+  else render();
+}
+
+function completeTeamAction(actionId) {
+  const action = (state.teamActions || []).find((item) => item.id === actionId);
+  if (!action) return;
+  action.status = "Completed";
+  toast("Team action completed.");
+  render();
+}
+
+function deleteRecord(personId, collection, recordId, index) {
+  const person = state.people.find((p) => p.id === personId);
+  const list = person?.[collection];
+  if (!Array.isArray(list)) return;
+  const actualIndex = recordId ? list.findIndex((item) => item.id === recordId) : index;
+  if (actualIndex < 0) return;
+  list.splice(actualIndex, 1);
+  save();
+  toast("Record deleted.");
+  openEmployee(personId);
+}
+
+function editTeamPlan() {
+  state.editingTeamPlanId = selectedTeamId();
+  state.editingTeamPlanRecordId = "";
+  render();
+}
+
+function cancelTeamPlanEdit() {
+  state.editingTeamPlanId = "";
+  state.editingTeamPlanRecordId = "";
+  render();
+}
+
+function editTeamPlanRecord(recordId) {
+  const teamId = selectedTeamId();
+  state.editingTeamPlanId = teamId;
+  state.editingTeamPlanRecordId = recordId;
+  render();
+}
+
+function deleteTeamPlanRecord(recordId, index) {
+  const teamId = selectedTeamId();
+  const plan = state.teamPlans[teamId] || { history: [] };
+  const actualIndex = recordId ? plan.history.findIndex((item) => item.id === recordId) : index;
+  if (actualIndex < 0) return;
+  plan.history.splice(actualIndex, 1);
+  applyCurrentPlanFromHistory(teamId);
+  state.editingTeamPlanId = "";
+  state.editingTeamPlanRecordId = "";
+  toast("Plan timeline record deleted.");
+  render();
+}
+
+function saveTeamPlan() {
+  const teamId = selectedTeamId();
+  const existingPlan = state.teamPlans[teamId] || { history: [] };
+  const nextPlan = {
+    situation: document.querySelector("[name='situation']").value,
+    goal: document.querySelector("[name='goal']").value,
+    gap: document.querySelector("[name='gap']").value,
+    work: document.querySelector("[name='work']").value,
+    startDate: document.querySelector("[name='startDate']").value,
+    endDate: document.querySelector("[name='endDate']").value,
+  };
+  const history = [...(existingPlan.history || [])];
+  const record = {
+    id: state.editingTeamPlanRecordId || `plan-${Date.now()}`,
+    type: "Team Plan Saved",
+    date: currentDate(),
+    plan: nextPlan,
+    text: planRecordText(nextPlan),
+  };
+  const recordIndex = state.editingTeamPlanRecordId ? history.findIndex((item) => item.id === state.editingTeamPlanRecordId) : -1;
+  if (recordIndex >= 0) history[recordIndex] = record;
+  else history.unshift(record);
+  state.teamPlans[teamId] = { ...nextPlan, history };
+  state.editingTeamPlanId = "";
+  state.editingTeamPlanRecordId = "";
+  toast("Team plan saved.");
+  render();
+}
+
+function applyCurrentPlanFromHistory(teamId) {
+  const plan = state.teamPlans[teamId] || { history: [] };
+  const latest = sortRecordsDesc(plan.history || [])[0];
+  const latestData = latest ? planRecordData(latest) : { situation: "", goal: "", gap: "", work: "", startDate: "", endDate: "" };
+  state.teamPlans[teamId] = { ...latestData, history: plan.history || [] };
+}
+
+function resetData() {
+  state = defaultState();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  toast("Prototype data reset.");
+  render();
+}
+
+function toggleLanguage() {
+  state.system = state.system || {};
+  state.system.language = state.system.language === "English" ? "Chinese" : "English";
+  toast("Language preference saved.");
+  render();
+}
+
+function toggleAppearance() {
+  state.system = state.system || {};
+  state.system.appearance = state.system.appearance === "Light" ? "High contrast" : "Light";
+  document.body.classList.toggle("high-contrast", state.system.appearance === "High contrast");
+  toast("Appearance preference saved.");
+  render();
+}
+
+function importDataForm() {
+  openDrawer("Import Mock Data", "System", `<form id="importDataForm" class="form-grid"><label class="full">Paste exported JSON<textarea name="json" required></textarea></label><div class="form-actions"><button class="primary-button">Import</button></div></form>`);
+  document.querySelector("#importDataForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    try {
+      const imported = JSON.parse(formData(event.target).json);
+      if (!imported.people?.length || !imported.units?.length) throw new Error("Invalid data");
+      state = imported;
+      closeDrawer();
+      toast("Mock data imported.");
+      render();
+    } catch {
+      toast("Import failed. Use exported prototype JSON.");
+    }
+  });
+}
+
+function exportData() {
+  downloadBlob("research-talent-mock-data.json", JSON.stringify(state, null, 2), "application/json");
+  toast("Mock data exported.");
+}
+
+function downloadBlob(filename, content, type) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function bindFilters() {
+  document.querySelectorAll("[data-filter]").forEach((field) => field.addEventListener("input", () => {
+    state.filters[field.dataset.filter] = field.value;
+    if (field.dataset.filter === "unit") state.filters.team = "All";
+    render();
+  }));
+  document.querySelectorAll("[data-filter-set]").forEach((button) => button.addEventListener("click", () => {
+    const key = button.dataset.filterSet;
+    state.filters[key] = button.dataset.filterValue;
+    if (key === "unit") state.filters.team = "All";
+    render();
+  }));
+  document.querySelectorAll("[data-filter-reset]").forEach((button) => button.addEventListener("click", () => {
+    state.filters.search = "";
+    state.filters.unit = "All";
+    state.filters.team = "All";
+    state.filters.contract = "All";
+    state.filters.tag = "All";
+    render();
+  }));
+}
+
+function inputFilter(label, key, value) {
+  return `<label>${label}<input data-filter="${key}" value="${escapeAttr(value)}" /></label>`;
+}
+
+function selectFilter(label, key, options) {
+  return `<label>${label}<select data-filter="${key}">${options.map(([value, text]) => `<option value="${value}" ${state.filters[key] === value ? "selected" : ""}>${text}</option>`).join("")}</select></label>`;
+}
+
+function field(label, name, value, type = "text") {
+  return `<label>${label}<input type="${type}" name="${name}" value="${escapeAttr(value)}" required /></label>`;
+}
+
+function textarea(label, name, value, disabled) {
+  return `<label>${label}<textarea name="${name}" ${disabled ? "disabled" : ""}>${escapeHtml(value)}</textarea></label>`;
+}
+
+function selectField(label, name, options, selected) {
+  return `<label>${label}<select name="${name}">${options.map(([value, text]) => `<option value="${value}" ${selected === value ? "selected" : ""}>${text}</option>`).join("")}</select></label>`;
+}
+
+function formData(form) {
+  return Object.fromEntries(new FormData(form).entries());
+}
+
+function currentDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function active(key) {
+  return state.config[key].filter((x) => x.active);
+}
+
+function tenure(dateString) {
+  const start = new Date(dateString);
+  const now = new Date("2026-07-14");
+  const months = Math.max(1, (now.getFullYear() - start.getFullYear()) * 12 + now.getMonth() - start.getMonth());
+  return months < 12 ? `${months} mo` : `${Math.floor(months / 12)}y ${months % 12}m`;
+}
+
+function nextNumber() {
+  return `00${120000 + state.people.length + state.archived.length + 1}`;
+}
+
+function openDrawer(title, eyebrow, body) {
+  el.drawer.classList.remove("profile-fullscreen");
+  el.drawerTitle.textContent = title;
+  el.drawerEyebrow.textContent = eyebrow;
+  el.drawerBody.innerHTML = body;
+  el.drawerBackdrop.hidden = false;
+  el.drawer.classList.add("open");
+  el.drawer.setAttribute("aria-hidden", "false");
+  el.drawerBody.querySelectorAll("[data-close]").forEach((button) => button.addEventListener("click", () => closeDrawer()));
+}
+
+function closeDrawer(skipReturn = false) {
+  const returnId = state.returnToEmployeeId;
+  const wasProfile = el.drawer.classList.contains("profile-fullscreen");
   el.drawer.classList.remove("open");
   el.drawer.setAttribute("aria-hidden", "true");
-}
-
-function drawerContent(kind) {
-  if (kind.startsWith("team-")) {
-    const team = kind.replace("team-", "");
-    const members = employeesForTeam(team);
-    const profile = teamProfiles[team];
-    const gap = capabilities.find((item) => item.team === team);
-    const openActionCount = members.reduce((sum, employee) => sum + employee.openActions, 0);
-    return `
-      <h3>${team}</h3>
-      <dl class="profile-facts">
-        <div><dt>Team Lead</dt><dd>${teamLeadName(team)}</dd></div>
-        <div><dt>Employee count</dt><dd>${members.length}</dd></div>
-        <div><dt>Current goal</dt><dd>${profile?.goal || "Maintain team delivery."}</dd></div>
-        <div><dt>Open actions</dt><dd>${openActionCount}</dd></div>
-      </dl>
-      <article class="ai-panel compact-ai">
-        ${aiMeta("AI Team Summary", "2026-07-14", "Team evidence", gap?.severity || "Moderate", "Current")}
-        <h2>${gap ? `${gap.gap} requires attention` : "Team is stable"}</h2>
-        <p>${gap ? gap.recommendation : "Current records do not show a critical team gap."}</p>
-      </article>
-      <div class="button-row">
-        <button class="secondary-button" data-target="team:${team}:People Insights">View People Insights</button>
-        <button class="secondary-button" data-target="team:${team}:Team/Lab Development">Open Development Plan</button>
-        <button class="primary-button" data-target="team:${team}:People Insights">Open People Review</button>
-      </div>
-    `;
-  }
-  if (kind.startsWith("unit-")) {
-    const unitName = kind.replace("unit-", "");
-    const unit = organization.businessUnits.find((item) => item.name === unitName);
-    const people = employeesForUnit(unitName);
-    const firstGoal = unit?.teams.map((team) => teamProfiles[team]?.goal).find(Boolean) || "Maintain research delivery.";
-    return `
-      <h3>${unitName}</h3>
-      <dl class="profile-facts">
-        <div><dt>Type</dt><dd>${unit?.type || "Business Unit"}</dd></div>
-        <div><dt>Leader</dt><dd>${unit ? unitLeaderName(unit) : "Unassigned"}</dd></div>
-        <div><dt>Teams</dt><dd>${unit?.teams.length || 0}</dd></div>
-        <div><dt>Employee count</dt><dd>${people.length}</dd></div>
-        <div><dt>Current annual priority</dt><dd>${firstGoal}</dd></div>
-      </dl>
-      <div class="button-row">
-        <button class="secondary-button" data-target="unit:${unitName}">View Teams</button>
-        <button class="primary-button" data-target="team:${unit?.teams[0] || ""}:Team/Lab Development">Open Unit Plan</button>
-      </div>
-    `;
-  }
-  if (kind === "briefing") {
-    return `${aiMeta("Evidence review", "2026-07-14", "2026 goals and records", "High", "Current")}<h3>Source goals</h3>${recordsList(annualGoals.slice(0, 8))}<h3>Reasoning summary</h3><p>AI compares annual goals with current people coverage, evidence quality and open development actions.</p>`;
-  }
-  if (kind.startsWith("employee-")) {
-    const employee = employees.find((item) => item.id === kind.replace("employee-", ""));
-    return `<h3>${employee.name}</h3><p>${employee.summary}</p><h3>Professional evidence</h3>${recordsList(employee.records)}<h3>Growth path</h3>${recordsList(employee.growthPath)}`;
-  }
-  if (kind.startsWith("cap-")) {
-    const capability = capabilities.find((item) => `cap-${item.name}` === kind);
-    return `${aiMeta("Capability gap analysis", "2026-07-14", "Team goals and evidence", capability.severity === "High" ? "High" : "Moderate", "Requires Review")}<h3>${capability.name}</h3><p><strong>Gap:</strong> ${capability.gap}</p><p>${capability.goal}</p><div class="table-wrap"><table><thead><tr><th>Employee</th><th>Level</th><th>Role</th><th>Evidence</th><th>Validation</th></tr></thead><tbody>${capability.coverage.length ? capability.coverage.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("") : '<tr><td colspan="5">No validated professional evidence in the selected scope.</td></tr>'}</tbody></table></div><h3>Recommended response</h3><p>${capability.recommendation}</p><div class="button-row"><button class="primary-button" data-action="createLearningAction">Create Learning Action</button></div>`;
-  }
-  return "<p>No evidence selected.</p>";
-}
-
-function actionDrawerContent(action, employee) {
-  if (action === "addEmployee") {
-    return `
-      <form data-action-form class="form-grid">
-        ${field("Employee number", "number", nextEmployeeNumber(), "text")}
-        ${field("Name", "name", "", "text")}
-        ${selectField("Business Unit", "unit", organization.businessUnits.map((unit) => unit.name), employee.unit)}
-        ${selectField("Team", "team", organization.businessUnits.flatMap((unit) => unit.teams), employee.team)}
-        ${field("Job Title", "title", "Research Engineer", "text")}
-        ${selectField("Level", "level", [...levels, "Team Lead", "Lab Director"], "Engineer")}
-        ${selectField("Contract Type", "contract", ["Employee", "Leased Labour", "Intern"], "Employee")}
-        ${field("Start Date", "startDate", "2026-07-14", "date")}
-        ${textareaField("Initial capability evidence", "notes", "Manager will add capability evidence after onboarding.")}
-        ${formActions("Create employee")}
-      </form>
-    `;
-  }
-  if (action === "editEmployee") {
-    return `
-      <form data-action-form class="form-grid">
-        ${field("Employee number", "number", employee.number, "text")}
-        ${field("Name", "name", employee.name, "text")}
-        ${selectField("Business Unit", "unit", organization.businessUnits.map((unit) => unit.name), employee.unit)}
-        ${selectField("Team", "team", organization.businessUnits.flatMap((unit) => unit.teams), employee.team)}
-        ${field("Job Title", "title", employee.title, "text")}
-        ${selectField("Level", "level", [...levels, "Team Lead", "Lab Director"], employee.level)}
-        ${selectField("Contract Type", "contract", ["Employee", "Leased Labour", "Intern"], employee.contract)}
-        ${field("Start Date", "startDate", employee.startDate, "date")}
-        ${optionalField("Talent Tags", "tags", employee.tags.join(", "), "text")}
-        ${optionalField("Awards", "awards", employee.awards.join(", "), "text")}
-        ${textareaField("Change reason", "notes", "Correct profile information after manager review.")}
-        ${formActions("Save changes")}
-      </form>
-    `;
-  }
-  if (action === "addManagerRecord") {
-    return `
-      <form data-action-form class="form-grid">
-        ${selectField("Record Type", "recordType", evidenceTypes, "Project contribution")}
-        ${field("Date", "date", "2026-07-14", "date")}
-        ${field("Scope or project", "scope", `${employee.team} project`, "text")}
-        ${selectField("Related capability", "capability", employee.capabilities.map((item) => item.name), employee.capabilities[0].name)}
-        ${textareaField("Description", "description", `${employee.name} provided concrete evidence connected to team goals.`)}
-        ${selectField("Visibility", "visibility", ["Manager visible", "Leadership visible", "HRBP visible"], "Manager visible")}
-        ${formActions("Add manager record")}
-      </form>
-    `;
-  }
-  if (action === "addTalentInsight") {
-    return `
-      <form data-action-form class="form-grid">
-        ${selectField("Record Type", "insightType", ["Talent Insight", "Talent Risk", "Development Suggestion", "HRBP observation", "Retention consideration"], "Development Suggestion")}
-        ${field("Date", "date", "2026-07-14", "date")}
-        ${field("Scope", "scope", employee.team, "text")}
-        ${textareaField("Description", "description", `${employee.name} should receive a focused development action connected to ${employee.capabilities[0].name}.`)}
-        ${textareaField("Recommended action", "recommendedAction", "Create a mentoring or learning action with review evidence.")}
-        ${selectField("Visibility", "visibility", ["HRBP only", "Leadership visible", "Manager visible after approval"], "HRBP only")}
-        ${formActions("Add HRBP record")}
-      </form>
-    `;
-  }
-  if (action === "archiveEmployee") {
-    return `
-      <form data-action-form class="form-grid">
-        <div class="form-wide">
-          <p><strong>${employee.name}</strong> will be archived from active employee views. Historical records, manager evidence, Talent Insights and actions remain preserved.</p>
-        </div>
-        ${field("Archive Date", "archiveDate", "2026-07-14", "date")}
-        ${selectField("Reason", "reason", ["Resigned", "Transferred out", "Contract ended", "Duplicate record", "Other"], "Contract ended")}
-        ${textareaField("Archive note", "note", "Archive employee while preserving historical talent and organization records.")}
-        ${formActions("Archive employee")}
-      </form>
-    `;
-  }
-  if (action === "createTalentAction" || action === "createLearningAction") {
-    const selectedCapability = capabilitiesInScope()[0]?.name || employee.capabilities[0].name;
-    return `
-      <form data-action-form class="form-grid">
-        ${selectField("Action Type", "actionType", activeConfig("talentActionTypes").map((item) => item.name), action === "createLearningAction" ? "Learning" : "Key Role Backup")}
-        ${selectField("Employee", "employeeId", employeesInScope().slice(0, 60).map((item) => `${item.id}|${item.name}`), `${employee.id}|${employee.name}`)}
-        ${field("Related capability", "capability", selectedCapability, "text")}
-        ${field("Owner", "owner", employee.manager || "Team Lead", "text")}
-        ${field("Due Date", "due", "2026-10-31", "date")}
-        ${selectField("Status", "status", currentRole().canAddTalentInsight && !currentRole().canAddManagerRecord ? ["Pending Manager Confirmation"] : ["Open", "In Progress", "Completed"], currentRole().canAddTalentInsight && !currentRole().canAddManagerRecord ? "Pending Manager Confirmation" : "Open")}
-        ${textareaField("Required evidence", "evidence", "Project contribution, manager validation and technical review.")}
-        ${formActions("Create action")}
-      </form>
-    `;
-  }
-  if (action === "importEmployees") {
-    return `
-      <form data-action-form class="form-grid">
-        ${textareaField("Paste employee rows", "rows", "Name,Employee Number,Business Unit,Team,Job Title,Level\\nNew Researcher,00199901,GPU Research Lab,GPU Compiler,Compiler Engineer,Engineer")}
-        <p class="muted">This prototype validates the flow and adds three sample employees after import.</p>
-        ${formActions("Import employees")}
-      </form>
-    `;
-  }
-  if (action === "exportEmployees") {
-    const rows = employeesInScope().slice(0, 12).map((item) => `${item.number},${item.name},${item.unit},${item.team},${item.title}`).join("\n");
-    return `
-      <h3>Export preview</h3>
-      <p class="muted">Static prototype export preview for the selected scope.</p>
-      <textarea readonly rows="12">Employee Number,Name,Business Unit,Team,Job Title\n${rows}</textarea>
-      <div class="button-row"><button class="primary-button" data-toast="CSV export prepared for the selected scope.">Prepare CSV</button><button class="secondary-button" data-action="exportEmployees">Refresh preview</button></div>
-    `;
-  }
-  if (action === "promptAI") {
-    return `
-      <form data-action-form class="form-grid">
-        ${selectField("AI intelligence type", "intelligenceType", ["Executive summary", "Risk analysis", "Recommended actions", "Evidence gaps", "Development opportunities"], "Risk analysis")}
-        ${selectField("Evidence scope", "evidenceScope", aiScopeOptions(), aiScopeOptions()[0])}
-        ${textareaField("Prompt", "prompt", defaultPromptForPage())}
-        <div class="form-wide ai-panel">
-          ${aiMeta("Controlled generation", "2026-07-14", "Selected scope", "Pending", "User requested")}
-          <p>The new intelligence will be generated as a reviewable draft. It will not overwrite existing talent judgments, capability validation or confirmed actions.</p>
-        </div>
-        ${formActions("Generate intelligence")}
-      </form>
-    `;
-  }
-  if (action === "generateAnalysis") {
-    return `
-      <h3>AI analysis stages</h3>
-      <div class="timeline">
-        ${["Reviewing annual goals", "Identifying required capabilities", "Matching people evidence", "Evaluating gaps", "Preparing recommendations"].map((stage) => `<div class="timeline-item"><h3>${stage} <span class="badge blue">Ready</span></h3><p>This stage uses the selected organization scope and current role permissions.</p></div>`).join("")}
-      </div>
-      <div class="button-row"><button class="primary-button" data-toast="AI analysis generated and placed under human review.">Generate analysis</button></div>
-    `;
-  }
-  if (action === "addBusinessUnit" || action === "editBusinessUnit") {
-    const unit = organization.businessUnits.find((item) => item.name === state.actionContext.unit) || organization.businessUnits[0];
-    return `<form data-action-form class="form-grid">
-      ${field("Business Unit Name", "unitName", action === "editBusinessUnit" ? unit.name : "New Research Unit", "text")}
-      ${selectField("Type", "unitType", ["Research Lab", "Platform", "Operations", "Independent Research Team"], action === "editBusinessUnit" ? unit.type : "Research Lab")}
-      ${textareaField("Change reason", "notes", "Organization structure update for user testing.")}
-      ${formActions(action === "editBusinessUnit" ? "Save business unit" : "Add business unit")}
-    </form>`;
-  }
-  if (action === "addTeam") {
-    return `<form data-action-form class="form-grid">
-      ${selectField("Business Unit", "unitName", organization.businessUnits.map((unit) => unit.name), el.businessFilter.value === "All permitted units" ? organization.businessUnits[0].name : el.businessFilter.value)}
-      ${field("Team Name", "teamName", "New Research Team", "text")}
-      ${textareaField("Current goal", "goal", "Define the team's research delivery goal.")}
-      ${formActions("Add team")}
-    </form>`;
-  }
-  if (action === "transferEmployee") {
-    const activeEmployees = employees.filter((item) => !item.archived).slice(0, 120);
-    return `<form data-action-form class="form-grid">
-      ${selectField("Employee", "employeeId", activeEmployees.map((item) => `${item.id}|${item.name} (${item.team})`), `${employee.id}|${employee.name} (${employee.team})`)}
-      ${selectField("New Business Unit", "unitName", organization.businessUnits.map((unit) => unit.name), employee.unit)}
-      ${selectField("New Team", "teamName", organization.businessUnits.flatMap((unit) => unit.teams), employee.team)}
-      ${textareaField("Transfer reason", "notes", "Move employee to new team while preserving history.")}
-      ${formActions("Transfer employee")}
-    </form>`;
-  }
-  if (action === "addConfigItem" || action === "editConfigItem") {
-    const item = configData[state.actionContext.configKey]?.find((entry) => entry.id === state.actionContext.configId);
-    return `<form data-action-form class="form-grid">
-      ${field(`${state.actionContext.configLabel || "Item"} Name`, "name", item?.name || "", "text")}
-      ${selectField("Status", "active", ["Active", "Inactive"], item?.active === false ? "Inactive" : "Active")}
-      ${textareaField("Change reason", "notes", "Configuration change for user testing.")}
-      ${formActions(action === "editConfigItem" ? "Save item" : "Add item")}
-    </form>`;
-  }
-  if (action === "deactivateConfigItem" || action === "deleteConfigItem") {
-    const item = configData[state.actionContext.configKey]?.find((entry) => entry.id === state.actionContext.configId);
-    const count = item ? affectedCount(state.actionContext.configKey, item.name) : 0;
-    return `<form data-action-form class="form-grid">
-      <div class="form-wide"><p><strong>${item?.name || "Item"}</strong> affects ${count} records. ${action === "deleteConfigItem" && count ? "Deletion is blocked until affected records are cleared." : "Confirm the status change."}</p></div>
-      ${textareaField("Reason", "notes", "Review affected-record count before changing this item.")}
-      ${formActions(action === "deleteConfigItem" ? "Delete item" : "Change status")}
-    </form>`;
-  }
-  if (action === "addUserAccount") {
-    return `<form data-action-form class="form-grid">
-      ${field("Name", "name", "", "text")}
-      ${selectField("Role", "role", Object.values(roles).map((role) => role.label), "Team Lead")}
-      ${field("Scope", "scope", "GPU Compiler", "text")}
-      ${formActions("Add user")}
-    </form>`;
-  }
-  if (action === "addActivity") {
-    const selectedTeam = el.teamFilter.value === "All permitted teams" ? employeesInScope()[0]?.team || "GPU Compiler" : el.teamFilter.value;
-    const selectedUnit = employees.find((item) => item.team === selectedTeam)?.unit || (el.businessFilter.value === "All permitted units" ? organization.businessUnits[0].name : el.businessFilter.value);
-    return `<form data-action-form class="form-grid">
-      ${selectField("Activity Type", "activityType", activeConfig("activityTypes").map((item) => item.name), "Technical Sharing")}
-      ${selectField("Business Unit", "unit", organization.businessUnits.map((unit) => unit.name), selectedUnit)}
-      ${selectField("Team", "team", organization.businessUnits.flatMap((unit) => unit.teams), selectedTeam)}
-      ${field("Date", "date", "2026-07-14", "date")}
-      ${field("Owner", "owner", teamLeadName(selectedTeam), "text")}
-      ${textareaField("Note", "note", "Record the purpose, participation and follow-up from this activity.")}
-      ${formActions("Add activity")}
-    </form>`;
-  }
-  if (action === "deleteActivity") {
-    const activity = configData.activities.find((item) => item.id === state.actionContext.activityId);
-    return `<form data-action-form class="form-grid">
-      <div class="form-wide"><p>Delete <strong>${activity?.type || "activity"}</strong> for ${activity?.team || "this team"}? This removes the activity from culture tracking.</p></div>
-      ${textareaField("Reason", "reason", "Remove duplicate or incorrect activity record.")}
-      ${formActions("Delete activity")}
-    </form>`;
-  }
-  if (action === "confirmTalentAction") {
-    const target = employees.find((item) => item.id === state.actionContext.employeeId) || employee;
-    const talentAction = target.actions[Number(state.actionContext.actionIndex)];
-    return `<form data-action-form class="form-grid">
-      <div class="form-wide"><p>Confirm <strong>${talentAction?.type || "development action"}</strong> for ${target.name}. The action will move from HRBP recommendation to manager-confirmed execution.</p></div>
-      ${textareaField("Manager confirmation note", "note", "Confirmed with business manager review.")}
-      ${formActions("Confirm action")}
-    </form>`;
-  }
-  return "<p>No action available.</p>";
-}
-
-function field(label, name, value, type) {
-  return `<div><label for="${name}">${label}</label><input id="${name}" name="${name}" type="${type}" value="${escapeAttr(value)}" required /></div>`;
-}
-
-function optionalField(label, name, value, type) {
-  return `<div><label for="${name}">${label}</label><input id="${name}" name="${name}" type="${type}" value="${escapeAttr(value)}" /></div>`;
-}
-
-function selectField(label, name, values, selected) {
-  return `<div><label for="${name}">${label}</label><select id="${name}" name="${name}">${values.map((value) => {
-    const optionValue = String(value);
-    const labelText = optionValue.includes("|") ? optionValue.split("|")[1] : optionValue;
-    return `<option value="${escapeAttr(optionValue)}" ${optionValue === selected ? "selected" : ""}>${labelText}</option>`;
-  }).join("")}</select></div>`;
-}
-
-function textareaField(label, name, value) {
-  return `<div class="form-wide"><label for="${name}">${label}</label><textarea id="${name}" name="${name}" rows="5" required>${escapeHtml(value)}</textarea></div>`;
-}
-
-function formActions(saveLabel) {
-  return `<div class="form-action-bar"><button type="button" class="secondary-button" data-action="closeDrawer">Cancel</button><button type="submit" class="primary-button" data-action-submit="true">${saveLabel}</button></div>`;
-}
-
-function handleActionSubmit(action, form) {
-  const data = Object.fromEntries(new FormData(form).entries());
-  const employee = employees.find((item) => item.id === state.selectedEmployee) || employees[0];
-  if (action === "addEmployee") {
-    const unit = organization.businessUnits.find((item) => item.name === data.unit);
-    const profile = teamProfiles[data.team] || teamProfiles[unit?.teams[0]] || teamProfiles.HR;
-    const created = createEmployee(employees.length + 1, unit || organization.businessUnits[0], data.team, profile, 1);
-    Object.assign(created, {
-      number: data.number,
-      name: data.name,
-      title: data.title,
-      level: data.level,
-      contract: data.contract,
-      startDate: data.startDate,
-      manager: "Unassigned",
-      reportingLine: `Unassigned > ${data.team} > ${data.unit}`,
-      records: [["Onboarding", "2026-07-14", "Initial record", data.notes]],
-      insights: [],
-      actions: [],
-      openActions: 0,
-      summary: `${data.name} was added to ${data.team}. Capability evidence should be validated by the manager.`,
-    });
-    employees.push(created);
-    state.selectedEmployee = created.id;
-    state.page = "talent";
-    state.talentTab = "Overview";
-    finishAction("Employee created.");
-    return;
-  }
-  if (action === "editEmployee") {
-    Object.assign(employee, {
-      number: data.number,
-      name: data.name,
-      unit: data.unit,
-      team: data.team,
-      title: data.title,
-      level: data.level,
-      contract: data.contract,
-      startDate: data.startDate,
-      tags: splitList(data.tags),
-      awards: splitList(data.awards),
-      reportingLine: `${employee.manager} > ${data.team} > ${data.unit}`,
-    });
-    employee.records.unshift(["Profile update", "2026-07-14", "Basic information changed", data.notes]);
-    finishAction("Employee profile updated.");
-    return;
-  }
-  if (action === "addManagerRecord") {
-    employee.records.unshift([data.recordType, data.date, data.scope, `${data.description} Related capability: ${data.capability}. Visibility: ${data.visibility}.`]);
-    state.talentTab = "Manager Records";
-    finishAction("Manager record added.");
-    return;
-  }
-  if (action === "addTalentInsight") {
-    employee.insights.unshift([data.insightType, data.date, "HRBP", `${data.description} Recommended action: ${data.recommendedAction}. Visibility: ${data.visibility}.`]);
-    state.talentTab = "HRBP Records";
-    finishAction("HRBP record added.");
-    return;
-  }
-  if (action === "archiveEmployee") {
-    employee.archived = true;
-    employee.archive = { date: data.archiveDate, reason: data.reason, note: data.note };
-    state.page = "people";
-    finishAction("Employee archived. Historical records preserved.");
-    return;
-  }
-  if (action === "createTalentAction" || action === "createLearningAction") {
-    const employeeId = data.employeeId.split("|")[0];
-    const target = employees.find((item) => item.id === employeeId) || employee;
-    const needsConfirmation = data.status === "Pending Manager Confirmation";
-    target.actions.unshift({ type: data.actionType, status: data.status, capability: data.capability, owner: data.owner, due: data.due, source: needsConfirmation ? "HRBP recommendation" : "Manager action", requiresManagerConfirmation: needsConfirmation });
-    target.openActions = target.actions.filter((item) => item.status !== "Completed").length;
-    state.selectedEmployee = target.id;
-    state.page = "talent";
-    state.talentTab = "Development";
-    finishAction("Talent action created.");
-    return;
-  }
-  if (action === "importEmployees") {
-    for (let index = 0; index < 3; index += 1) {
-      const unit = organization.businessUnits[0];
-      const profile = teamProfiles["GPU Compiler"];
-      const created = createEmployee(employees.length + 1, unit, "GPU Compiler", profile, index + 2);
-      created.name = `Imported Researcher ${index + 1}`;
-      created.records = [["Bulk import", "2026-07-14", "Imported employee", "Created from People Operations import flow."]];
-      created.insights = [];
-      created.actions = [];
-      created.openActions = 0;
-      created.summary = `${created.name} was imported into GPU Compiler.`;
-      employees.push(created);
-    }
-    finishAction("3 employees imported.");
-    return;
-  }
-  if (action === "promptAI") {
-    const page = state.page;
-    state.aiOutputs.unshift({
-      page,
-      date: "2026-07-14",
-      scope: data.evidenceScope,
-      prompt: data.prompt,
-      title: `${data.intelligenceType} generated from prompt`,
-      response: generatePromptResponse(data.prompt, data.intelligenceType, page),
-    });
-    finishAction("AI intelligence generated from prompt.");
-  }
-  if (action === "addBusinessUnit") {
-    organization.businessUnits.push({ name: data.unitName, type: data.unitType, teams: [] });
-    finishAction("Business unit added.");
-    return;
-  }
-  if (action === "editBusinessUnit") {
-    const unit = organization.businessUnits.find((item) => item.name === state.actionContext.unit);
-    if (unit) {
-      const oldName = unit.name;
-      unit.name = data.unitName;
-      unit.type = data.unitType;
-      employees.filter((item) => item.unit === oldName).forEach((item) => {
-        item.unit = data.unitName;
-      });
-    }
-    finishAction("Business unit updated.");
-    return;
-  }
-  if (action === "addTeam") {
-    const unit = organization.businessUnits.find((item) => item.name === data.unitName);
-    if (unit && !unit.teams.includes(data.teamName)) {
-      unit.teams.push(data.teamName);
-      teamProfiles[data.teamName] = {
-        titles: ["Research Engineer", "Senior Engineer", "Team Lead"],
-        capabilities: ["Technical Design", "Research Delivery", "Collaboration"],
-        goal: data.goal,
-        riskCapability: "Research Delivery",
-      };
-    }
-    finishAction("Team added.");
-    return;
-  }
-  if (action === "transferEmployee") {
-    const employeeId = data.employeeId.split("|")[0];
-    const target = employees.find((item) => item.id === employeeId);
-    if (target) {
-      const previous = `${target.unit} / ${target.team}`;
-      target.unit = data.unitName;
-      target.team = data.teamName;
-      target.reportingLine = `${target.manager} > ${data.teamName} > ${data.unitName}`;
-      target.growthPath.unshift(["Team transfer", "2026-07-14", `${previous} to ${data.unitName} / ${data.teamName}`, data.notes]);
-      state.selectedEmployee = target.id;
-    }
-    finishAction("Employee transferred.");
-    return;
-  }
-  if (action === "addConfigItem") {
-    const key = state.actionContext.configKey;
-    configData[key].push({ id: `${key}-${Date.now()}`, name: data.name, active: data.active === "Active" });
-    finishAction(`${state.actionContext.configLabel} added.`);
-    return;
-  }
-  if (action === "editConfigItem") {
-    const item = configData[state.actionContext.configKey].find((entry) => entry.id === state.actionContext.configId);
-    if (item) {
-      item.name = data.name;
-      item.active = data.active === "Active";
-    }
-    finishAction(`${state.actionContext.configLabel} updated.`);
-    return;
-  }
-  if (action === "deactivateConfigItem") {
-    const item = configData[state.actionContext.configKey].find((entry) => entry.id === state.actionContext.configId);
-    if (item) item.active = !item.active;
-    finishAction("Configuration status changed.");
-    return;
-  }
-  if (action === "deleteConfigItem") {
-    const key = state.actionContext.configKey;
-    const item = configData[key].find((entry) => entry.id === state.actionContext.configId);
-    if (item && affectedCount(key, item.name) === 0) {
-      configData[key] = configData[key].filter((entry) => entry.id !== item.id);
-      finishAction("Configuration item deleted.");
-    } else {
-      closeDrawer();
-      showToast("Delete blocked because records still use this item.");
-    }
-    return;
-  }
-  if (action === "addUserAccount") {
-    configData.users.push({ id: `u${Date.now()}`, name: data.name, role: data.role, scope: data.scope, active: true });
-    finishAction("User account added.");
-    return;
-  }
-  if (action === "addActivity") {
-    configData.activities.unshift({ id: `act-${Date.now()}`, type: data.activityType, unit: data.unit, team: data.team, date: data.date, owner: data.owner, note: data.note });
-    state.talentTeamView = "Culture Management";
-    finishAction("Culture activity added.");
-    return;
-  }
-  if (action === "deleteActivity") {
-    configData.activities = configData.activities.filter((item) => item.id !== state.actionContext.activityId);
-    finishAction("Culture activity deleted.");
-    return;
-  }
-  if (action === "confirmTalentAction") {
-    const target = employees.find((item) => item.id === state.actionContext.employeeId) || employee;
-    const talentAction = target.actions[Number(state.actionContext.actionIndex)];
-    if (talentAction) {
-      talentAction.status = "In Progress";
-      talentAction.requiresManagerConfirmation = false;
-      talentAction.confirmedBy = currentRole().label;
-      talentAction.confirmationNote = data.note;
-      target.records.unshift(["Manager confirmation", "2026-07-14", talentAction.type, data.note]);
-    }
-    state.talentTab = "Development";
-    finishAction("Development action confirmed.");
+  el.drawerBackdrop.hidden = true;
+  state.returnToEmployeeId = "";
+  if (!skipReturn && returnId) {
+    openEmployee(returnId);
+  } else if (!skipReturn && wasProfile && state.page === "people") {
+    render();
   }
 }
 
-function finishAction(message) {
-  closeDrawer();
-  renderFilters(false);
-  renderNav();
-  renderPage();
-  showToast(message);
-}
-
-function nextEmployeeNumber() {
-  return `00${String(120000 + employees.length + 1).slice(-6)}`;
-}
-
-function splitList(value) {
-  return String(value || "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
-function aiScopeOptions() {
-  const options = [el.scopeSummary.textContent.replace("Viewing: ", "") || "Current page context"];
-  if (state.page === "talent") {
-    const employee = employees.find((item) => item.id === state.selectedEmployee) || employees[0];
-    options.unshift(`${employee.name} profile evidence`);
-  }
-  if (state.page === "talentTeam") options.unshift("Talent and team management evidence");
-  if (state.page === "organization") options.unshift("Research Center structure and annual goals");
-  return options;
-}
-
-function defaultPromptForPage() {
-  if (state.page === "talent") return "Summarize the most important evidence gaps and next best talent action for this employee.";
-  if (state.page === "talentTeam") return "Identify the highest-impact team or talent action for the selected scope.";
-  if (state.page === "organization") return "Summarize which labs have the most urgent operating model or capability coverage concerns.";
-  return "What are the three most important leadership decisions for this scope this month?";
-}
-
-function generatePromptResponse(prompt, type, page) {
-  const scoped = employeesInScope();
-  const scopedCapabilities = capabilitiesInScope();
-  const highRisks = scopedCapabilities.filter((item) => item.severity === "High");
-  if (page === "talent") {
-    const employee = employees.find((item) => item.id === state.selectedEmployee) || employees[0];
-    return `${type}: ${employee.name} has strongest evidence in ${employee.capabilities[0].name}. Based on the prompt, the next review should focus on ${employee.dependency === "No critical dependency" ? "evidence quality and development history" : employee.dependency}. Recommended follow-up: create or update one talent action with manager-visible evidence.`;
-  }
-  if (page === "talentTeam") {
-    const gap = highRisks[0] || scopedCapabilities[0];
-    return `${type}: The strongest signal is ${gap?.team || "the selected scope"} / ${gap?.name || "capability coverage"}. The recommended response is to prioritize internal development first, assign an owner, and require project contribution plus manager validation as completion evidence.`;
-  }
-  if (page === "organization") {
-    return `${type}: The Research Center has ${organization.businessUnits.length} business units and ${employees.length} people. The prompt points to cross-lab operating risk, so the next useful review is comparing annual goals with confirmed capability depth in GPU, Storage, Wireless and AI Platform teams.`;
-  }
-  return `${type}: In this scope, ${highRisks.length} high-severity capability risks and ${scoped.filter((employee) => employee.retentionRisk === "High").length} high retention-risk profiles need attention. The best next action is to review evidence, approve one backup or learning action, and dismiss low-evidence recommendations until better records are available.`;
-}
-
-function escapeHtml(value) {
-  return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-}
-
-function escapeAttr(value) {
-  return escapeHtml(value).replaceAll('"', "&quot;");
-}
-
-function showToast(message) {
+function toast(message) {
   el.toast.textContent = message;
   el.toast.classList.add("show");
-  window.clearTimeout(showToast.timer);
-  showToast.timer = window.setTimeout(() => el.toast.classList.remove("show"), 2400);
+  window.setTimeout(() => el.toast.classList.remove("show"), 1800);
+}
+
+function empty(title, text) {
+  return `<div class="empty-state"><h2>${title}</h2><p>${text}</p></div>`;
+}
+
+function escapeHtml(value = "") {
+  return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+}
+
+function escapeAttr(value = "") {
+  return escapeHtml(value);
 }
 
 init();
